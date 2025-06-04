@@ -2,22 +2,18 @@ package main
 
 import (
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
 
+type Application struct {
+	Port string
+}
+
 func main() {
-	r := chi.NewRouter()
-
-	// Middlewares
-	r.Use(middleware.Logger)
-
-	// Handlers
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello world"))
-	})
+	// Initialize Application
+	app := Application{
+		Port: ":8080",
+	}
 
 	// HTTP server
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(app.Port, NewRouter(&app))
 }
