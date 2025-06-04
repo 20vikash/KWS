@@ -11,7 +11,10 @@ func NewRouter(app *Application) http.Handler {
 	r := chi.NewRouter()
 
 	// Middlewares
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
 	// Endpoints
 	r.Get("/", app.HelloWorld)
