@@ -14,8 +14,11 @@ services:
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DBNAME}
     volumes:
       - postgres_db_data_kws:/var/lib/postgresql/data:rw
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
     networks:
       - kws_main
 
