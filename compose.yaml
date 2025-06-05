@@ -1,0 +1,34 @@
+networks:
+  kws_main:
+    driver: bridge
+  
+volumes:
+  postgres_db_data_kws:
+
+services:
+  postgres:
+    image: postgres:alpine
+    container_name: postgres_db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_db_data_kws:/var/lib/postgresql/data:rw
+    networks:
+      - kws_main
+
+  kws_gateway:
+    image: golang:latest
+    container_name: kws_gateway
+    volumes:
+      - ./src/:/app/data
+    networks:
+      - kws_main
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    working_dir: /app/data/cmd
+    command: go run .
