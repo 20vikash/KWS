@@ -6,6 +6,8 @@ down:
 	docker compose down
 stop:
 	docker compose stop
+dv:
+	docker volume rm kws_postgres_db_data_kws
 
 create_migration:
 	migrate create -ext=sql -dir=internal/database/migrations -seq init
