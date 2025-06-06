@@ -51,7 +51,7 @@ func GetRedisPassword() string {
 
 // Gmail
 func GetGmailAppPassword() string {
-	return os.Getenv("GMAIL_PASSWORD")
+	return os.Getenv("GMAIL_APP_PASSWORD")
 }
 
 func GetGmail() string {

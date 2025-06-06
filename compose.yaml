@@ -49,4 +49,4 @@ services:
     ports:
       - "8080:8080"
     working_dir: /app/data/cmd
-    command: go run .
+    command: sh -c "apt-get update && apt-get install -y uuid-runtime && go run ."

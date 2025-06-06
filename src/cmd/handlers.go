@@ -1,6 +1,7 @@
 package main
 
 import (
+	"kws/kws/internal/gmail"
 	"kws/kws/models"
 	"log"
 	"net/http"
@@ -68,4 +69,13 @@ func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 	}
+
+	// Generate token and set it to the redis store.
+	token := app.Store.Auth.GenerateToken(r.Context(), user.Email)
+	app.Store.InMemory.SetEmailToken(r.Context(), user.Email, token)
+
+	// Send the gmail to the address.
+	go func(email, token string) {
+		gmail.SendMail(user.Email, token)
+	}(user.Email, token)
 }

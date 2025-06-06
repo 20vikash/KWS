@@ -16,7 +16,8 @@ type RedisStore struct {
 func (r *RedisStore) SetEmailToken(ctx context.Context, email string, token string) error {
 	err := r.ds.Set(ctx, token, "email:"+email, 24*time.Hour).Err()
 	if err != nil {
-		log.Fatal("Failed to set email token")
+		log.Println(err.Error())
+		log.Println("Failed to set email token")
 		return err
 	}
 

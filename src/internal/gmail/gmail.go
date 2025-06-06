@@ -22,6 +22,7 @@ func SendMail(to string, token string) {
 	d := gomail.NewDialer("smtp.gmail.com", 587, env.GetGmail(), env.GetGmailAppPassword())
 
 	if err := d.DialAndSend(m); err != nil {
-		log.Fatal("Cannot send mail")
+		log.Println(err.Error())
+		log.Println("Cannot send mail")
 	}
 }

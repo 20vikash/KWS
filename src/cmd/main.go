@@ -28,7 +28,7 @@ func main() {
 
 	// Initialize Redis database
 	redis := database.RedisDB{
-		Addr:     "redis_db:6379",
+		Addr:     "redis_db_kws:6379",
 		Password: env.GetRedisPassword(),
 		DB:       0,
 	}
