@@ -4,19 +4,20 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func GetNewDBConnection() *pgxpool.Pool {
-	dbUser := os.Getenv("DB_USERNAME")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_DBNAME")
+type Pg struct {
+	User     string
+	Password string
+	Host     string
+	Port     string
+	Name     string
+}
 
-	url := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable", dbUser, dbPassword, dbHost, dbPort, dbName)
+func (p *Pg) GetNewDBConnection() *pgxpool.Pool {
+	url := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable", p.User, p.Password, p.Host, p.Port, p.Name)
 
 	dbPool, err := pgxpool.New(context.Background(), url)
 	if err != nil {
