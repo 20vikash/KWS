@@ -20,6 +20,7 @@ func (u *User) ValidateEmail() bool {
 	return re.MatchString(u.Email)
 }
 
+// Should be atleast 8 characters with atleast 1 low case, upper case, number, and a special character
 func (u *User) ValidatePassword() bool {
 	if len(u.Password) < 8 {
 		return false
@@ -44,4 +45,16 @@ func (u *User) ValidatePassword() bool {
 	}
 
 	return (hasUpper && hasLower && hasNumber && hasSpecial)
+}
+
+// Should be from 5 to 30 characters. Should not start with a special character. Limited special characters.
+func (u *User) ValidateUserName() bool {
+	re := regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9._]{4,29}$`)
+	return re.MatchString(u.User_name)
+}
+
+// Min 5 characters, max 30 characters. With limited special characters
+func (u *User) ValidateFLNames() bool {
+	re := regexp.MustCompile(`^[A-Za-z'-]{5,30}$`)
+	return re.MatchString(u.First_name) && re.MatchString(u.Last_name)
 }
