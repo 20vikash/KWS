@@ -21,3 +21,19 @@ func GetDBPort() string {
 func GetDBName() string {
 	return os.Getenv("DB_DBNAME")
 }
+
+func GetGmailAppPassword() string {
+	return os.Getenv("GMAIL_PASSWORD")
+}
+
+func GetRedisHost() string {
+	return os.Getenv("REDIS_HOST")
+}
+
+func GetRedisPort() string {
+	return os.Getenv("REDIS_PORT")
+}
+
+func GetGmail() string {
+	return os.Getenv("GMAIL_ADDRESS")
+}

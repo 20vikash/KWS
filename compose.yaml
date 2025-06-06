@@ -4,11 +4,12 @@ networks:
   
 volumes:
   postgres_db_data_kws:
+  redis_db_data_kws:
 
 services:
   postgres:
     image: postgres:alpine
-    container_name: postgres_db
+    container_name: postgres_db_kws
     env_file:
       - .env
     environment:
@@ -19,6 +20,16 @@ services:
       - postgres_db_data_kws:/var/lib/postgresql/data:rw
     ports:
       - "${DB_PORT}:${DB_PORT}"
+    networks:
+      - kws_main
+
+  redis:
+    image: redis:alpine
+    container_name: redis_db_kws
+    volumes:
+      - redis_db_data_kws:/data:rw
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
     networks:
       - kws_main
 
