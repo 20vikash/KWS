@@ -6,6 +6,7 @@ func GetDBUserName() string {
 	return os.Getenv("DB_USERNAME")
 }
 
+// Postgres
 func GetDBPassword() string {
 	return os.Getenv("DB_PASSWORD")
 }
@@ -22,16 +23,22 @@ func GetDBName() string {
 	return os.Getenv("DB_DBNAME")
 }
 
-func GetGmailAppPassword() string {
-	return os.Getenv("GMAIL_PASSWORD")
-}
-
+// Redis
 func GetRedisHost() string {
 	return os.Getenv("REDIS_HOST")
 }
 
 func GetRedisPort() string {
 	return os.Getenv("REDIS_PORT")
+}
+
+func GetRedisPassword() string {
+	return os.Getenv("REDIS_PASSWORD")
+}
+
+// Gmail
+func GetGmailAppPassword() string {
+	return os.Getenv("GMAIL_PASSWORD")
 }
 
 func GetGmail() string {
