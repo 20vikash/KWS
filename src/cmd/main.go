@@ -13,6 +13,9 @@ type Application struct {
 }
 
 func main() {
+	// Load .env variables into OS.
+	env.LoadEnv()
+
 	// Initialize Pg database
 	pg := database.Pg{
 		User:     env.GetDBUserName(),

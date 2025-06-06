@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"errors"
 	"log"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
@@ -21,11 +23,11 @@ func hashedPassword(password string) []byte {
 	return hash
 }
 
-func (auth *AuthStore) CreateUser(ctx context.Context, first_name, last_name, email, password string) error {
+func (auth *AuthStore) CreateUser(ctx context.Context, first_name, last_name, email, password, user_name string) error {
 	passwordHash := hashedPassword(password)
 
 	sql := `
-		INSERT INTO users(first_name, last_name, email, password_hash) VALUES($1, $2, %3. $4)
+		INSERT INTO users(first_name, last_name, email, password_hash, user_name) VALUES($1, $2, $3, $4, $5)
 	`
 
 	_, err := auth.db.Exec(ctx, sql,
@@ -33,9 +35,16 @@ func (auth *AuthStore) CreateUser(ctx context.Context, first_name, last_name, em
 		last_name,
 		email,
 		passwordHash,
+		user_name,
 	)
 	if err != nil {
-		log.Println("Cannot create a new User. Failed at inserting the user details into the table.")
+		if strings.Contains(err.Error(), "23505") { // 23505 is the error code for duplicate violation
+			log.Println("Error: Duplicate entry (unique constraint violation)")
+			return errors.New("username or email already exists")
+		} else {
+			log.Println("Cannot create a new User. Failed at inserting the user details into the table.")
+		}
+
 		return err
 	}
 

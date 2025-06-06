@@ -53,8 +53,8 @@ func (u *User) ValidateUserName() bool {
 	return re.MatchString(u.User_name)
 }
 
-// Min 5 characters, max 30 characters. With limited special characters
+// Min 2 characters, max 30 characters. With limited special characters
 func (u *User) ValidateFLNames() bool {
-	re := regexp.MustCompile(`^[A-Za-z'-]{5,30}$`)
+	re := regexp.MustCompile(`^[A-Za-z'.-]{2,30}$`)
 	return re.MatchString(u.First_name) && re.MatchString(u.Last_name)
 }

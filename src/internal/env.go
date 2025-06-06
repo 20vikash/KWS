@@ -1,12 +1,25 @@
 package env
 
-import "os"
+import (
+	"log"
+	"os"
 
+	"github.com/joho/godotenv"
+)
+
+// Load .env file variables
+func LoadEnv() {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatal("Cannot load .env variables into the OS")
+	}
+}
+
+// Postgres
 func GetDBUserName() string {
 	return os.Getenv("DB_USERNAME")
 }
 
-// Postgres
 func GetDBPassword() string {
 	return os.Getenv("DB_PASSWORD")
 }

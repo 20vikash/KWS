@@ -35,22 +35,37 @@ func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate before updating the database.
-	if !(user.ValidateEmail() && user.ValidatePassword() && user.ValidateUserName() && user.ValidateFLNames()) {
+	if !(user.ValidateEmail()) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("One of the field values are not in the right format"))
+		w.Write([]byte("Email is in the wrong format"))
+		return
+	}
+	if !(user.ValidatePassword()) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Password format is wrong"))
+		return
+	}
+	if !(user.ValidateFLNames()) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("First name or/and last name is in the wrong format"))
+		return
+	}
+	if !(user.ValidateUserName()) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("User name format is wrong"))
 		return
 	}
 
+	// Update the database after all the validations
 	err = app.Store.Auth.CreateUser(r.Context(),
 		user.First_name,
 		user.Last_name,
 		user.Email,
 		user.Password,
+		user.User_name,
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 	}
-
-	log.Println(email)
 }
