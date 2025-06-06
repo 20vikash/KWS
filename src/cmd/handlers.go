@@ -76,6 +76,9 @@ func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Send the gmail to the address.
 	go func(email, token string) {
-		gmail.SendMail(user.Email, token)
+		err := gmail.SendMail(user.Email, token)
+		if err != nil {
+			log.Println(err.Error())
+		}
 	}(user.Email, token)
 }
