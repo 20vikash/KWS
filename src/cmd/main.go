@@ -23,10 +23,18 @@ func main() {
 	}
 	connPool := pg.GetNewDBConnection()
 
+	// Initialize Redis database
+	redis := database.RedisDB{
+		Addr:     "redis_db:6379",
+		Password: env.GetRedisPassword(),
+		DB:       0,
+	}
+	rc := redis.Connect()
+
 	// Initialize Application
 	app := Application{
 		Port:  ":8080",
-		Store: store.NewStore(connPool),
+		Store: store.NewStore(connPool, rc),
 	}
 
 	// HTTP server
