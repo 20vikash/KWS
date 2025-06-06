@@ -2,9 +2,13 @@ package store
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
+	"fmt"
 	"log"
+	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
@@ -21,6 +25,23 @@ func hashedPassword(password string) []byte {
 	}
 
 	return hash
+}
+
+func (auth *AuthStore) GenerateToken(ctx context.Context, email string) string {
+	uuid, err := exec.Command("uuidgen").Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	t := email + time.Now().String() + fmt.Sprintf("%x", uuid)
+
+	h := sha256.New()
+	h.Write([]byte(t))
+	bs := h.Sum(nil)
+
+	token := fmt.Sprintf("%x", bs)
+
+	return token
 }
 
 func (auth *AuthStore) CreateUser(ctx context.Context, first_name, last_name, email, password, user_name string) error {

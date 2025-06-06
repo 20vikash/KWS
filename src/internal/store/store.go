@@ -10,6 +10,7 @@ import (
 type Storage struct {
 	Auth interface {
 		CreateUser(ctx context.Context, first_name, last_name, email, password, user_name string) error
+		GenerateToken(ctx context.Context, email string) string
 	}
 
 	InMemory interface {
