@@ -30,6 +30,10 @@ services:
       - redis_db_data_kws:/data:rw
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
+    env_file:
+      - .env
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    restart: always
     networks:
       - kws_main
 

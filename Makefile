@@ -11,6 +11,7 @@ start:
 	docker compose logs -f
 dv:
 	docker volume rm kws_postgres_db_data_kws
+	docker volume rm kws_redis_db_data_kws
 
 create_migration:
 	migrate create -ext=sql -dir=internal/database/migrations -seq init
