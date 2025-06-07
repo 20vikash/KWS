@@ -9,6 +9,8 @@ import (
 )
 
 func (app *Application) HelloWorld(w http.ResponseWriter, r *http.Request) {
+	app.sessionManager.Put(r.Context(), "isAuthorized", false)
+
 	w.Write([]byte("Hello world"))
 }
 
