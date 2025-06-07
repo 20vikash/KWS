@@ -27,9 +27,9 @@ func NewRouter(app *Application) http.Handler {
 	})
 
 	// Public routes (no auth required)
-	r.Get("/create_user", app.CreateUser)
+	r.Post("/create_user", app.CreateUser)
 	r.Get("/verify", app.VerifyUser)
-	r.Get("/login", app.LoginUser)
+	r.Post("/login", app.LoginUser)
 
 	return r
 }
