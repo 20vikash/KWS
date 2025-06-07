@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KWS Cloud | Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      background: #0e1015;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 40% 40%, rgba(80, 130, 255, 0.1), transparent 50%),
+                  radial-gradient(circle at 60% 60%, rgba(100, 180, 255, 0.08), transparent 50%);
+      z-index: 0;
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      animation: sparkle 12s linear infinite;
+    }
+
+    @keyframes sparkle {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 0.6;
+        transform: translateY(-10px) scale(1.1);
+      }
+      100% {
+        transform: translateY(-100vh) scale(0.8);
+        opacity: 0;
+      }
+    }
+
+    .floating {
+      animation: floating 6s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .fadeIn {
+      animation: fadeIn 1.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="relative flex items-center justify-center">
+  <!-- Sparkle background -->
+  <div id="sparkle-container"></div>
+
+  <!-- Simple Home Page -->
+  <div class="relative z-10 text-center text-white max-w-2xl p-10 fadeIn">
+    <h1 class="text-5xl font-bold text-blue-400 mb-6 floating">Welcome to KWS Cloud</h1>
+    <p class="text-gray-300 text-lg mb-4">Your secure and scalable cloud infrastructure for modern development.</p>
+    <p class="text-gray-400">Deploy, monitor, and scale applications with ease — all from a sleek and powerful dashboard.</p>
+    <div class="mt-10 space-x-4">
+      <a href="#" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition">Dashboard</a>
+      <a href="#" class="inline-block px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition">Docs</a>
+    </div>
+  </div>
+
+  <script>
+    // Sparkle background animation generator
+    const sparkleContainer = document.getElementById('sparkle-container');
+    for (let i = 0; i < 160; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.classList.add('sparkle');
+      sparkle.style.left = Math.random() * 100 + 'vw';
+      sparkle.style.top = Math.random() * 100 + 'vh';
+      sparkle.style.animationDuration = 6 + Math.random() * 12 + 's';
+      sparkle.style.animationDelay = Math.random() * 10 + 's';
+      sparkleContainer.appendChild(sparkle);
+    }
+  </script>
+</body>
+</html>
