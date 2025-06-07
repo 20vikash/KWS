@@ -71,3 +71,16 @@ func (auth *AuthStore) CreateUser(ctx context.Context, first_name, last_name, em
 
 	return nil
 }
+
+func (auth *AuthStore) VerifyUser(ctx context.Context, email string) error {
+	sql := `
+		UPDATE users SET verified=true WHERE email = $1
+	`
+
+	_, err := auth.db.Exec(ctx, sql, email)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

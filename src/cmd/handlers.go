@@ -82,3 +82,5 @@ func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}(user.Email, token)
 }
+
+// Verify the email token and verify the user.
