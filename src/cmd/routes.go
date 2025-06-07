@@ -17,6 +17,8 @@ func NewRouter(app *Application) http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
+	// Session manager middleware
+	r.Use(sessionManager.LoadAndSave)
 
 	// Endpoints
 	r.Get("/", app.HelloWorld)
