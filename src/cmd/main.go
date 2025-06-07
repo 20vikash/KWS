@@ -6,6 +6,7 @@ import (
 	database "kws/kws/internal/database/connection"
 	"kws/kws/internal/store"
 	"net/http"
+	"time"
 
 	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
@@ -38,6 +39,14 @@ func main() {
 	// Initialize session manager.
 	sessionManager = scs.New()
 	sessionManager.Store = redisstore.New(rPool)
+
+	// Session manager cookie properties.
+	sessionManager.Lifetime = 24 * time.Hour                  // Session cookie timeout
+	sessionManager.Cookie.Name = "kws_session"                // Session cookie name
+	sessionManager.Cookie.HttpOnly = true                     // Javascript cannot read the cookie
+	sessionManager.Cookie.Persist = true                      // Persists after browser restart
+	sessionManager.Cookie.SameSite = http.SameSiteDefaultMode // Only send the session cookie if I am in the same site.
+	sessionManager.Cookie.Secure = env.IsProd()               // Set in the .env (HTTPS mode)
 
 	// Initialize Pg database
 	pg := database.Pg{

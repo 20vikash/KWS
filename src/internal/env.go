@@ -3,6 +3,7 @@ package env
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -56,4 +57,13 @@ func GetGmailAppPassword() string {
 
 func GetGmail() string {
 	return os.Getenv("GMAIL_ADDRESS")
+}
+
+// Environment
+func getENV() string {
+	return os.Getenv("ENV")
+}
+
+func IsProd() bool {
+	return strings.ToLower(getENV()) == "production"
 }
