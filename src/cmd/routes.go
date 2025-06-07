@@ -21,6 +21,7 @@ func NewRouter(app *Application) http.Handler {
 	// Endpoints
 	r.Get("/", app.HelloWorld)
 	r.Post("/create_user", app.CreateUser)
+	r.Get("/verify", app.VerifyUser)
 
 	return r
 }

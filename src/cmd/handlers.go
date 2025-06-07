@@ -5,6 +5,7 @@ import (
 	"kws/kws/models"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func (app *Application) HelloWorld(w http.ResponseWriter, r *http.Request) {
@@ -84,3 +85,28 @@ func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // Verify the email token and verify the user.
+func (a *Application) VerifyUser(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("token")
+
+	value := a.Store.InMemory.GetEmailFromToken(r.Context(), token)
+
+	email := strings.Split(value, ":")[2]
+
+	err := a.Store.InMemory.DeleteEmailToken(r.Context(), token)
+	if err != nil {
+		w.WriteHeader(http.StatusGone)
+		w.Write([]byte("The link got expied. Try again"))
+		return
+	}
+
+	err = a.Store.Auth.VerifyUser(r.Context(), email)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to verify. Try again"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Successfully verified the email"))
+}
