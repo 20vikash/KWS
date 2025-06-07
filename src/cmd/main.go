@@ -16,8 +16,9 @@ import (
 var sessionManager *scs.SessionManager
 
 type Application struct {
-	Port  string
-	Store *store.Storage
+	Port           string
+	Store          *store.Storage
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -68,8 +69,9 @@ func main() {
 
 	// Initialize Application
 	app := Application{
-		Port:  ":8080",
-		Store: store.NewStore(connPool, rc),
+		Port:           ":8080",
+		Store:          store.NewStore(connPool, rc),
+		sessionManager: sessionManager,
 	}
 
 	// HTTP server
