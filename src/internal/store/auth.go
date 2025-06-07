@@ -86,7 +86,7 @@ func (auth *AuthStore) VerifyUser(ctx context.Context, email string) error {
 	return nil
 }
 
-func (auth *AuthStore) LoginUser(ctx context.Context, userName, password string) error {
+func (auth *AuthStore) LoginUser(ctx context.Context, userName, password string) (*models.User, error) {
 	var userModel models.User
 
 	sql := `
@@ -94,10 +94,40 @@ func (auth *AuthStore) LoginUser(ctx context.Context, userName, password string)
 	`
 
 	err := auth.db.QueryRow(ctx, sql, userName).Scan(&userModel.Verified)
+
 	if err != nil {
 		log.Println("No rows found in the table")
-		return errors.New("the user name is invalid")
+		return nil, errors.New("the user name is invalid")
 	}
 
-	return nil
+	if !userModel.Verified {
+		log.Println("The user is still not verified")
+		return nil, errors.New("user is not verified")
+	}
+
+	sql = `
+		SELECT id, first_name, last_name, email, password_hash, verified, user_name FROM users where user_name = $1
+	`
+
+	err = auth.db.QueryRow(ctx, sql, userName).Scan(
+		&userModel.Id,
+		&userModel.First_name,
+		&userModel.Last_name,
+		&userModel.Email,
+		&userModel.Password,
+		&userModel.Verified,
+		&userModel.User_name,
+	)
+	if err != nil {
+		log.Println("No rows found in the table: ", err.Error())
+		return nil, errors.New("the user name is invalid")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(userModel.Password), []byte(password))
+	if err != nil {
+		log.Println("Wrong password")
+		return nil, errors.New("wrong credentials")
+	}
+
+	return &userModel, nil
 }
