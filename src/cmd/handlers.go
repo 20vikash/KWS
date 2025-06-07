@@ -15,6 +15,13 @@ func (app *Application) HelloWorld(w http.ResponseWriter, r *http.Request) {
 
 // Endpoint dedicated to web forms.
 func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
+	// If already authorized, redirect to home page.
+	isAuthorized := app.sessionManager.GetBool(r.Context(), "isAuthorized")
+	if isAuthorized {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	// Parse the form
 	err := r.ParseForm()
 	if err != nil {
@@ -114,6 +121,13 @@ func (a *Application) VerifyUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) LoginUser(w http.ResponseWriter, r *http.Request) {
+	// If already authorized, redirect to home page.
+	isAuthorized := app.sessionManager.GetBool(r.Context(), "isAuthorized")
+	if isAuthorized {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	// Parse form fields.
 	err := r.ParseForm()
 	if err != nil {
