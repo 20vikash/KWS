@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"kws/kws/models"
 	"log"
 	"os/exec"
 	"strings"
@@ -80,6 +81,22 @@ func (auth *AuthStore) VerifyUser(ctx context.Context, email string) error {
 	_, err := auth.db.Exec(ctx, sql, email)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (auth *AuthStore) LoginUser(ctx context.Context, userName, password string) error {
+	var userModel models.User
+
+	sql := `
+		SELECT verified FROM users WHERE user_name = $1
+	`
+
+	err := auth.db.QueryRow(ctx, sql, userName).Scan(&userModel.Verified)
+	if err != nil {
+		log.Println("No rows found in the table")
+		return errors.New("the user name is invalid")
 	}
 
 	return nil

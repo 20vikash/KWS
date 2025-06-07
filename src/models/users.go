@@ -11,6 +11,7 @@ type User struct {
 	Last_name  string
 	User_name  string
 	Password   string
+	Verified   bool
 }
 
 func (u *User) ValidateEmail() bool {
