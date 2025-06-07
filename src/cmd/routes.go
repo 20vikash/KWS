@@ -23,6 +23,7 @@ func NewRouter(app *Application) http.Handler {
 	r.Group(func(protected chi.Router) {
 		protected.Use(app.IsAuthorized)
 		protected.Get("/", app.HelloWorld)
+		protected.Get("/logout", app.LogOutUser)
 	})
 
 	// Public routes (no auth required)

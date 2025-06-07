@@ -166,3 +166,26 @@ func (app *Application) LoginUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Logged in successfully"))
 }
+
+func (app *Application) LogOutUser(w http.ResponseWriter, r *http.Request) {
+	// Check if the user is not authorized
+	isAuthorized := app.sessionManager.GetBool(r.Context(), "isAuthorized")
+	if !isAuthorized {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("You are not authorized to logout"))
+
+		return
+	}
+
+	// Destroy the session
+	err := app.sessionManager.Destroy(r.Context())
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Failed to logout"))
+
+		return
+	}
+
+	// Redirect the user to the login page.
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
