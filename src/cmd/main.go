@@ -33,6 +33,7 @@ func main() {
 				fmt.Sprintf("%s:%s",
 					env.GetRedisHost(), env.GetRedisPort()),
 				redis.DialDatabase(1),
+				redis.DialPassword(env.GetRedisPassword()),
 			)
 		},
 	}
