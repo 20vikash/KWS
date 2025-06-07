@@ -15,11 +15,14 @@ require (
 )
 
 require (
+	github.com/alexedwards/scs/v2 v2.8.0
+	github.com/gomodule/redigo v1.9.2
 	github.com/redis/go-redis/v9 v9.9.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
 require (
+	github.com/alexedwards/scs/redisstore v0.0.0-20250417082927-ab20b3feb5e9
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/joho/godotenv v1.5.1 // direct
