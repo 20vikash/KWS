@@ -10,8 +10,6 @@ import (
 )
 
 func (app *Application) HelloWorld(w http.ResponseWriter, r *http.Request) {
-	app.sessionManager.Put(r.Context(), "isAuthorized", false)
-
 	w.Write([]byte("Hello world"))
 }
 
@@ -72,6 +70,7 @@ func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+		return
 	}
 
 	// Generate token and set it to the redis store.
@@ -141,9 +140,15 @@ func (app *Application) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(message))
+
+		return // I forgot you. You fucking trouble maker
 	}
 
-	// Put the userID, and userName into the session store making them authorized
+	// Put the userID, userName, and isAuthorized into the session store making them authorized
 	app.sessionManager.Put(r.Context(), "id", userModel.Id)
 	app.sessionManager.Put(r.Context(), "user_name", userModel.User_name)
+	app.sessionManager.Put(r.Context(), "isAuthorized", true)
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Logged in successfully"))
 }

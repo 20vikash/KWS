@@ -20,11 +20,16 @@ func NewRouter(app *Application) http.Handler {
 	// Session manager middleware
 	r.Use(sessionManager.LoadAndSave)
 
-	// Endpoints
-	r.Get("/", app.HelloWorld)
+	// Endpoints before the authorization middleware
 	r.Post("/create_user", app.CreateUser)
 	r.Get("/verify", app.VerifyUser)
 	r.Post("/login", app.LoginUser)
+
+	// Authorization middleware
+	r.Use(app.IsAuthorized)
+
+	// Endpoints that need to be authorized
+	r.Get("/", app.HelloWorld)
 
 	return r
 }
