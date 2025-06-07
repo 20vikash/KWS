@@ -24,6 +24,7 @@ func NewRouter(app *Application) http.Handler {
 	r.Get("/", app.HelloWorld)
 	r.Post("/create_user", app.CreateUser)
 	r.Get("/verify", app.VerifyUser)
+	r.Post("/login", app.LoginUser)
 
 	return r
 }

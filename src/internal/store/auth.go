@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"kws/kws/models"
+	"kws/kws/status"
 	"log"
 	"os/exec"
 	"strings"
@@ -97,12 +98,12 @@ func (auth *AuthStore) LoginUser(ctx context.Context, userName, password string)
 
 	if err != nil {
 		log.Println("No rows found in the table")
-		return nil, errors.New("the user name is invalid")
+		return nil, errors.New(status.USER_NAME_INVALID)
 	}
 
 	if !userModel.Verified {
 		log.Println("The user is still not verified")
-		return nil, errors.New("user is not verified")
+		return nil, errors.New(status.USER_NOT_VERIFIED)
 	}
 
 	sql = `
@@ -120,13 +121,13 @@ func (auth *AuthStore) LoginUser(ctx context.Context, userName, password string)
 	)
 	if err != nil {
 		log.Println("No rows found in the table: ", err.Error())
-		return nil, errors.New("the user name is invalid")
+		return nil, errors.New(status.USER_NAME_INVALID)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(userModel.Password), []byte(password))
 	if err != nil {
 		log.Println("Wrong password")
-		return nil, errors.New("wrong credentials")
+		return nil, errors.New(status.WRONG_CREDENTIALS)
 	}
 
 	return &userModel, nil

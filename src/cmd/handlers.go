@@ -3,6 +3,7 @@ package main
 import (
 	"kws/kws/internal/gmail"
 	"kws/kws/models"
+	"kws/kws/status"
 	"log"
 	"net/http"
 	"strings"
@@ -111,4 +112,38 @@ func (a *Application) VerifyUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Successfully verified the email"))
+}
+
+func (app *Application) LoginUser(w http.ResponseWriter, r *http.Request) {
+	// Parse form fields.
+	err := r.ParseForm()
+	if err != nil {
+		log.Println("There is an error parsing the form")
+	}
+
+	// Usermodel instance
+	var userModel *models.User
+
+	// Get the field values
+	userName := r.FormValue("user_name")
+	password := r.FormValue("password")
+
+	// Login the user
+	userModel, err = app.Store.Auth.LoginUser(r.Context(), userName, password)
+	if err != nil {
+		message := ""
+
+		if err.Error() == status.USER_NAME_INVALID || err.Error() == status.WRONG_CREDENTIALS {
+			message = "Password or user name is wrong"
+		} else if err.Error() == status.USER_NOT_VERIFIED {
+			message = "You are not verified."
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(message))
+	}
+
+	// Put the userID, and userName into the session store making them authorized
+	app.sessionManager.Put(r.Context(), "id", userModel.Id)
+	app.sessionManager.Put(r.Context(), "user_name", userModel.User_name)
 }
