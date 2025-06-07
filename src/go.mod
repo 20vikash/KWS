@@ -21,6 +21,8 @@ require (
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
+require golang.org/x/time v0.12.0
+
 require (
 	github.com/alexedwards/scs/redisstore v0.0.0-20250417082927-ab20b3feb5e9
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
