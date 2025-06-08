@@ -15,7 +15,7 @@ type Instance struct {
 	IsRunning     bool
 }
 
-func (i *Instance) CreateInstanceType(uid int, userName string) *Instance {
+func CreateInstanceType(uid int, userName string) *Instance {
 	s := fmt.Sprintf("%d:%s", uid, userName)
 	h := sha256.Sum256([]byte(s))
 	hashString := hex.EncodeToString(h[:])
