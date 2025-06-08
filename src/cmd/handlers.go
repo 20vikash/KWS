@@ -16,7 +16,7 @@ func (app *Application) HelloWorld(w http.ResponseWriter, r *http.Request) {
 // Endpoint dedicated to web forms.
 func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// If already authorized, redirect to home page.
-	isAuthorized := app.sessionManager.GetBool(r.Context(), "isAuthorized")
+	isAuthorized := app.SessionManager.GetBool(r.Context(), "isAuthorized")
 	if isAuthorized {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -122,7 +122,7 @@ func (a *Application) VerifyUser(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) LoginUser(w http.ResponseWriter, r *http.Request) {
 	// If already authorized, redirect to home page.
-	isAuthorized := app.sessionManager.GetBool(r.Context(), "isAuthorized")
+	isAuthorized := app.SessionManager.GetBool(r.Context(), "isAuthorized")
 	if isAuthorized {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -159,9 +159,9 @@ func (app *Application) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Put the userID, userName, and isAuthorized into the session store making them authorized
-	app.sessionManager.Put(r.Context(), "id", userModel.Id)
-	app.sessionManager.Put(r.Context(), "user_name", userModel.User_name)
-	app.sessionManager.Put(r.Context(), "isAuthorized", true)
+	app.SessionManager.Put(r.Context(), "id", userModel.Id)
+	app.SessionManager.Put(r.Context(), "user_name", userModel.User_name)
+	app.SessionManager.Put(r.Context(), "isAuthorized", true)
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Logged in successfully"))
@@ -169,7 +169,7 @@ func (app *Application) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) LogOutUser(w http.ResponseWriter, r *http.Request) {
 	// Check if the user is not authorized
-	isAuthorized := app.sessionManager.GetBool(r.Context(), "isAuthorized")
+	isAuthorized := app.SessionManager.GetBool(r.Context(), "isAuthorized")
 	if !isAuthorized {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("You are not authorized to logout"))
@@ -178,7 +178,7 @@ func (app *Application) LogOutUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Destroy the session
-	err := app.sessionManager.Destroy(r.Context())
+	err := app.SessionManager.Destroy(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to logout"))

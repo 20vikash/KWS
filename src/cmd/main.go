@@ -4,12 +4,15 @@ import (
 	"fmt"
 	env "kws/kws/internal"
 	database "kws/kws/internal/database/connection"
+	"kws/kws/internal/docker"
 	"kws/kws/internal/store"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
+	"github.com/docker/docker/client"
 	"github.com/gomodule/redigo/redis"
 )
 
@@ -18,12 +21,19 @@ var sessionManager *scs.SessionManager
 type Application struct {
 	Port           string
 	Store          *store.Storage
-	sessionManager *scs.SessionManager
+	SessionManager *scs.SessionManager
+	Docker         *client.Client
 }
 
 func main() {
 	// Load .env variables into OS.
 	env.LoadEnv()
+
+	// Get docker connection
+	docker, err := docker.GetConnection()
+	if err != nil {
+		log.Fatal("Failed to connect to docker")
+	}
 
 	// Set up redis db pool for session manager.
 	rPool := &redis.Pool{
@@ -72,7 +82,8 @@ func main() {
 	app := Application{
 		Port:           ":8080",
 		Store:          store.NewStore(connPool, rc),
-		sessionManager: sessionManager,
+		SessionManager: sessionManager,
+		Docker:         docker,
 	}
 
 	// HTTP server
