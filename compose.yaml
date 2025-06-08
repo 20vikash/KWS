@@ -42,6 +42,7 @@ services:
     container_name: kws_gateway
     volumes:
       - ./src/:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - kws_main
     depends_on:
