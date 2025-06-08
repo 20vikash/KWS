@@ -21,6 +21,11 @@ type Storage struct {
 		GetEmailFromToken(ctx context.Context, token string) string
 		DeleteEmailToken(ctx context.Context, token string) error
 	}
+
+	Instance interface {
+		CreateInstance(ctx context.Context, uid int, userName string) error
+		RemoveInstance(ctx context.Context, uid int) error
+	}
 }
 
 func NewStore(pg *pgxpool.Pool, redis *redis.Client) *Storage {
@@ -30,6 +35,9 @@ func NewStore(pg *pgxpool.Pool, redis *redis.Client) *Storage {
 		},
 		InMemory: &RedisStore{
 			ds: redis,
+		},
+		Instance: &InstanceStore{
+			db: pg,
 		},
 	}
 }
