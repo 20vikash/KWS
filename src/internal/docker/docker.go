@@ -16,6 +16,7 @@ import (
 
 	"github.com/docker/docker/api/types/build"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 )
 
@@ -175,8 +176,34 @@ func (d *Docker) FindContainerIP(containerName string) {
 }
 
 // Named volume for every user creating a container.
-func (d *Docker) CreateNamedVolume(volumeName string) {
+func (d *Docker) CreateNamedVolume(ctx context.Context, volumeName string) error {
+	// List out all the volumes
+	vols, err := d.Con.VolumeList(ctx, volume.ListOptions{})
+	if err != nil {
+		log.Println("Cannot list the available volumes")
+		return err
+	}
 
+	// Check if the volume already exists.
+	for _, vol := range vols.Volumes {
+		if vol.Name == volumeName {
+			log.Println("Volume already exists")
+			return nil
+		}
+	}
+
+	// Create a named volume if it doesnt exist
+	_, err = d.Con.VolumeCreate(ctx, volume.CreateOptions{
+		Name: volumeName,
+	})
+	if err != nil {
+		log.Println("Cannot create volume")
+		return err
+	}
+
+	log.Println("Successfully created volume", volumeName)
+
+	return nil
 }
 
 // Custom network created at startup where user containers live.
