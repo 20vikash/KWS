@@ -2,8 +2,12 @@ package docker
 
 import (
 	"context"
+	"kws/kws/consts/config"
 	"log"
 
+	"slices"
+
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 )
 
@@ -30,7 +34,21 @@ func GetConnection() (*client.Client, error) {
 }
 
 // Creating the core image which would be a typical ubuntu setup with sshd, and code server.
-func (d *Docker) CreateImageCore() {
+func (d *Docker) CreateImageCore(ctx context.Context) {
+	// Collect the images list and check if the core image already exists
+	image, err := d.con.ImageList(ctx, image.ListOptions{})
+	if err != nil {
+		log.Println("Failed to collect image summaries")
+		return
+	}
+	for _, v := range image {
+		if slices.Contains(v.RepoTags, config.CORE_IMAGE_NAME) {
+			log.Println("Image already exists")
+			return
+		}
+	}
+
+	// If it dosent exist, create one using the existing dockerfile
 
 }
 
