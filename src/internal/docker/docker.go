@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/docker/docker/api/types/build"
 	"github.com/docker/docker/api/types/filters"
@@ -110,21 +111,17 @@ func GetConnection() (*client.Client, error) {
 
 // Creating the core image which would be a typical ubuntu setup with sshd, and code server.
 func (d *Docker) CreateImageCore(ctx context.Context) error {
-	// Create filters.
-	filter := filters.NewArgs()
-	filter.Add("name", config.CORE_IMAGE_NAME)
-
 	// Collect the images list and check if the core image already exists
-	image, err := d.Con.ImageList(ctx, image.ListOptions{Filters: filter})
+	image, err := d.Con.ImageList(ctx, image.ListOptions{})
 	if err != nil {
 		log.Println("Failed to collect image summaries")
 		return err
 	}
-
-	// Check if the image already exists.
-	if len(image) > 0 {
-		log.Println("Image already exists")
-		return err
+	for _, v := range image {
+		if slices.Contains(v.RepoTags, config.CORE_IMAGE_NAME) {
+			log.Println("Image already exists")
+			return err
+		}
 	}
 
 	// If it dosent exist, create one using the existing dockerfile
@@ -233,6 +230,7 @@ func (d *Docker) CreateCustomNetwork(ctx context.Context) error {
 		return nil
 	}
 
+	// Create the network if it dosent exist
 	_, err = d.Con.NetworkCreate(ctx, networkName, network.CreateOptions{
 		Driver: "bridge",
 	})
