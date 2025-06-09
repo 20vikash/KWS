@@ -195,6 +195,7 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 }
 
 func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
+	// Start the container
 	if err := d.Con.ContainerStart(ctx, containerID, container.StartOptions{}); err != nil {
 		log.Println("Failed to start the container with the ID", containerID)
 		return err
