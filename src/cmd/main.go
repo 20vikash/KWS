@@ -91,7 +91,10 @@ func main() {
 	}
 
 	// Initialize the server with the docker images
-	docker.CreateImageCore(context.Background())
+	err = docker.CreateImageCore(context.Background())
+	if err != nil {
+		log.Fatal("Core image creation error")
+	}
 
 	// HTTP server
 	http.ListenAndServe(app.Port, NewRouter(&app))

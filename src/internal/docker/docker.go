@@ -108,17 +108,17 @@ func GetConnection() (*client.Client, error) {
 }
 
 // Creating the core image which would be a typical ubuntu setup with sshd, and code server.
-func (d *Docker) CreateImageCore(ctx context.Context) {
+func (d *Docker) CreateImageCore(ctx context.Context) error {
 	// Collect the images list and check if the core image already exists
 	image, err := d.Con.ImageList(ctx, image.ListOptions{})
 	if err != nil {
 		log.Println("Failed to collect image summaries")
-		return
+		return err
 	}
 	for _, v := range image {
 		if slices.Contains(v.RepoTags, config.CORE_IMAGE_NAME) {
 			log.Println("Image already exists")
-			return
+			return err
 		}
 	}
 
@@ -127,7 +127,7 @@ func (d *Docker) CreateImageCore(ctx context.Context) {
 	tar, err := createTarDir(coreDockerFileDir) // Creates a tar of the dockerfile including all the files in that dir.
 	if err != nil {
 		log.Println("Cannot create tar out of the given directory")
-		return
+		return err
 	}
 
 	// Image build options
@@ -140,7 +140,7 @@ func (d *Docker) CreateImageCore(ctx context.Context) {
 	resp, err := d.Con.ImageBuild(ctx, tar, imageOpts)
 	if err != nil {
 		log.Println("Cannot create the image")
-		return
+		return err
 	}
 	defer resp.Body.Close()
 
@@ -148,8 +148,10 @@ func (d *Docker) CreateImageCore(ctx context.Context) {
 	_, err = io.Copy(os.Stdout, resp.Body)
 	if err != nil {
 		log.Println("Cannot stream output")
-		return
+		return err
 	}
+
+	return nil
 }
 
 // Creating the container using the core ubuntu image created earlier. (Has persistent named volume, network)
