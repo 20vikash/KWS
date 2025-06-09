@@ -1,9 +1,34 @@
 package main
 
-import "net/http"
+import (
+	"kws/kws/consts/config"
+	"kws/kws/models"
+	"net/http"
+)
 
 func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
 	//TODO: Pass this request to a message queue, and process it all in the background. SSE all the info.
+
+	// This is just a test code. Should change this.
+	uid := app.SessionManager.GetInt(r.Context(), "id")
+	userName := app.SessionManager.GetString(r.Context(), "user_name")
+
+	instanceType := models.CreateInstanceType(uid, userName)
+	id, err := app.Docker.CreateContainerCore(r.Context(),
+		instanceType.ContainerName,
+		instanceType.VolumeName,
+		config.CORE_NETWORK_NAME,
+	)
+	if err != nil {
+		http.Error(w, "cannot deploy instance", http.StatusInternalServerError)
+		return
+	}
+
+	err = app.Docker.StartContainer(r.Context(), id)
+	if err != nil {
+		http.Error(w, "cannot start instance", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (app *Application) StopInstance(w http.ResponseWriter, r *http.Request) {
