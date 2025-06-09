@@ -25,6 +25,9 @@ func NewRouter(app *Application) http.Handler {
 		protected.Use(app.IsAuthorized)
 		protected.Get("/", app.HelloWorld)
 		protected.Get("/logout", app.LogOutUser)
+		protected.Get("/deploy", app.Deploy)
+		protected.Get("/stop", app.StopInstance)
+		protected.Get("/kill", app.DeleteInstance)
 	})
 
 	// Public routes (no auth required)
