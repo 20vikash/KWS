@@ -52,6 +52,11 @@ func createTarDir(src string) (*bytes.Buffer, error) {
 			return nil
 		}
 
+		// Write the header
+		if err := tw.WriteHeader(header); err != nil {
+			return err
+		}
+
 		// Open the file.
 		f, err := os.Open(path)
 		if err != nil {
