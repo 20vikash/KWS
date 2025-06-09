@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	env "kws/kws/internal"
 	database "kws/kws/internal/database/connection"
@@ -29,10 +30,13 @@ func main() {
 	// Load .env variables into OS.
 	env.LoadEnv()
 
-	// Get docker connection
-	docker, err := docker.GetConnection()
+	// Get dockerCon connection
+	dockerCon, err := docker.GetConnection()
 	if err != nil {
 		log.Fatal("Failed to connect to docker")
+	}
+	docker := docker.Docker{
+		Con: dockerCon,
 	}
 
 	// Set up redis db pool for session manager.
@@ -83,8 +87,11 @@ func main() {
 		Port:           ":8080",
 		Store:          store.NewStore(connPool, rc),
 		SessionManager: sessionManager,
-		Docker:         docker,
+		Docker:         dockerCon,
 	}
+
+	// Initialize the server with the docker images
+	docker.CreateImageCore(context.Background())
 
 	// HTTP server
 	http.ListenAndServe(app.Port, NewRouter(&app))

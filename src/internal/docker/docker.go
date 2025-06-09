@@ -20,7 +20,7 @@ import (
 )
 
 type Docker struct {
-	con *client.Client
+	Con *client.Client
 }
 
 func createTarDir(src string) (*bytes.Buffer, error) {
@@ -105,7 +105,7 @@ func GetConnection() (*client.Client, error) {
 // Creating the core image which would be a typical ubuntu setup with sshd, and code server.
 func (d *Docker) CreateImageCore(ctx context.Context) {
 	// Collect the images list and check if the core image already exists
-	image, err := d.con.ImageList(ctx, image.ListOptions{})
+	image, err := d.Con.ImageList(ctx, image.ListOptions{})
 	if err != nil {
 		log.Println("Failed to collect image summaries")
 		return
@@ -119,7 +119,7 @@ func (d *Docker) CreateImageCore(ctx context.Context) {
 
 	// If it dosent exist, create one using the existing dockerfile
 	coreDockerFileDir := core.GetPath()
-	tar, err := createTarDir(coreDockerFileDir)
+	tar, err := createTarDir(coreDockerFileDir) // Creates a tar of the dockerfile including all the files in that dir.
 	if err != nil {
 		log.Println("Cannot create tar out of the given directory")
 		return
@@ -132,7 +132,7 @@ func (d *Docker) CreateImageCore(ctx context.Context) {
 		Remove:         true,                             // Remove intermediatory containers
 	}
 
-	resp, err := d.con.ImageBuild(ctx, tar, imageOpts)
+	resp, err := d.Con.ImageBuild(ctx, tar, imageOpts)
 	if err != nil {
 		log.Println("Cannot create the image")
 		return
