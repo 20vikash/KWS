@@ -14,6 +14,7 @@ import (
 
 	"slices"
 
+	"github.com/docker/docker/api/types/build"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 )
@@ -121,6 +122,27 @@ func (d *Docker) CreateImageCore(ctx context.Context) {
 	tar, err := createTarDir(coreDockerFileDir)
 	if err != nil {
 		log.Println("Cannot create tar out of the given directory")
+		return
+	}
+
+	// Image build options
+	imageOpts := build.ImageBuildOptions{
+		Tags:           []string{config.CORE_IMAGE_NAME}, // Image tag name
+		SuppressOutput: false,                            // Does not supresses verbose output from the build process
+		Remove:         true,                             // Remove intermediatory containers
+	}
+
+	resp, err := d.con.ImageBuild(ctx, tar, imageOpts)
+	if err != nil {
+		log.Println("Cannot create the image")
+		return
+	}
+	defer resp.Body.Close()
+
+	// Stream build output to stdout
+	_, err = io.Copy(os.Stdout, resp.Body)
+	if err != nil {
+		log.Println("Cannot stream output")
 		return
 	}
 }
