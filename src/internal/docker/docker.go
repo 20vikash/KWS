@@ -173,3 +173,13 @@ func (d *Docker) DeleteContainer(containerName string) {
 func (d *Docker) FindContainerIP(containerName string) {
 
 }
+
+// Named volume for every user creating a container.
+func (d *Docker) CreateNamedVolume(volumeName string) {
+
+}
+
+// Custom network created at startup where user containers live.
+func (d *Docker) CreateCustomNetwork(networkName string) {
+
+}
