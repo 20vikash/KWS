@@ -12,10 +12,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"slices"
-
 	"github.com/docker/docker/api/types/build"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 )
@@ -110,17 +110,21 @@ func GetConnection() (*client.Client, error) {
 
 // Creating the core image which would be a typical ubuntu setup with sshd, and code server.
 func (d *Docker) CreateImageCore(ctx context.Context) error {
+	// Create filters.
+	filter := filters.NewArgs()
+	filter.Add("name", config.CORE_IMAGE_NAME)
+
 	// Collect the images list and check if the core image already exists
-	image, err := d.Con.ImageList(ctx, image.ListOptions{})
+	image, err := d.Con.ImageList(ctx, image.ListOptions{Filters: filter})
 	if err != nil {
 		log.Println("Failed to collect image summaries")
 		return err
 	}
-	for _, v := range image {
-		if slices.Contains(v.RepoTags, config.CORE_IMAGE_NAME) {
-			log.Println("Image already exists")
-			return err
-		}
+
+	// Check if the image already exists.
+	if len(image) > 0 {
+		log.Println("Image already exists")
+		return err
 	}
 
 	// If it dosent exist, create one using the existing dockerfile
@@ -177,19 +181,21 @@ func (d *Docker) FindContainerIP(containerName string) {
 
 // Named volume for every user creating a container.
 func (d *Docker) CreateNamedVolume(ctx context.Context, volumeName string) error {
+	// Create a filter
+	filter := filters.NewArgs()
+	filter.Add("name", volumeName)
+
 	// List out all the volumes
-	vols, err := d.Con.VolumeList(ctx, volume.ListOptions{})
+	vols, err := d.Con.VolumeList(ctx, volume.ListOptions{Filters: filter})
 	if err != nil {
 		log.Println("Cannot list the available volumes")
 		return err
 	}
 
 	// Check if the volume already exists.
-	for _, vol := range vols.Volumes {
-		if vol.Name == volumeName {
-			log.Println("Volume already exists")
-			return nil
-		}
+	if len(vols.Volumes) > 0 {
+		log.Println("Volume already exists")
+		return nil
 	}
 
 	// Create a named volume if it doesnt exist
@@ -207,6 +213,35 @@ func (d *Docker) CreateNamedVolume(ctx context.Context, volumeName string) error
 }
 
 // Custom network created at startup where user containers live.
-func (d *Docker) CreateCustomNetwork(networkName string) {
+func (d *Docker) CreateCustomNetwork(ctx context.Context) error {
+	networkName := config.CORE_NETWORK_NAME
 
+	// Create a filter
+	filter := filters.NewArgs()
+	filter.Add("name", networkName)
+
+	// List out all the network names
+	networks, err := d.Con.NetworkList(ctx, network.ListOptions{Filters: filter})
+	if err != nil {
+		log.Println("Error listing out the networks")
+		return err
+	}
+
+	// Check if the network already exists
+	if len(networks) > 0 {
+		log.Println("Network already exists")
+		return nil
+	}
+
+	_, err = d.Con.NetworkCreate(ctx, networkName, network.CreateOptions{
+		Driver: "bridge",
+	})
+	if err != nil {
+		log.Println("Error creating a network")
+		return err
+	}
+
+	log.Println("Created network successfully")
+
+	return nil
 }
