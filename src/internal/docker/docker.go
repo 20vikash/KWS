@@ -1,9 +1,16 @@
 package docker
 
 import (
+	"archive/tar"
+	"bytes"
 	"context"
+	"io"
+	"io/fs"
 	"kws/kws/consts/config"
+	"kws/kws/internal/docker/dockerfiles/core"
 	"log"
+	"os"
+	"path/filepath"
 
 	"slices"
 
@@ -13,6 +20,67 @@ import (
 
 type Docker struct {
 	con *client.Client
+}
+
+func createTarDir(src string) (*bytes.Buffer, error) {
+	buf := new(bytes.Buffer)
+	tw := tar.NewWriter(buf)
+
+	err := filepath.Walk(src, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Create header
+		header, err := tar.FileInfoHeader(info, info.Name())
+		if err != nil {
+			log.Println("Error while creating the header")
+			return err
+		}
+
+		// Change the header's file name to relative paths.
+		rel, err := filepath.Rel(src, path)
+		if err != nil {
+			log.Println("Error while changing the header's file name to relative path")
+			return err
+		}
+		header.Name = rel
+
+		// If not a regular file, skip the execution.
+		if !info.Mode().IsRegular() {
+			return nil
+		}
+
+		// Open the file.
+		f, err := os.Open(path)
+		if err != nil {
+			log.Println("Error while opening the file")
+			return err
+		}
+
+		// Copy the file content into the tar.
+		if _, err := io.Copy(tw, f); err != nil {
+			log.Println("Error while copying the file content into the tar")
+			return err
+		}
+
+		// Close the file
+		f.Close()
+
+		return nil
+	})
+
+	if err != nil {
+		log.Println("Error walking the directory")
+		return nil, err
+	}
+
+	if err := tw.Close(); err != nil {
+		log.Println("Error while closing the tar writer")
+		return nil, err
+	}
+
+	return buf, nil
 }
 
 // Getting connection
@@ -49,7 +117,12 @@ func (d *Docker) CreateImageCore(ctx context.Context) {
 	}
 
 	// If it dosent exist, create one using the existing dockerfile
-
+	coreDockerFileDir := core.GetPath()
+	tar, err := createTarDir(coreDockerFileDir)
+	if err != nil {
+		log.Println("Cannot create tar out of the given directory")
+		return
+	}
 }
 
 // Creating the container using the core ubuntu image created earlier. (Has persistent named volume, network)

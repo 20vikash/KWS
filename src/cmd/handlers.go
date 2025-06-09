@@ -1,9 +1,9 @@
 package main
 
 import (
+	"kws/kws/consts/status"
 	"kws/kws/internal/gmail"
 	"kws/kws/models"
-	"kws/kws/status"
 	"log"
 	"net/http"
 	"strings"
