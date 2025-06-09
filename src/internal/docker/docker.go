@@ -233,6 +233,14 @@ func (d *Docker) CreateCustomNetwork(ctx context.Context) error {
 	// Create the network if it dosent exist
 	_, err = d.Con.NetworkCreate(ctx, networkName, network.CreateOptions{
 		Driver: "bridge",
+		IPAM: &network.IPAM{
+			Config: []network.IPAMConfig{
+				{
+					Subnet:  config.CORE_NETWORK_SUBNET,
+					Gateway: config.CORE_NETWORK_GATEWAY,
+				},
+			},
+		},
 	})
 	if err != nil {
 		log.Println("Error creating a network")
