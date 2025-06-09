@@ -13,7 +13,6 @@ import (
 
 	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
-	"github.com/docker/docker/client"
 	"github.com/gomodule/redigo/redis"
 )
 
@@ -23,7 +22,7 @@ type Application struct {
 	Port           string
 	Store          *store.Storage
 	SessionManager *scs.SessionManager
-	Docker         *client.Client
+	Docker         *docker.Docker
 }
 
 func main() {
@@ -35,7 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to connect to docker")
 	}
-	docker := docker.Docker{
+	docker := &docker.Docker{
 		Con: dockerCon,
 	}
 
@@ -87,7 +86,7 @@ func main() {
 		Port:           ":8080",
 		Store:          store.NewStore(connPool, rc),
 		SessionManager: sessionManager,
-		Docker:         dockerCon,
+		Docker:         docker,
 	}
 
 	// Initialize the server with the docker images
