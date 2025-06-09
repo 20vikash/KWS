@@ -96,6 +96,12 @@ func main() {
 		log.Fatal("Core image creation error")
 	}
 
+	// Initialize the server with custom bridge networks
+	err = docker.CreateCustomNetwork(context.Background())
+	if err != nil {
+		log.Fatal("Core network creation error")
+	}
+
 	// HTTP server
 	http.ListenAndServe(app.Port, NewRouter(&app))
 }
