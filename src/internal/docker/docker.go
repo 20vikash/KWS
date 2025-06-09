@@ -160,10 +160,12 @@ func (d *Docker) CreateImageCore(ctx context.Context) error {
 
 // Creating the container using the core ubuntu image created earlier. (Has persistent named volume, network)
 func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeName, networkName string) (string, error) {
+	// Container config that has the image name.
 	containerConfig := &container.Config{
 		Image: config.CORE_IMAGE_NAME,
 	}
 
+	// Container config that has the volume name.
 	hostConfig := &container.HostConfig{
 		Mounts: []mount.Mount{
 			{
@@ -174,12 +176,14 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 		},
 	}
 
+	// Network config.
 	networkConfig := &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
 			networkName: {},
 		},
 	}
 
+	// Create container
 	resp, err := d.Con.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, nil, containerName)
 	if err != nil {
 		log.Println("Cannot create container for core image")
