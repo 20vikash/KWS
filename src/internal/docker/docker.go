@@ -194,6 +194,10 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 	return resp.ID, nil
 }
 
+func (d *Docker) StartContainer(containerID string) {
+
+}
+
 // Stops the container without killing it.
 func (d *Docker) StopContainer(containerName string) {
 
