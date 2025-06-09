@@ -14,8 +14,10 @@ import (
 	"slices"
 
 	"github.com/docker/docker/api/types/build"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
@@ -157,8 +159,35 @@ func (d *Docker) CreateImageCore(ctx context.Context) error {
 }
 
 // Creating the container using the core ubuntu image created earlier. (Has persistent named volume, network)
-func (d *Docker) CreateContainerCore(containerName, volumeName, networkName string) {
+func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeName, networkName string) (string, error) {
+	containerConfig := &container.Config{
+		Image: config.CORE_IMAGE_NAME,
+	}
 
+	hostConfig := &container.HostConfig{
+		Mounts: []mount.Mount{
+			{
+				Type:   mount.TypeVolume,
+				Source: volumeName,
+				Target: "/",
+			},
+		},
+	}
+
+	networkConfig := &network.NetworkingConfig{
+		EndpointsConfig: map[string]*network.EndpointSettings{
+			networkName: {},
+		},
+	}
+
+	resp, err := d.Con.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, nil, containerName)
+	if err != nil {
+		log.Println("Cannot create container for core image")
+		return "", err
+	}
+
+	log.Println("Container created:", resp.ID)
+	return resp.ID, nil
 }
 
 // Stops the container without killing it.
