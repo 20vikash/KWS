@@ -159,6 +159,11 @@ func (d *Docker) CreateContainerCore(containerName, volumeName, networkName stri
 
 }
 
+// Stops the container without killing it.
+func (d *Docker) StopContainer(containerName string) {
+
+}
+
 // Delete the running container using the container name being passed.
 func (d *Docker) DeleteContainer(containerName string) {
 
