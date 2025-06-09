@@ -194,8 +194,15 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 	return resp.ID, nil
 }
 
-func (d *Docker) StartContainer(containerID string) {
+func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
+	if err := d.Con.ContainerStart(ctx, containerID, container.StartOptions{}); err != nil {
+		log.Println("Failed to start the container with the ID", containerID)
+		return err
+	}
 
+	log.Println("Container started successfully")
+
+	return nil
 }
 
 // Stops the container without killing it.
