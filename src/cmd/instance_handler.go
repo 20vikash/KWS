@@ -2,6 +2,7 @@ package main
 
 import (
 	"kws/kws/consts/config"
+	"kws/kws/consts/status"
 	"kws/kws/models"
 	"net/http"
 )
@@ -26,6 +27,11 @@ func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
 
 	err = app.Docker.StartContainer(r.Context(), id)
 	if err != nil {
+		if err.Error() == status.CONTAINER_ALREADY_RUNNING {
+			http.Error(w, "instance is already running", http.StatusBadRequest)
+			return
+		}
+
 		http.Error(w, "cannot start instance", http.StatusInternalServerError)
 		return
 	}
