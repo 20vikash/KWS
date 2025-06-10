@@ -171,7 +171,7 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 			{
 				Type:   mount.TypeVolume,
 				Source: volumeName,
-				Target: "/",
+				Target: "/root", // TODO:Change it in the future by creating a dedicated user.
 			},
 		},
 	}
@@ -186,7 +186,7 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 	// Create container
 	resp, err := d.Con.ContainerCreate(ctx, containerConfig, hostConfig, networkConfig, nil, containerName)
 	if err != nil {
-		log.Println("Cannot create container for core image")
+		log.Println("Cannot create container for core image:", err.Error())
 		return "", err
 	}
 
