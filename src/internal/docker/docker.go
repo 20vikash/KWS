@@ -4,9 +4,11 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"io/fs"
 	"kws/kws/consts/config"
+	"kws/kws/consts/status"
 	"kws/kws/internal/docker/dockerfiles/core"
 	"log"
 	"os"
@@ -160,6 +162,20 @@ func (d *Docker) CreateImageCore(ctx context.Context) error {
 
 // Creating the container using the core ubuntu image created earlier. (Has persistent named volume, network)
 func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeName, networkName string) (string, error) {
+	// Check if the container already exists
+	containers, err := d.Con.ContainerList(ctx, container.ListOptions{All: true}) // All to true will include non running containers
+	if err != nil {
+		log.Println("Failed to list out all the containers")
+		return "", nil
+	}
+
+	for _, container := range containers {
+		if containerName == container.Names[0] {
+			log.Println("Container already exists")
+			return container.ID, errors.New(status.CONTAINER_ALREADY_EXISTS) // Return the container ID without creating it again
+		}
+	}
+
 	// Container config that has the image name.
 	containerConfig := &container.Config{
 		Image: config.CORE_IMAGE_NAME,
@@ -195,6 +211,20 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 }
 
 func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
+	// Check if the container is already running.
+	containers, err := d.Con.ContainerList(ctx, container.ListOptions{All: false})
+	if err != nil {
+		log.Println("Failed to list out all the running containers")
+		return err
+	}
+
+	for _, container := range containers {
+		if container.ID == containerID {
+			log.Println("The container is already running")
+			return errors.New(status.CONTAINER_ALREADY_RUNNING)
+		}
+	}
+
 	// Start the container
 	if err := d.Con.ContainerStart(ctx, containerID, container.StartOptions{}); err != nil {
 		log.Println("Failed to start the container with the ID", containerID)
