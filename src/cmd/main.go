@@ -138,6 +138,9 @@ func main() {
 		log.Fatal("Core network creation error")
 	}
 
+	// Start the rabbitmq consumer to listen in the background
+	app.Store.MessageQueue.ConsumeMessageInstance()
+
 	// HTTP server
 	http.ListenAndServe(app.Port, NewRouter(&app))
 }
