@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"errors"
+	"kws/kws/consts/status"
 	"kws/kws/models"
 	"log"
 
@@ -41,10 +43,17 @@ func (i *InstanceStore) StartInstance(ctx context.Context, uid int) error {
 		UPDATE users SET is_running=TRUE WHERE user_id=$1
 	`
 
-	_, err := i.db.Exec(ctx, sql, uid)
+	res, err := i.db.Exec(ctx, sql, uid)
 	if err != nil {
 		log.Println("Cannot start the instance(db)")
 		return err
+	}
+
+	rows := res.RowsAffected()
+
+	if rows == 0 {
+		log.Printf("No user found with user_id=%d\n", uid)
+		return errors.New(status.CONTAINER_START_FAILED)
 	}
 
 	return nil

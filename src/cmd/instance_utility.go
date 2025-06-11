@@ -62,7 +62,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	// Start the container
 	err = app.Docker.StartContainer(ctx, id)
 	if err != nil {
-		if err.Error() == status.CONTAINER_ALREADY_RUNNING {
+		if err.Error() != status.CONTAINER_ALREADY_RUNNING {
 			d.Nack(false, false) // Send to retry queue
 			return
 		}
@@ -80,8 +80,22 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	} else {
 		err = app.Store.Instance.StartInstance(ctx, uid)
 		if err != nil {
-			d.Nack(false, false) // Send to retry queue
-			return
+			if err.Error() == status.CONTAINER_START_FAILED { // There should be a row at this point. If not, fix it.
+				log.Println("Detected missing DB row for running container. Recreating and recovering state.")
+				err = app.Store.Instance.CreateInstance(ctx, uid, userName) // Create.
+				if err != nil {
+					d.Nack(false, false) // Send to retry queue
+					return
+				}
+				err = app.Store.Instance.StartInstance(ctx, uid) // Start
+				if err != nil {
+					d.Nack(false, false)
+					return
+				}
+			} else {
+				d.Nack(false, false) // Send to retry queue
+				return
+			}
 		}
 	}
 
