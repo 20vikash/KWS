@@ -3,6 +3,8 @@ package mq
 import (
 	"fmt"
 	"kws/kws/consts/config"
+	"log"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -15,12 +17,19 @@ type Mq struct {
 }
 
 func (mq *Mq) ConnectToMq() (*amqp.Connection, error) {
-	conn, err := amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s/", mq.User, mq.Pass, mq.Host, mq.Port))
-	if err != nil {
-		return nil, err
+	var err error
+	var conn *amqp.Connection
+	for i := range 5 { // Retry for 5 times
+		log.Printf("Attempt mq connection: %d", i+1)
+		conn, err = amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s/", mq.User, mq.Pass, mq.Host, mq.Port))
+		if err != nil {
+			time.Sleep(1 * time.Second)
+		} else {
+			return conn, nil
+		}
 	}
 
-	return conn, nil
+	return nil, err
 }
 
 func (mq *Mq) CreateChannel(con *amqp.Connection) (*amqp.Channel, error) {

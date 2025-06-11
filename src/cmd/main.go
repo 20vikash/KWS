@@ -1,5 +1,7 @@
 package main
 
+// TODO: Please do graceful shutdown. Maintain the state.
+
 import (
 	"context"
 	"fmt"
@@ -131,6 +133,7 @@ func main() {
 		Store:          store.NewStore(connPool, rc, mqType),
 		SessionManager: sessionManager,
 		Docker:         docker,
+		Mq:             mqType,
 	}
 
 	// Initialize the server with the docker images
