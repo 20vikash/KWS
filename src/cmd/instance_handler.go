@@ -3,9 +3,20 @@ package main
 import (
 	"kws/kws/consts/config"
 	"kws/kws/consts/status"
+	"kws/kws/internal/store"
 	"kws/kws/models"
+	"log"
 	"net/http"
 )
+
+func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
+	go func() {
+		for d := range mq.Consumer {
+			log.Printf("Received a message: %s", d.Body)
+			d.Ack(true)
+		}
+	}()
+}
 
 func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
 	//TODO: Pass this request to a message queue, and process it all in the background. SSE all the info.

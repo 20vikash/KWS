@@ -139,7 +139,7 @@ func main() {
 	}
 
 	// Start the rabbitmq consumer to listen in the background
-	app.Store.MessageQueue.ConsumeMessageInstance()
+	app.ConsumeMessageInstance(app.Mq)
 
 	// HTTP server
 	http.ListenAndServe(app.Port, NewRouter(&app))

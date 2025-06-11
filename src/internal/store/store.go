@@ -30,7 +30,6 @@ type Storage struct {
 
 	MessageQueue interface {
 		PushMessageInstance(ctx context.Context, message *QueueMessage) error
-		ConsumeMessageInstance()
 	}
 }
 

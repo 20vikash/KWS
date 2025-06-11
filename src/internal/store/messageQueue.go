@@ -47,12 +47,3 @@ func (mq *MQ) PushMessageInstance(ctx context.Context, message *QueueMessage) er
 
 	return nil
 }
-
-func (mq *MQ) ConsumeMessageInstance() {
-	go func() {
-		for d := range mq.Consumer {
-			log.Printf("Received a message: %s", d.Body)
-			d.Ack(true)
-		}
-	}()
-}
