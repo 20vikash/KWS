@@ -26,6 +26,7 @@ func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		http.Error(w, "failed to handle your request", http.StatusInternalServerError)
+		return
 	}
 
 	instanceResponse := &InstanceResponse{

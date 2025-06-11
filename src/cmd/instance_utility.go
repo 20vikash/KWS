@@ -67,8 +67,6 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 			d.Nack(false, false) // Send to retry queue
 			return
 		}
-
-		return
 	}
 
 	// Update the database records.
