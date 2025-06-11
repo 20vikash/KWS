@@ -62,6 +62,19 @@ func main() {
 		log.Fatal("Failed to create instance queue")
 	}
 
+	// Create a consumer for that queue
+	consumer, err := mq.CreateConsumer(mqCh, queue)
+	if err != nil {
+		log.Fatal("Failed to create a consumer")
+	}
+
+	// Create MQ struct instance.
+	mqType := &store.MQ{
+		Consumer: consumer,
+		Ch:       mqCh,
+		Queue:    queue,
+	}
+
 	// Set up redis db pool for session manager.
 	rPool := &redis.Pool{
 		MaxIdle: 10,
@@ -108,7 +121,7 @@ func main() {
 	// Initialize Application
 	app := Application{
 		Port:           ":8080",
-		Store:          store.NewStore(connPool, rc, mqCh, queue),
+		Store:          store.NewStore(connPool, rc, mqType),
 		SessionManager: sessionManager,
 		Docker:         docker,
 	}

@@ -46,3 +46,20 @@ func (mq *Mq) CreateQueue(ch *amqp.Channel, queueName string) (*amqp.Queue, erro
 
 	return &q, nil
 }
+
+func (mq *Mq) CreateConsumer(ch *amqp.Channel, queue *amqp.Queue) (<-chan amqp.Delivery, error) {
+	msgs, err := ch.Consume(
+		queue.Name, // queue
+		"",         // consumer
+		false,      // auto-ack
+		false,      // exclusive
+		false,      // no-local
+		false,      // no-wait
+		nil,        // args
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return msgs, nil
+}
