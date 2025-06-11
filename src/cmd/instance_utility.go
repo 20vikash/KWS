@@ -12,10 +12,14 @@ import (
 	"kws/kws/internal/store"
 	"kws/kws/models"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/rabbitmq/amqp091-go"
 )
+
+var retries = make(map[string]int, 0)
+var mutex = &sync.Mutex{}
 
 // Generate a unique job ID for every instance based request.
 func generateHashedJobID(uid int, username string) string {
@@ -26,6 +30,17 @@ func generateHashedJobID(uid int, username string) string {
 
 // Raw deploy logic which will be called as a goroutine.
 func (app *Application) deploy(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string) {
+	// Check if the request exceeded the retry count (3)
+	mutex.Lock()
+	defer mutex.Unlock()
+	if retries[jobID] == 3 {
+		d.Nack(false, false)
+		delete(retries, jobID)
+		return
+	}
+	// Update the retry counter
+	retries[jobID]++
+
 	containerExists := false
 
 	// Create the container.
