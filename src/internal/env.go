@@ -67,3 +67,20 @@ func getENV() string {
 func IsProd() bool {
 	return strings.ToLower(getENV()) == "production"
 }
+
+// RabbitMq
+func GetMqHost() string {
+	return os.Getenv("MQ_HOST")
+}
+
+func GetMqPort() string {
+	return os.Getenv("MQ_SERVER_PORT")
+}
+
+func GetMqUser() string {
+	return os.Getenv("MQ_USER")
+}
+
+func GetMqPassword() string {
+	return os.Getenv("MQ_PASSWORD")
+}
