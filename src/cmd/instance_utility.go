@@ -39,6 +39,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 		return
 	}
 	// Update the retry counter
+	log.Printf("Job ID: %s, retry counter: %d", jobID, retries[jobID])
 	retries[jobID]++
 
 	containerExists := false
