@@ -36,8 +36,9 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 		config.CORE_NETWORK_NAME,
 	)
 	if err != nil {
-		if !(err.Error() == status.CONTAINER_ALREADY_EXISTS) {
+		if err.Error() == status.CONTAINER_ALREADY_EXISTS {
 			containerExists = true
+		} else {
 			return
 		}
 	}
