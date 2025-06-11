@@ -43,7 +43,22 @@ func (i *InstanceStore) RemoveInstance(ctx context.Context, uid int) error {
 
 	_, err := i.db.Exec(ctx, sql, uid)
 	if err != nil {
-		log.Println("Cannot stop/remove the instance")
+		log.Println("Cannot remove the instance")
+		return err
+	}
+
+	return nil
+}
+
+// Database level function: Stop an instance record related to the user
+func (i *InstanceStore) StopInstance(ctx context.Context, uid int) error {
+	sql := `
+		UPDATE users SET is_running=FALSE WHERE user_id=$1
+	`
+
+	_, err := i.db.Exec(ctx, sql, uid)
+	if err != nil {
+		log.Println("Cannot stop the instance")
 		return err
 	}
 
