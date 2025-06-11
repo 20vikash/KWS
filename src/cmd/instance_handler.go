@@ -1,51 +1,101 @@
 package main
 
 import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/gob"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
 	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/internal/store"
 	"kws/kws/models"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/rabbitmq/amqp091-go"
 )
 
-func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
-	go func() {
-		for d := range mq.Consumer {
-			log.Printf("Received a message: %s", d.Body)
-			d.Ack(true)
-		}
-	}()
+type InstanceResponse struct {
+	JobID string
 }
 
-func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
-	//TODO: Pass this request to a message queue, and process it all in the background. SSE all the info.
+// Generate a unique job ID for every instance based request.
+func generateHashedJobID(uid int, username string) string {
+	data := fmt.Sprintf("%d-%d-%s", time.Now().UnixNano(), uid, username)
+	hash := sha256.Sum256([]byte(data))
+	return hex.EncodeToString(hash[:])
+}
 
-	// This is just a test code. Should change this.
-	uid := app.SessionManager.GetInt(r.Context(), "id")
-	userName := app.SessionManager.GetString(r.Context(), "user_name")
-
+// Raw deploy logic which will be called as a goroutine.
+func (app *Application) deploy(ctx context.Context, uid int, userName string, d amqp091.Delivery, jobID string) {
+	// Create the container.
 	instanceType := models.CreateInstanceType(uid, userName)
-	id, err := app.Docker.CreateContainerCore(r.Context(),
+	id, err := app.Docker.CreateContainerCore(ctx,
 		instanceType.ContainerName,
 		instanceType.VolumeName,
 		config.CORE_NETWORK_NAME,
 	)
 	if err != nil {
-		http.Error(w, "cannot deploy instance", http.StatusInternalServerError)
 		return
 	}
 
-	err = app.Docker.StartContainer(r.Context(), id)
+	// Start the container
+	err = app.Docker.StartContainer(ctx, id)
 	if err != nil {
 		if err.Error() == status.CONTAINER_ALREADY_RUNNING {
-			http.Error(w, "instance is already running", http.StatusBadRequest)
 			return
 		}
 
-		http.Error(w, "cannot start instance", http.StatusInternalServerError)
 		return
 	}
+
+	// Ack the request once everything went well
+	d.Ack(true)
+	log.Println("ACK'd a message with a job ID", jobID)
+}
+
+func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
+	// Consumer goroutine that runs in the background listening for incoming requests in the queue.
+	go func() {
+		for d := range mq.Consumer {
+			var queueMessage store.QueueMessage
+			body := d.Body
+			gob.NewDecoder(bytes.NewReader(body)).Decode(&queueMessage)
+
+			go app.deploy(context.Background(), queueMessage.UserID, queueMessage.UserName, d, queueMessage.JobID)
+		}
+	}()
+}
+
+func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
+	// Get the session values (uid and username)
+	uid := app.SessionManager.GetInt(r.Context(), "id")
+	userName := app.SessionManager.GetString(r.Context(), "user_name")
+
+	// Generate a job ID
+	jid := generateHashedJobID(uid, userName)
+
+	// Push the message to the queue.
+	err := app.Store.MessageQueue.PushMessageInstance(r.Context(), &store.QueueMessage{
+		UserID:   uid,
+		UserName: userName,
+		JobID:    jid,
+	})
+	if err != nil {
+		http.Error(w, "failed to handle your request", http.StatusInternalServerError)
+	}
+
+	instanceResponse := &InstanceResponse{
+		JobID: jid,
+	}
+
+	// Send the json response with the Job ID
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(instanceResponse)
 }
 
 func (app *Application) StopInstance(w http.ResponseWriter, r *http.Request) {

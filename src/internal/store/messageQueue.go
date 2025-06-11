@@ -17,7 +17,7 @@ type MQ struct {
 
 type QueueMessage struct {
 	JobID    string
-	UserID   string
+	UserID   int
 	UserName string
 }
 
