@@ -30,3 +30,19 @@ func (mq *Mq) CreateChannel(con *amqp.Connection) (*amqp.Channel, error) {
 
 	return ch, nil
 }
+
+func (mq *Mq) CreateQueue(ch *amqp.Channel, queueName string) (*amqp.Queue, error) {
+	q, err := ch.QueueDeclare(
+		queueName, // name
+		false,     // durable
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		nil,       // arguments
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &q, nil
+}

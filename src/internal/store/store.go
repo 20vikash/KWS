@@ -33,7 +33,7 @@ type Storage struct {
 	}
 }
 
-func NewStore(pg *pgxpool.Pool, redis *redis.Client, ch *amqp091.Channel) *Storage {
+func NewStore(pg *pgxpool.Pool, redis *redis.Client, ch *amqp091.Channel, queue *amqp091.Queue) *Storage {
 	return &Storage{
 		Auth: &AuthStore{
 			db: pg,
@@ -45,7 +45,8 @@ func NewStore(pg *pgxpool.Pool, redis *redis.Client, ch *amqp091.Channel) *Stora
 			db: pg,
 		},
 		MessageQueue: &MQ{
-			ch: ch,
+			ch:    ch,
+			queue: queue,
 		},
 	}
 }

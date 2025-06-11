@@ -56,6 +56,12 @@ func main() {
 		log.Fatal("Failed to create a Mq channel")
 	}
 
+	// Initialize mq queue
+	queue, err := mq.CreateQueue(mqCh, "instance")
+	if err != nil {
+		log.Fatal("Failed to create instance queue")
+	}
+
 	// Set up redis db pool for session manager.
 	rPool := &redis.Pool{
 		MaxIdle: 10,
@@ -102,7 +108,7 @@ func main() {
 	// Initialize Application
 	app := Application{
 		Port:           ":8080",
-		Store:          store.NewStore(connPool, rc, mqCh),
+		Store:          store.NewStore(connPool, rc, mqCh, queue),
 		SessionManager: sessionManager,
 		Docker:         docker,
 	}
