@@ -39,8 +39,24 @@ func (i *InstanceStore) CreateInstance(ctx context.Context, uid int, userName st
 
 // Database level function: Start an instance record related to the user
 func (i *InstanceStore) StartInstance(ctx context.Context, uid int) error {
+	var isRunning bool
+
 	sql := `
-		UPDATE users SET is_running=TRUE WHERE user_id=$1
+		SELECT is_running FROM instance WHERE user_id=$1
+	`
+
+	err := i.db.QueryRow(ctx, sql, uid).Scan(&isRunning)
+	if err != nil {
+		log.Println("Cannot query the instance table(db)")
+		return err
+	}
+
+	if isRunning {
+		return errors.New(status.CONTAINER_ALREADY_RUNNING)
+	}
+
+	sql = `
+		UPDATE instance SET is_running=TRUE WHERE user_id=$1
 	`
 
 	res, err := i.db.Exec(ctx, sql, uid)
@@ -77,7 +93,7 @@ func (i *InstanceStore) RemoveInstance(ctx context.Context, uid int) error {
 // Database level function: Stop an instance record related to the user
 func (i *InstanceStore) StopInstance(ctx context.Context, uid int) error {
 	sql := `
-		UPDATE users SET is_running=FALSE WHERE user_id=$1
+		UPDATE instance SET is_running=FALSE WHERE user_id=$1
 	`
 
 	_, err := i.db.Exec(ctx, sql, uid)
