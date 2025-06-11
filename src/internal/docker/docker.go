@@ -172,7 +172,7 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 	for _, container := range containers {
 		if containerName == container.Names[0][1:] { // Sample structure: ["/container_name"]
 			log.Println("Container already exists")
-			return container.ID, nil // Return the container ID without creating it again
+			return container.ID, errors.New(status.CONTAINER_ALREADY_EXISTS) // Return the container ID without creating it again
 		}
 	}
 

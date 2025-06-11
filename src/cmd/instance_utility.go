@@ -25,7 +25,9 @@ func generateHashedJobID(uid int, username string) string {
 }
 
 // Raw deploy logic which will be called as a goroutine.
-func (app *Application) deploy(ctx context.Context, uid int, userName string, d amqp091.Delivery, jobID string) {
+func (app *Application) deploy(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string) {
+	containerExists := false
+
 	// Create the container.
 	instanceType := models.CreateInstanceType(uid, userName)
 	id, err := app.Docker.CreateContainerCore(ctx,
@@ -34,7 +36,10 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 		config.CORE_NETWORK_NAME,
 	)
 	if err != nil {
-		return
+		if !(err.Error() == status.CONTAINER_ALREADY_EXISTS) {
+			containerExists = true
+			return
+		}
 	}
 
 	// Start the container
@@ -46,6 +51,21 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 
 		return
 	}
+
+	// Update the database records.
+	if !containerExists {
+		err = app.Store.Instance.CreateInstance(ctx, uid, userName)
+		if err != nil {
+			return
+		}
+	} else {
+		err = app.Store.Instance.StartInstance(ctx, uid)
+		if err != nil {
+			return
+		}
+	}
+
+	log.Println("Successfully running a container and updated the database records")
 
 	// Ack the request once everything went well
 	d.Ack(true)
@@ -60,7 +80,7 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 			body := d.Body
 			gob.NewDecoder(bytes.NewReader(body)).Decode(&queueMessage)
 
-			go app.deploy(context.Background(), queueMessage.UserID, queueMessage.UserName, d, queueMessage.JobID)
+			go app.deploy(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
 		}
 	}()
 }
