@@ -5,6 +5,7 @@ import (
 	"kws/kws/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rabbitmq/amqp091-go"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -27,9 +28,12 @@ type Storage struct {
 		RemoveInstance(ctx context.Context, uid int) error
 		StopInstance(ctx context.Context, uid int) error
 	}
+
+	MessageQueue interface {
+	}
 }
 
-func NewStore(pg *pgxpool.Pool, redis *redis.Client) *Storage {
+func NewStore(pg *pgxpool.Pool, redis *redis.Client, ch *amqp091.Channel) *Storage {
 	return &Storage{
 		Auth: &AuthStore{
 			db: pg,
@@ -39,6 +43,9 @@ func NewStore(pg *pgxpool.Pool, redis *redis.Client) *Storage {
 		},
 		Instance: &InstanceStore{
 			db: pg,
+		},
+		MessageQueue: &MQ{
+			ch: ch,
 		},
 	}
 }

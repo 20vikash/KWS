@@ -6,6 +6,7 @@ import (
 	env "kws/kws/internal"
 	database "kws/kws/internal/database/connection"
 	"kws/kws/internal/docker"
+	"kws/kws/internal/mq"
 	"kws/kws/internal/store"
 	"log"
 	"net/http"
@@ -23,6 +24,7 @@ type Application struct {
 	Store          *store.Storage
 	SessionManager *scs.SessionManager
 	Docker         *docker.Docker
+	Mq             *store.MQ
 }
 
 func main() {
@@ -36,6 +38,22 @@ func main() {
 	}
 	docker := &docker.Docker{
 		Con: dockerCon,
+	}
+
+	// Get rabbitmq connection and set up channel.
+	mq := mq.Mq{
+		User: env.GetMqUser(),
+		Pass: env.GetMqPassword(),
+		Port: env.GetMqPort(),
+		Host: env.GetMqHost(),
+	}
+	con, err := mq.ConnectToMq() // TCP connection
+	if err != nil {
+		log.Fatal("Failed to connect to rabbitmq")
+	}
+	mqCh, err := mq.CreateChannel(con) // Channel connection
+	if err != nil {
+		log.Fatal("Failed to create a Mq channel")
 	}
 
 	// Set up redis db pool for session manager.
@@ -84,7 +102,7 @@ func main() {
 	// Initialize Application
 	app := Application{
 		Port:           ":8080",
-		Store:          store.NewStore(connPool, rc),
+		Store:          store.NewStore(connPool, rc, mqCh),
 		SessionManager: sessionManager,
 		Docker:         docker,
 	}
