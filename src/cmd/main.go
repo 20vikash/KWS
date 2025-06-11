@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"kws/kws/consts/config"
 	env "kws/kws/internal"
 	database "kws/kws/internal/database/connection"
 	"kws/kws/internal/docker"
@@ -56,10 +57,16 @@ func main() {
 		log.Fatal("Failed to create a Mq channel")
 	}
 
-	// Initialize mq queue
-	queue, err := mq.CreateQueue(mqCh, "instance")
+	// Initialize mq main instance queue
+	queue, err := mq.CreateQueueInstance(mqCh, config.MAIN_INSTANCE_QUEUE, config.RETRY_QUEUE)
 	if err != nil {
 		log.Fatal("Failed to create instance queue")
+	}
+
+	// Initialize mq retry queue
+	_, err = mq.CreateRetryQueue(mqCh, config.RETRY_QUEUE)
+	if err != nil {
+		log.Fatal("Failed to create retry queue")
 	}
 
 	// Create a consumer for that queue

@@ -2,6 +2,7 @@ package mq
 
 import (
 	"fmt"
+	"kws/kws/consts/config"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -31,14 +32,37 @@ func (mq *Mq) CreateChannel(con *amqp.Connection) (*amqp.Channel, error) {
 	return ch, nil
 }
 
-func (mq *Mq) CreateQueue(ch *amqp.Channel, queueName string) (*amqp.Queue, error) {
+func (mq *Mq) CreateQueueInstance(ch *amqp.Channel, queueName string, retryQueue string) (*amqp.Queue, error) {
 	q, err := ch.QueueDeclare(
 		queueName, // name
-		false,     // durable
+		true,      // durable
 		false,     // delete when unused
 		false,     // exclusive
 		false,     // no-wait
-		nil,       // arguments
+		amqp.Table{
+			"x-dead-letter-exchange":    "",         // Use default exchange
+			"x-dead-letter-routing-key": retryQueue, // On failure, go here
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &q, nil
+}
+
+func (mq *Mq) CreateRetryQueue(ch *amqp.Channel, queueName string) (*amqp.Queue, error) {
+	q, err := ch.QueueDeclare(
+		queueName, // name
+		true,      // durable
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		amqp.Table{
+			"x-message-ttl":             int32(1000),                // Wait 5 seconds
+			"x-dead-letter-exchange":    "",                         // Use default exchange
+			"x-dead-letter-routing-key": config.MAIN_INSTANCE_QUEUE, // Send back to main
+		},
 	)
 	if err != nil {
 		return nil, err

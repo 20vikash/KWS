@@ -34,7 +34,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	mutex.Lock()
 	defer mutex.Unlock()
 	if retries[jobID] == 3 {
-		d.Nack(false, false)
+		d.Ack(false)
 		delete(retries, jobID)
 		return
 	}
@@ -54,6 +54,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 		if err.Error() == status.CONTAINER_ALREADY_EXISTS {
 			containerExists = true
 		} else {
+			d.Nack(false, false) // Send to retry queue
 			return
 		}
 	}
@@ -62,6 +63,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	err = app.Docker.StartContainer(ctx, id)
 	if err != nil {
 		if err.Error() == status.CONTAINER_ALREADY_RUNNING {
+			d.Nack(false, false) // Send to retry queue
 			return
 		}
 
@@ -72,11 +74,13 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	if !containerExists {
 		err = app.Store.Instance.CreateInstance(ctx, uid, userName)
 		if err != nil {
+			d.Nack(false, false) // Send to retry queue
 			return
 		}
 	} else {
 		err = app.Store.Instance.StartInstance(ctx, uid)
 		if err != nil {
+			d.Nack(false, false) // Send to retry queue
 			return
 		}
 	}
