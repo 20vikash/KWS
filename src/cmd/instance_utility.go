@@ -17,10 +17,6 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
-type InstanceResponse struct {
-	JobID string
-}
-
 // Generate a unique job ID for every instance based request.
 func generateHashedJobID(uid int, username string) string {
 	data := fmt.Sprintf("%d-%d-%s", time.Now().UnixNano(), uid, username)

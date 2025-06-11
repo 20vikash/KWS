@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+type InstanceResponse struct {
+	JobID string
+}
+
 func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
 	// Get the session values (uid and username)
 	uid := app.SessionManager.GetInt(r.Context(), "id")
