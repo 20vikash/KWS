@@ -5,6 +5,7 @@ networks:
 volumes:
   postgres_db_data_kws:
   redis_db_data_kws:
+  mq_kws:
 
 services:
   postgres:
@@ -20,6 +21,28 @@ services:
       - postgres_db_data_kws:/var/lib/postgresql/data:rw
     ports:
       - "${DB_PORT}:${DB_PORT}"
+    networks:
+      - kws_main
+  
+  rabbitmq:
+    image: rabbitmq:4.0.7-management-alpine
+    container_name: mq_q_kws
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_DEFAULT_USER=${MQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${MQ_PASSWORD}
+    ports:
+      - "${MQ_SERVER_PORT}:${MQ_SERVER_PORT}"
+      - "${MQ_UI_PORT}:${MQ_UI_PORT}"
+    volumes:
+      - mq_kws:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - kws_main
 
@@ -47,6 +70,8 @@ services:
       - kws_main
     depends_on:
       - postgres
+      - redis
+      - rabbitmq
     ports:
       - "8080:8080"
     working_dir: /app/data/cmd
