@@ -237,8 +237,41 @@ func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
 }
 
 // Stops the container without killing it.
-func (d *Docker) StopContainer(containerName string) {
+func (d *Docker) StopContainer(ctx context.Context, containerName string) error {
+	// Check if the container is not present.
+	notPresent := true
+	var containerID string
 
+	containers, err := d.Con.ContainerList(ctx, container.ListOptions{All: false})
+	if err != nil {
+		log.Println("Failed to list out all the running containers")
+		return err
+	}
+
+	for _, container := range containers {
+		if container.Names[0][1:] == containerName {
+			log.Println("The container is running. Preparing to stop it.")
+			notPresent = false
+			containerID = container.ID
+			break
+		}
+	}
+
+	if notPresent {
+		log.Println("Cannot find the container to stop")
+		return errors.New(status.CONTAINER_NOT_FOUND_TO_STOP)
+	}
+
+	// Stop the container.
+	err = d.Con.ContainerStop(ctx, containerID, container.StopOptions{})
+	if err != nil {
+		log.Println("Cannot stop the container")
+		return err
+	}
+
+	log.Println("Successfully stopped the container")
+
+	return nil
 }
 
 // Delete the running container using the container name being passed.

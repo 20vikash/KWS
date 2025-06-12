@@ -12,6 +12,7 @@ start:
 dv:
 	docker volume rm kws_postgres_db_data_kws
 	docker volume rm kws_redis_db_data_kws
+	docker volume rm kws_mq_kws
 
 create_migration:
 	migrate create -ext=sql -dir=src/internal/database/migrations -seq init
