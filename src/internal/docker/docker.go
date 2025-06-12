@@ -269,14 +269,49 @@ func (d *Docker) StopContainer(ctx context.Context, containerName string) error 
 		return err
 	}
 
-	log.Println("Successfully stopped the container")
+	log.Println("Successfully stopped the container:", containerName)
 
 	return nil
 }
 
 // Delete the running container using the container name being passed.
-func (d *Docker) DeleteContainer(containerName string) {
+func (d *Docker) DeleteContainer(ctx context.Context, containerName string) error {
+	var containerID string
+	containerFound := false
 
+	// List all containers, including stopped ones
+	containers, err := d.Con.ContainerList(ctx, container.ListOptions{All: true})
+	if err != nil {
+		log.Println("Failed to list containers")
+		return err
+	}
+
+	for _, container := range containers {
+		if container.Names[0][1:] == containerName {
+			log.Println("Found the container. Preparing to delete it.")
+			containerID = container.ID
+			containerFound = true
+			break
+		}
+	}
+
+	if !containerFound {
+		log.Println("Cannot find the container to delete")
+		return errors.New(status.CONTAINER_NOT_FOUND_TO_DELETE)
+	}
+
+	// Remove the container
+	removeOptions := container.RemoveOptions{
+		Force: true, // Force remove even if running
+	}
+
+	if err := d.Con.ContainerRemove(ctx, containerID, removeOptions); err != nil {
+		log.Println("Failed to delete the container:", err)
+		return err
+	}
+
+	log.Println("Successfully deleted the container:", containerName)
+	return nil
 }
 
 // Extracts the IP assigned by the docker daemon while creating the container in the custom network.
