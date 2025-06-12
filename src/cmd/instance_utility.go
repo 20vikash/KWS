@@ -160,7 +160,6 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 			} else if queueMessage.Action == config.KILL {
 				go app.kill(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
 			}
-
 		}
 	}()
 }

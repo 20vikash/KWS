@@ -409,3 +409,7 @@ func (d *Docker) CreateCustomNetwork(ctx context.Context) error {
 
 	return nil
 }
+
+func (d *Docker) RemoveNamedVolume(ctx context.Context, volumeName string) error {
+	return nil
+}
