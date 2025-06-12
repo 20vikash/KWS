@@ -105,6 +105,14 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	log.Println("ACK'd a message with a job ID", jobID)
 }
 
+func (app *Application) stop(ctx context.Context, uid int, userName string, a *amqp091.Delivery, jobID string) {
+
+}
+
+func (app *Application) kill(ctx context.Context, uid int, userName string, a *amqp091.Delivery, jobID string) {
+
+}
+
 func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 	// Consumer goroutine that runs in the background listening for incoming requests in the queue.
 	go func() {
@@ -113,7 +121,14 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 			body := d.Body
 			gob.NewDecoder(bytes.NewReader(body)).Decode(&queueMessage)
 
-			go app.deploy(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
+			if queueMessage.Action == config.DEPLOY {
+				go app.deploy(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
+			} else if queueMessage.Action == config.STOP {
+				go app.stop(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
+			} else if queueMessage.Action == config.KILL {
+				go app.kill(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
+			}
+
 		}
 	}()
 }
