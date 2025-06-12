@@ -315,8 +315,23 @@ func (d *Docker) DeleteContainer(ctx context.Context, containerName string) erro
 }
 
 // Extracts the IP assigned by the docker daemon while creating the container in the custom network.
-func (d *Docker) FindContainerIP(containerName string) {
+func (d *Docker) FindContainerIP(ctx context.Context, containerName string) (string, error) {
+	// Inspect the container to get network settings
+	containerJSON, err := d.Con.ContainerInspect(ctx, containerName)
+	if err != nil {
+		return "", err
+	}
 
+	// Iterate through the network settings
+	for netName, netSettings := range containerJSON.NetworkSettings.Networks {
+		log.Printf("Found container in network: %s, IP: %s", netName, netSettings.IPAddress)
+		if netSettings.IPAddress != "" {
+			return netSettings.IPAddress, nil
+		}
+	}
+
+	log.Println("No IP address found for the container")
+	return "", errors.New("no ip address found")
 }
 
 // Named volume for every user creating a container.
