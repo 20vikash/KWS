@@ -30,18 +30,6 @@ func generateHashedJobID(uid int, username string) string {
 
 // Raw deploy logic which will be called as a goroutine.
 func (app *Application) deploy(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string) {
-	// Check if the request exceeded the retry count (3)
-	mutex.Lock()
-	defer mutex.Unlock()
-	if retries[jobID] == 3 {
-		d.Ack(false)
-		delete(retries, jobID)
-		return
-	}
-	// Update the retry counter
-	log.Printf("Job ID: %s, retry counter: %d", jobID, retries[jobID])
-	retries[jobID]++
-
 	containerExists := false
 
 	// Create the container.
@@ -120,6 +108,18 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 			var queueMessage store.QueueMessage
 			body := d.Body
 			gob.NewDecoder(bytes.NewReader(body)).Decode(&queueMessage)
+
+			// Check if the request exceeded the retry count (3)
+			mutex.Lock()
+			defer mutex.Unlock()
+			if retries[queueMessage.JobID] == 3 {
+				d.Ack(false)
+				delete(retries, queueMessage.JobID)
+				return
+			}
+			// Update the retry counter
+			log.Printf("Job ID: %s, retry counter: %d", queueMessage.JobID, retries[queueMessage.JobID])
+			retries[queueMessage.JobID]++
 
 			if queueMessage.Action == config.DEPLOY {
 				go app.deploy(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
