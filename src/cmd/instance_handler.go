@@ -12,7 +12,7 @@ type InstanceResponse struct {
 	Action string
 }
 
-func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
+func (app *Application) handleInstanceAction(w http.ResponseWriter, r *http.Request, action string) {
 	// Get the session values (uid and username)
 	uid := app.SessionManager.GetInt(r.Context(), "id")
 	userName := app.SessionManager.GetString(r.Context(), "user_name")
@@ -25,79 +25,29 @@ func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
 		UserID:   uid,
 		UserName: userName,
 		JobID:    jid,
-		Action:   config.DEPLOY,
+		Action:   action,
 	})
 	if err != nil {
 		http.Error(w, "failed to handle your request", http.StatusInternalServerError)
 		return
 	}
 
-	instanceResponse := &InstanceResponse{
-		JobID:  jid,
-		Action: config.DEPLOY,
-	}
-
-	// Send the json response with the Job ID
+	// Send the JSON response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(instanceResponse)
+	json.NewEncoder(w).Encode(&InstanceResponse{
+		JobID:  jid,
+		Action: action,
+	})
+}
+
+func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
+	app.handleInstanceAction(w, r, config.DEPLOY)
 }
 
 func (app *Application) StopInstance(w http.ResponseWriter, r *http.Request) {
-	// Get the session values (uid and username)
-	uid := app.SessionManager.GetInt(r.Context(), "id")
-	userName := app.SessionManager.GetString(r.Context(), "user_name")
-
-	// Generate a job ID
-	jid := generateHashedJobID(uid, userName)
-
-	// Push the message to the queue.
-	err := app.Store.MessageQueue.PushMessageInstance(r.Context(), &store.QueueMessage{
-		UserID:   uid,
-		UserName: userName,
-		JobID:    jid,
-		Action:   config.STOP,
-	})
-	if err != nil {
-		http.Error(w, "failed to handle your request", http.StatusInternalServerError)
-		return
-	}
-
-	instanceResponse := &InstanceResponse{
-		JobID:  jid,
-		Action: config.STOP,
-	}
-
-	// Send the json response with the Job ID
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(instanceResponse)
+	app.handleInstanceAction(w, r, config.STOP)
 }
 
 func (app *Application) DeleteInstance(w http.ResponseWriter, r *http.Request) {
-	// Get the session values (uid and username)
-	uid := app.SessionManager.GetInt(r.Context(), "id")
-	userName := app.SessionManager.GetString(r.Context(), "user_name")
-
-	// Generate a job ID
-	jid := generateHashedJobID(uid, userName)
-
-	// Push the message to the queue.
-	err := app.Store.MessageQueue.PushMessageInstance(r.Context(), &store.QueueMessage{
-		UserID:   uid,
-		UserName: userName,
-		JobID:    jid,
-		Action:   config.KILL,
-	})
-	if err != nil {
-		http.Error(w, "failed to handle your request", http.StatusInternalServerError)
-		return
-	}
-
-	instanceResponse := &InstanceResponse{
-		JobID:  jid,
-		Action: config.KILL,
-	}
-
-	// Send the json response with the Job ID
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(instanceResponse)
+	app.handleInstanceAction(w, r, config.KILL)
 }
