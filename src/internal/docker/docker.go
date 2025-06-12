@@ -411,8 +411,27 @@ func (d *Docker) CreateCustomNetwork(ctx context.Context) error {
 }
 
 func (d *Docker) RemoveNamedVolume(ctx context.Context, volumeName string) error {
+	// Check if the volume exist.
+	found := false
+	volumes, err := d.Con.VolumeList(ctx, volume.ListOptions{})
+	if err != nil {
+		log.Println("Cannot list out all the volumes")
+	}
+
+	for _, volume := range volumes.Volumes {
+		if volume.Name == volumeName {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		log.Println("Cannot find the volume to stop")
+		return errors.New(status.VOLUME_NOT_FOUND)
+	}
+
 	// Remove volume
-	err := d.Con.VolumeRemove(ctx, volumeName, false)
+	err = d.Con.VolumeRemove(ctx, volumeName, false)
 	if err != nil {
 		log.Println("Cannot remove named volume:", volumeName)
 		return err
