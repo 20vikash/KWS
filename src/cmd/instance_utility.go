@@ -93,8 +93,29 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	log.Println("ACK'd a message with a job ID", jobID)
 }
 
-func (app *Application) stop(ctx context.Context, uid int, userName string, a *amqp091.Delivery, jobID string) {
+func (app *Application) stop(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string) {
+	// Stop the container
+	instanceType := models.CreateInstanceType(uid, userName)
+	err := app.Docker.StopContainer(ctx, instanceType.ContainerName)
+	if err != nil {
+		if err.Error() != status.CONTAINER_NOT_FOUND_TO_STOP {
+			log.Println("Something went wrong in stopping the container")
+			d.Nack(false, false) // Send to retry queue
+			return
+		}
+	}
 
+	// Update the DB
+	err = app.Store.Instance.StopInstance(ctx, uid)
+	if err != nil {
+		log.Println("Failed to update the db for stopping the instance")
+		d.Nack(false, false) // Send to retry queue
+		return
+	}
+
+	log.Println("Successfully stopped the container and updated the database")
+	d.Ack(true) // Ack the message once its all done
+	log.Println("ACK'd a message with a job ID", jobID)
 }
 
 func (app *Application) kill(ctx context.Context, uid int, userName string, a *amqp091.Delivery, jobID string) {
