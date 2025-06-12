@@ -411,5 +411,12 @@ func (d *Docker) CreateCustomNetwork(ctx context.Context) error {
 }
 
 func (d *Docker) RemoveNamedVolume(ctx context.Context, volumeName string) error {
+	// Remove volume
+	err := d.Con.VolumeRemove(ctx, volumeName, false)
+	if err != nil {
+		log.Println("Cannot remove named volume:", volumeName)
+		return err
+	}
+
 	return nil
 }
