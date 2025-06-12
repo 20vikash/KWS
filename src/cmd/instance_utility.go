@@ -111,15 +111,16 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 
 			// Check if the request exceeded the retry count (3)
 			mutex.Lock()
-			defer mutex.Unlock()
 			if retries[queueMessage.JobID] == 3 {
 				d.Ack(false)
 				delete(retries, queueMessage.JobID)
-				return
+				mutex.Unlock()
+				continue
 			}
 			// Update the retry counter
 			log.Printf("Job ID: %s, retry counter: %d", queueMessage.JobID, retries[queueMessage.JobID])
 			retries[queueMessage.JobID]++
+			mutex.Unlock()
 
 			if queueMessage.Action == config.DEPLOY {
 				go app.deploy(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
