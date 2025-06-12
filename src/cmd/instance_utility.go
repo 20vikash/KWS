@@ -90,6 +90,11 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 
 	// Ack the request once everything went well
 	d.Ack(true)
+	// Delete the retry entry
+	mutex.Lock()
+	delete(retries, jobID)
+	mutex.Unlock()
+
 	log.Println("ACK'd a message with a job ID", jobID)
 }
 
@@ -115,6 +120,11 @@ func (app *Application) stop(ctx context.Context, uid int, userName string, d *a
 
 	log.Println("Successfully stopped the container and updated the database")
 	d.Ack(true) // Ack the message once its all done
+	// Delete the retry entry
+	mutex.Lock()
+	delete(retries, jobID)
+	mutex.Unlock()
+
 	log.Println("ACK'd a message with a job ID", jobID)
 }
 
