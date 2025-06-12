@@ -1,18 +1,18 @@
 package status
 
 const (
-	USER_NAME_INVALID = "0"
-	USER_NOT_VERIFIED = "1"
-	WRONG_CREDENTIALS = "2"
+	USER_NAME_INVALID = "user_name_invalid"
+	USER_NOT_VERIFIED = "user_not_verified"
+	WRONG_CREDENTIALS = "wrong_credentials"
 
-	CONTAINER_ALREADY_RUNNING     = "3"
-	CONTAINER_ALREADY_EXISTS      = "4"
-	CONTAINER_NOT_FOUND_TO_STOP   = "5"
-	CONTAINER_NOT_FOUND_TO_DELETE = "6"
-	VOLUME_NOT_FOUND              = "7"
+	CONTAINER_ALREADY_RUNNING     = "container_already_running"
+	CONTAINER_ALREADY_EXISTS      = "container_already_exists"
+	CONTAINER_NOT_FOUND_TO_STOP   = "container_not_found_to_stop"
+	CONTAINER_NOT_FOUND_TO_DELETE = "container_not_found_to_delete"
+	VOLUME_NOT_FOUND              = "volume_not_found"
 
 	// DB errors
-	CONTAINER_START_FAILED  = "8"
-	CONTAINER_STOP_FAILED   = "9"
-	CONTAINER_DELETE_FAILED = "10"
+	CONTAINER_START_FAILED  = "container_start_failed"
+	CONTAINER_STOP_FAILED   = "container_stop_failed"
+	CONTAINER_DELETE_FAILED = "container_delete_failed"
 )
