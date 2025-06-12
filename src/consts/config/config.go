@@ -8,4 +8,7 @@ const (
 
 	MAIN_INSTANCE_QUEUE = "instance_queue"
 	RETRY_QUEUE         = "retry_queue"
+
+	DEPLOY = "deploy"
+	STOP   = "stop"
 )
