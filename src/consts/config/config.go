@@ -11,4 +11,5 @@ const (
 
 	DEPLOY = "deploy"
 	STOP   = "stop"
+	KILL   = "kill"
 )
