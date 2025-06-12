@@ -95,7 +95,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	delete(retries, jobID)
 	mutex.Unlock()
 
-	log.Println("ACK'd a message with a job ID", jobID)
+	log.Println("ACK'd a message with a job ID for deploying instance", jobID)
 }
 
 func (app *Application) stop(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string) {
@@ -125,11 +125,47 @@ func (app *Application) stop(ctx context.Context, uid int, userName string, d *a
 	delete(retries, jobID)
 	mutex.Unlock()
 
-	log.Println("ACK'd a message with a job ID", jobID)
+	log.Println("ACK'd a message with a job ID fo stopping instance", jobID)
 }
 
-func (app *Application) kill(ctx context.Context, uid int, userName string, a *amqp091.Delivery, jobID string) {
+func (app *Application) kill(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string) {
+	// kill the container
+	instanceType := models.CreateInstanceType(uid, userName)
+	err := app.Docker.DeleteContainer(ctx, instanceType.ContainerName)
+	if err != nil {
+		if err.Error() != status.CONTAINER_NOT_FOUND_TO_DELETE {
+			log.Println("Something went wrong in stopping the container")
+			d.Nack(false, false) // Send to retry queue
+			return
+		}
+	}
 
+	// Delete the attached volume
+	err = app.Docker.RemoveNamedVolume(ctx, instanceType.VolumeName)
+	if err != nil {
+		if err.Error() != status.VOLUME_NOT_FOUND {
+			log.Println("Something went wrong in stopping the container")
+			d.Nack(false, false) // Send to retry queue
+			return
+		}
+	}
+
+	// Update the DB
+	err = app.Store.Instance.RemoveInstance(ctx, uid)
+	if err != nil {
+		log.Println("Failed to update the db for killing the instance")
+		d.Nack(false, false) // Send to retry queue
+		return
+	}
+
+	log.Println("Successfully killed the container and updated the database")
+	d.Ack(true) // Ack the message once its all done
+	// Delete the retry entry
+	mutex.Lock()
+	delete(retries, jobID)
+	mutex.Unlock()
+
+	log.Println("ACK'd a message with a job ID for killing instance", jobID)
 }
 
 func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
