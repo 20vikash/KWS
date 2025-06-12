@@ -25,6 +25,7 @@ func (app *Application) Deploy(w http.ResponseWriter, r *http.Request) {
 		UserID:   uid,
 		UserName: userName,
 		JobID:    jid,
+		Action:   config.DEPLOY,
 	})
 	if err != nil {
 		http.Error(w, "failed to handle your request", http.StatusInternalServerError)
@@ -54,6 +55,7 @@ func (app *Application) StopInstance(w http.ResponseWriter, r *http.Request) {
 		UserID:   uid,
 		UserName: userName,
 		JobID:    jid,
+		Action:   config.STOP,
 	})
 	if err != nil {
 		http.Error(w, "failed to handle your request", http.StatusInternalServerError)
@@ -83,6 +85,7 @@ func (app *Application) DeleteInstance(w http.ResponseWriter, r *http.Request) {
 		UserID:   uid,
 		UserName: userName,
 		JobID:    jid,
+		Action:   config.KILL,
 	})
 	if err != nil {
 		http.Error(w, "failed to handle your request", http.StatusInternalServerError)

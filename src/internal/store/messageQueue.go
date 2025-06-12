@@ -19,6 +19,7 @@ type QueueMessage struct {
 	JobID    string
 	UserID   int
 	UserName string
+	Action   string
 }
 
 func (mq *MQ) PushMessageInstance(ctx context.Context, message *QueueMessage) error {
