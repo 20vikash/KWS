@@ -81,10 +81,17 @@ func (i *InstanceStore) RemoveInstance(ctx context.Context, uid int) error {
 		DELETE FROM instance WHERE user_id = $1
 	`
 
-	_, err := i.db.Exec(ctx, sql, uid)
+	res, err := i.db.Exec(ctx, sql, uid)
 	if err != nil {
 		log.Println("Cannot remove the instance(db)")
 		return err
+	}
+
+	rows := res.RowsAffected()
+
+	if rows == 0 {
+		log.Printf("No user found with user_id=%d\n", uid)
+		return errors.New(status.CONTAINER_STOP_FAILED)
 	}
 
 	return nil
@@ -96,10 +103,17 @@ func (i *InstanceStore) StopInstance(ctx context.Context, uid int) error {
 		UPDATE instance SET is_running=FALSE WHERE user_id=$1
 	`
 
-	_, err := i.db.Exec(ctx, sql, uid)
+	res, err := i.db.Exec(ctx, sql, uid)
 	if err != nil {
 		log.Println("Cannot stop the instance(db)")
 		return err
+	}
+
+	rows := res.RowsAffected()
+
+	if rows == 0 {
+		log.Printf("No user found with user_id=%d\n", uid)
+		return errors.New(status.CONTAINER_DELETE_FAILED)
 	}
 
 	return nil
