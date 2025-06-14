@@ -11,6 +11,7 @@ import (
 	"kws/kws/internal/docker"
 	"kws/kws/internal/mq"
 	"kws/kws/internal/store"
+	"kws/kws/internal/wg"
 	"log"
 	"net/http"
 	"time"
@@ -28,6 +29,7 @@ type Application struct {
 	SessionManager *scs.SessionManager
 	Docker         *docker.Docker
 	Mq             *store.MQ
+	Wg             *wg.WgOperations
 }
 
 func main() {
@@ -127,6 +129,17 @@ func main() {
 	}
 	rc := redis.Connect()
 
+	// Connect to the wireguard server.
+	wgCli, err := wg.ConnectToWireguard()
+	if err != nil {
+		log.Fatal("Cannot connect to the wireguard server.")
+	}
+
+	// Create WgOprations struct
+	wgOp := &wg.WgOperations{
+		Con: wgCli,
+	}
+
 	// Initialize Application
 	app := Application{
 		Port:           ":8080",
@@ -134,6 +147,7 @@ func main() {
 		SessionManager: sessionManager,
 		Docker:         docker,
 		Mq:             mqType,
+		Wg:             wgOp,
 	}
 
 	// Initialize the server with the docker images
