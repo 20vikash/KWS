@@ -12,4 +12,7 @@ const (
 	DEPLOY = "deploy"
 	STOP   = "stop"
 	KILL   = "kill"
+
+	INTERFACE_NAME    = "wg0"
+	INTERFACE_ADDRESS = "10.0.0.1/24"
 )
