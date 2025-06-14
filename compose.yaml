@@ -66,13 +66,13 @@ services:
     volumes:
       - ./src/:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - kws_main
+      - /etc/wireguard:/etc/wireguard:ro
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
     depends_on:
       - postgres
       - redis
       - rabbitmq
-    ports:
-      - "8080:8080"
     working_dir: /app/data/cmd
     command: sh -c "apt-get update && apt-get install -y uuid-runtime && go run ."
