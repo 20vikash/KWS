@@ -137,7 +137,8 @@ func main() {
 
 	// Create WgOprations struct
 	wgOp := &wg.WgOperations{
-		Con: wgCli,
+		Con:        wgCli,
+		PrivateKey: env.GetWireguardPrivateKey(),
 	}
 
 	// Initialize Application
