@@ -84,3 +84,8 @@ func GetMqUser() string {
 func GetMqPassword() string {
 	return os.Getenv("MQ_PASSWORD")
 }
+
+// Wireguard
+func GetWireguardPrivateKey() string {
+	return os.Getenv("WG_PRIVATE_KEY")
+}
