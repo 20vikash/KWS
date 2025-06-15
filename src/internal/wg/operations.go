@@ -4,10 +4,12 @@ import (
 	"errors"
 	"kws/kws/consts/config"
 	"kws/kws/consts/status"
+	env "kws/kws/internal"
 	"log"
 
 	"github.com/vishvananda/netlink"
 	"golang.zx2c4.com/wireguard/wgctrl"
+	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
 type WgOperations struct {
@@ -73,4 +75,32 @@ func (wg *WgOperations) CreateInterfaceWgMain() error {
 	log.Println("Successfully created and brought up wg0")
 
 	return nil
+}
+
+func (wg *WgOperations) ConfigureWireguard() error {
+	privateKey, err := wgtypes.ParseKey(env.GetWireguardPrivateKey())
+	if err != nil {
+		log.Println("Failed to parse wireguard private key")
+		return err
+	}
+
+	wgConfig := wgtypes.Config{
+		PrivateKey:   &privateKey,
+		ListenPort:   getIntPtr(51820),
+		ReplacePeers: false,
+	}
+
+	err = wg.Con.ConfigureDevice(config.INTERFACE_NAME, wgConfig)
+	if err != nil {
+		log.Println("Cannot configure wireguard interface")
+		return err
+	}
+
+	log.Println("Successfully configured the wireguard kernel module binded to the wg0 interface")
+
+	return nil
+}
+
+func getIntPtr(no int) *int {
+	return &no
 }

@@ -172,6 +172,12 @@ func main() {
 		}
 	}
 
+	// Configure wireguard interface to the kernel module.
+	err = app.Wg.ConfigureWireguard()
+	if err != nil {
+		log.Fatal("Cannot configure wireguard to the kernel module")
+	}
+
 	// Start the rabbitmq consumer to listen in the background
 	app.ConsumeMessageInstance(app.Mq)
 
