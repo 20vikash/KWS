@@ -6,6 +6,7 @@ import (
 	"kws/kws/consts/status"
 	env "kws/kws/internal"
 	"log"
+	"os"
 
 	"github.com/vishvananda/netlink"
 	"golang.zx2c4.com/wireguard/wgctrl"
@@ -15,6 +16,11 @@ import (
 type WgOperations struct {
 	Con        *wgctrl.Client
 	PrivateKey string
+}
+
+func SetForwardBitToOne() error {
+	path := "/proc/sys/net/ipv4/ip_forward"
+	return os.WriteFile(path, []byte("1"), 0644)
 }
 
 func interfaceExists(inter string) bool {
