@@ -16,8 +16,19 @@ type WgOperations struct {
 }
 
 func interfaceExists(inter string) bool {
-	_, err := netlink.LinkByName(inter)
-	return err != nil
+	links, err := netlink.LinkList()
+	if err != nil {
+		log.Println("Cannot list out the links")
+		return false
+	}
+
+	for _, link := range links {
+		if link.Attrs().Name == inter {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (wg *WgOperations) CreateInterfaceWgMain() error {
