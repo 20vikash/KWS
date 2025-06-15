@@ -1,6 +1,8 @@
 package main
 
 // TODO: Please do graceful shutdown. Maintain the state.
+// Bring all the interfaces down
+// Stop all the container and maintain the db state.
 
 import (
 	"context"
