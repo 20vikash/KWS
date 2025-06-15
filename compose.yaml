@@ -63,13 +63,12 @@ services:
   kws_gateway:
     image: golang:latest
     container_name: kws_gateway
+    privileged: true
     volumes:
       - ./src/:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/wireguard:/etc/wireguard:ro
     network_mode: "host"
-    cap_add:
-      - NET_ADMIN
     depends_on:
       - postgres
       - redis
