@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"kws/kws/consts/config"
+	"kws/kws/consts/status"
 	env "kws/kws/internal"
 	database "kws/kws/internal/database/connection"
 	"kws/kws/internal/docker"
@@ -161,6 +162,14 @@ func main() {
 	err = docker.CreateCustomNetwork(context.Background())
 	if err != nil {
 		log.Fatal("Core network creation error")
+	}
+
+	// Create the main wg0 interface
+	err = app.Wg.CreateInterfaceWgMain()
+	if err != nil {
+		if err.Error() != status.INTERFACE_ALREADY_EXISTS {
+			log.Fatal("Cannot create interface wg0")
+		}
 	}
 
 	// Start the rabbitmq consumer to listen in the background
