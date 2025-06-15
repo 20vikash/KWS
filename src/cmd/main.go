@@ -3,6 +3,8 @@ package main
 // TODO: Please do graceful shutdown. Maintain the state.
 // Bring all the interfaces down
 // Stop all the container and maintain the db state.
+// Set IP forward Bit to 0
+// Revert all the ip table rules if done any.
 
 import (
 	"context"
