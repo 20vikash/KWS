@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"errors"
+	"kws/kws/consts/status"
 	"kws/kws/models"
 	"log"
 
@@ -31,5 +33,21 @@ func (wg *WireguardStore) AddPeer(ctx context.Context, uid string, wgType *model
 }
 
 func (wg *WireguardStore) RemovePeer(ctx context.Context, uid string) error {
+	sql := `
+		DELETE FROM wgpeer WHERE user_id = $1
+	`
+
+	rows, err := wg.Con.Exec(ctx, sql, uid)
+	if err != nil {
+		log.Println("Cannot delete wgpeer record")
+		return err
+	}
+
+	rowsAffected := rows.RowsAffected()
+	if rowsAffected == 0 {
+		log.Println("No rows found to delete")
+		return errors.New(status.PEER_DOES_NOT_EXIST)
+	}
+
 	return nil
 }

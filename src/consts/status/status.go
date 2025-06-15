@@ -17,4 +17,6 @@ const (
 	CONTAINER_DELETE_FAILED = "container_delete_failed"
 
 	INTERFACE_ALREADY_EXISTS = "interface_already_exists"
+
+	PEER_DOES_NOT_EXIST = "peer_does_not_exist"
 )
