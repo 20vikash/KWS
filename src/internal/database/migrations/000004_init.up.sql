@@ -1,6 +1,6 @@
 CREATE TABLE wgpeer (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    public_key VARCHAR(50),
-    ip_address VARCHAR(20)
+    public_key VARCHAR(50) NOT NULL UNIQUE,
+    ip_address VARCHAR(20) NOT NULL UNIQUE
 )
