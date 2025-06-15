@@ -70,7 +70,6 @@ services:
     network_mode: "host"
     cap_add:
       - NET_ADMIN
-      - SYS_ADMIN
     depends_on:
       - postgres
       - redis
