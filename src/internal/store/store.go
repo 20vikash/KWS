@@ -34,8 +34,8 @@ type Storage struct {
 	}
 
 	Wireguard interface {
-		AddPeer(ctx context.Context) error
-		RemovePeer(ctx context.Context) error
+		AddPeer(ctx context.Context, uid string, wgType *models.WireguardType) error
+		RemovePeer(ctx context.Context, uid string) error
 	}
 }
 
