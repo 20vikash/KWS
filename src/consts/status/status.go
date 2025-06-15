@@ -15,4 +15,6 @@ const (
 	CONTAINER_START_FAILED  = "container_start_failed"
 	CONTAINER_STOP_FAILED   = "container_stop_failed"
 	CONTAINER_DELETE_FAILED = "container_delete_failed"
+
+	INTERFACE_ALREADY_EXISTS = "interface_already_exists"
 )
