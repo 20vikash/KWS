@@ -180,6 +180,12 @@ func main() {
 		log.Fatal("Cannot configure wireguard to the kernel module")
 	}
 
+	// Set the IP forward bit to 1
+	err = app.Wg.SetForwardBitToOne()
+	if err != nil {
+		log.Fatal("Cannot set forward bit to 1")
+	}
+
 	// Start the rabbitmq consumer to listen in the background
 	app.ConsumeMessageInstance(app.Mq)
 

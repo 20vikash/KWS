@@ -18,9 +18,16 @@ type WgOperations struct {
 	PrivateKey string
 }
 
-func SetForwardBitToOne() error {
+func (wg *WgOperations) SetForwardBitToOne() error {
 	path := "/proc/sys/net/ipv4/ip_forward"
-	return os.WriteFile(path, []byte("1"), 0644)
+
+	err := os.WriteFile(path, []byte("1"), 0644)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Now, the IP forward bit is set to 1")
+	return nil
 }
 
 func interfaceExists(inter string) bool {
