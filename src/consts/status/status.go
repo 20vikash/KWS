@@ -19,4 +19,6 @@ const (
 	INTERFACE_ALREADY_EXISTS = "interface_already_exists"
 
 	PEER_DOES_NOT_EXIST = "peer_does_not_exist"
+
+	INVALID_CIDR = "invalid_cidr"
 )
