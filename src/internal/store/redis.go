@@ -3,7 +3,10 @@ package store
 import (
 	"context"
 	"errors"
+	"kws/kws/consts/config"
+	"kws/kws/consts/status"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -37,4 +40,34 @@ func (r *RedisStore) GetEmailFromToken(ctx context.Context, token string) string
 	val := r.ds.Get(ctx, token).String()
 
 	return val
+}
+
+func (r *RedisStore) PushFreeIp(ctx context.Context, ip int) error {
+	err := r.ds.LPush(ctx, config.STACK_KEY, ip).Err()
+	if err != nil {
+		log.Println("Cannot push free IP to the stack")
+		return err
+	}
+
+	return nil
+}
+
+func (r *RedisStore) PopFreeIp(ctx context.Context) (int, error) {
+	val, err := r.ds.LPop(ctx, config.STACK_KEY).Result()
+	if err != nil {
+		if err == redis.Nil {
+			log.Println("Nothing to pop")
+			return -1, errors.New(status.EMPTY_IP_STACK)
+		}
+
+		return -1, err
+	}
+
+	intVal, convErr := strconv.Atoi(val)
+	if convErr != nil {
+		log.Println("Conversion to int failed")
+		return -1, convErr
+	}
+
+	return intVal, nil
 }

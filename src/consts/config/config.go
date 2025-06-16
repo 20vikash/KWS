@@ -15,4 +15,6 @@ const (
 
 	INTERFACE_NAME    = "wg0"
 	INTERFACE_ADDRESS = "10.0.0.1/24"
+
+	STACK_KEY = "ip_stack"
 )
