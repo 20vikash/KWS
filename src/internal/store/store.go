@@ -20,6 +20,8 @@ type Storage struct {
 		SetEmailToken(ctx context.Context, email string, token string) error
 		GetEmailFromToken(ctx context.Context, token string) string
 		DeleteEmailToken(ctx context.Context, token string) error
+		PushFreeIp(ctx context.Context, ip int) error
+		PopFreeIp(ctx context.Context) (int, error)
 	}
 
 	Instance interface {

@@ -51,3 +51,19 @@ func (wg *WireguardStore) RemovePeer(ctx context.Context, uid string) error {
 
 	return nil
 }
+
+func (wg *WireguardStore) GetNextMaxHostNumber(ctx context.Context) (int, error) {
+	var ip int
+
+	sql := `
+		SELECT MAX(ip_address) FROM wgpeer
+	`
+
+	err := wg.Con.QueryRow(ctx, sql).Scan(&ip)
+	if err != nil {
+		log.Println("Cannot find the max of the ip")
+		return -1, err
+	}
+
+	return ip + 1, nil
+}
