@@ -48,12 +48,12 @@ func (ip *IPAllocator) GetFreeIp(ctx context.Context) (string, error) {
 	if err != nil {
 		if err.Error() != status.EMPTY_IP_STACK {
 			return "", err
-		}
-	} else {
-		// Fallback to db if there are no free relased IP's
-		ipAddr, err = ip.Store.Wireguard.GetNextMaxHostNumber(ctx)
-		if err != nil {
-			return "", err
+		} else {
+			// Fallback to db if there are no free relased IP's
+			ipAddr, err = ip.Store.Wireguard.GetNextMaxHostNumber(ctx)
+			if err != nil {
+				return "", err
+			}
 		}
 	}
 
