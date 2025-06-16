@@ -16,6 +16,7 @@ type RedisStore struct {
 	ds *redis.Client
 }
 
+// Email
 func (r *RedisStore) SetEmailToken(ctx context.Context, email string, token string) error {
 	err := r.ds.Set(ctx, token, "email:"+email, 24*time.Hour).Err()
 	if err != nil {
@@ -42,6 +43,7 @@ func (r *RedisStore) GetEmailFromToken(ctx context.Context, token string) string
 	return val
 }
 
+// Wireguard
 func (r *RedisStore) PushFreeIp(ctx context.Context, ip int) error {
 	err := r.ds.LPush(ctx, config.STACK_KEY, ip).Err()
 	if err != nil {
