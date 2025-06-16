@@ -56,7 +56,7 @@ func (wg *WireguardStore) GetNextMaxHostNumber(ctx context.Context) (int, error)
 	var ip int
 
 	sql := `
-		SELECT MAX(ip_address) FROM wgpeer
+		SELECT ip_address FROM wgpeer ORDER BY ip_address LIMIT 1
 	`
 
 	err := wg.Con.QueryRow(ctx, sql).Scan(&ip)
