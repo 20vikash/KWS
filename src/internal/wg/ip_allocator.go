@@ -1,15 +1,18 @@
 package wg
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"kws/kws/consts/status"
+	"kws/kws/internal/store"
 	"log"
 	"math"
 )
 
 type IPAllocator struct {
 	CidrValue int
+	Store     *store.Storage
 }
 
 func (ip *IPAllocator) FindNoOfUsableHosts() int {
@@ -37,4 +40,28 @@ func (ip *IPAllocator) GenerateIP(hostNumber int) (string, error) {
 	thirdOctet = hostNumber % 256
 
 	return fmt.Sprintf("10.%d.%d.%d", firstOctet, secondOctet, thirdOctet), nil
+}
+
+func (ip *IPAllocator) GetFreeIp(ctx context.Context) (string, error) {
+	// Check redis stack for any released IP's
+	ipAddr, err := ip.Store.InMemory.PopFreeIp(ctx)
+	if err != nil {
+		if err.Error() != status.EMPTY_IP_STACK {
+			return "", err
+		}
+	} else {
+		// Fallback to db if there are no free relased IP's
+		ipAddr, err = ip.Store.Wireguard.GetNextMaxHostNumber(ctx)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	// Generate IP address string from the host Number
+	ipString, err := ip.GenerateIP(ipAddr)
+	if err != nil {
+		return "", nil
+	}
+
+	return ipString, nil
 }
