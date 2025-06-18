@@ -161,7 +161,14 @@ func (wg *WgOperations) AddPeer(ctx context.Context, uid int, pubKey string, ipA
 	return nil
 }
 
-func (wg *WgOperations) RemovePeer(ctx context.Context, pubKey string, uid int) error {
+func (wg *WgOperations) RemovePeer(ctx context.Context, pubKey string, uid int, ipAlloc *IPAllocator) error {
+	// Delete DB record and push the released IP to the redis stack
+	err := ipAlloc.DeAllocateIP(ctx, uid)
+	if err != nil {
+		log.Println("Failed to deallocate IP from db")
+		return err
+	}
+
 	// Parse pub key.
 	peerPubKey, err := wgtypes.ParseKey(pubKey)
 	if err != nil {

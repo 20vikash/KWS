@@ -50,24 +50,24 @@ func (wg *WireguardStore) GetPublicKey(ctx context.Context, uid int) (string, er
 	return pubKey, nil
 }
 
-func (wg *WireguardStore) RemovePeer(ctx context.Context, uid int) error {
+func (wg *WireguardStore) RemovePeer(ctx context.Context, uid int) (int, error) {
+	var ipAddress int
+
 	sql := `
-		DELETE FROM wgpeer WHERE user_id = $1
+		DELETE FROM wgpeer WHERE user_id = $1 RETURNING ip_address
 	`
 
-	rows, err := wg.Con.Exec(ctx, sql, uid)
+	err := wg.Con.QueryRow(ctx, sql, uid).Scan(&ipAddress)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			log.Println("No rows found to delete")
+			return -1, errors.New(status.PEER_DOES_NOT_EXIST)
+		}
 		log.Println("Cannot delete wgpeer record")
-		return err
+		return -1, err
 	}
 
-	rowsAffected := rows.RowsAffected()
-	if rowsAffected == 0 {
-		log.Println("No rows found to delete")
-		return errors.New(status.PEER_DOES_NOT_EXIST)
-	}
-
-	return nil
+	return ipAddress, nil
 }
 
 func (wg *WireguardStore) AllocateNextFreeIP(ctx context.Context, maxHostNumber int, uid int, wgType *models.WireguardType) (int, error) {

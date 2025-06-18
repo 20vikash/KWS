@@ -81,3 +81,19 @@ func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid int, pubKey strin
 
 	return ipString, nil
 }
+
+func (ip *IPAllocator) DeAllocateIP(ctx context.Context, uid int) error {
+	// Delete the IP from the database
+	ipAddr, err := ip.WgStore.RemovePeer(ctx, uid)
+	if err != nil {
+		return err
+	}
+
+	// Push the IP to the redis stack
+	err = ip.RedisStore.PushFreeIp(ctx, ipAddr)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
