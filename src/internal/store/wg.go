@@ -26,11 +26,8 @@ func (wg *WireguardStore) AddPeer(ctx context.Context, uid int, wgType *models.W
 
 	err := wg.Con.QueryRow(ctx, sql, uid).Scan(&numberOfDevices)
 	if err != nil {
-		if err != pgx.ErrNoRows {
-			log.Println("Cannot find number of users")
-			return err
-		}
-		numberOfDevices = 0
+		log.Println("Cannot find number of users")
+		return err
 	}
 
 	if numberOfDevices == config.MAX_WG_DEVICES_PER_USER {
