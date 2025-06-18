@@ -7,6 +7,8 @@ import (
 	"kws/kws/models"
 	"log"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -52,18 +54,58 @@ func (wg *WireguardStore) RemovePeer(ctx context.Context, uid string) error {
 	return nil
 }
 
-func (wg *WireguardStore) GetNextMaxHostNumber(ctx context.Context) (int, error) {
+func (wg *WireguardStore) AllocateNextMaxIP(ctx context.Context, uid string, wgType *models.WireguardType) error {
 	var ip int
+	maxRetries := 5
 
-	sql := `
+	sqlSelect := `
 		SELECT ip_address FROM wgpeer ORDER BY ip_address DESC LIMIT 1
 	`
+	sqlInsert := `
+		INSERT INTO wgpeer (user_id, public_key, ip_address) VALUES ($1, $2, $3)
+	`
 
-	err := wg.Con.QueryRow(ctx, sql).Scan(&ip)
-	if err != nil {
-		log.Println("Cannot find the max of the ip")
-		return -1, err
+	for i := range maxRetries {
+		tx, err := wg.Con.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
+		if err != nil {
+			log.Println("Cannot start transaction")
+			return err
+		}
+
+		err = func() error {
+			defer tx.Rollback(ctx)
+
+			err := wg.Con.QueryRow(ctx, sqlSelect).Scan(&ip)
+			if err != nil {
+				log.Println("Cannot find the max of the ip")
+				return err
+			}
+
+			_, err = wg.Con.Exec(ctx, sqlInsert,
+				uid,
+				wgType.PublicKey,
+				ip+1,
+			)
+			if err != nil {
+				log.Println("Cannot insert ip+1 record")
+			}
+
+			return tx.Commit(ctx)
+		}()
+
+		if err == nil {
+			log.Println("Transaction successful")
+			break
+		}
+
+		if pgError, ok := err.(*pgconn.PgError); ok && pgError.Code == "40001" {
+			log.Printf("Serialization conflict, retrying... Attempt: %d\n", i+1)
+			continue
+		}
+
+		log.Println("Transaction failed. Not serializable error")
+		return err
 	}
 
-	return ip + 1, nil
+	return nil
 }

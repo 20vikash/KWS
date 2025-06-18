@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"kws/kws/consts/status"
 	"kws/kws/internal/store"
+	"kws/kws/models"
 	"log"
 	"math"
 )
@@ -42,7 +43,7 @@ func (ip *IPAllocator) GenerateIP(hostNumber int) (string, error) {
 	return fmt.Sprintf("10.%d.%d.%d", firstOctet, secondOctet, thirdOctet), nil
 }
 
-func (ip *IPAllocator) GetFreeIp(ctx context.Context) (string, error) {
+func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid string, pubKey string) (string, error) {
 	// Check redis stack for any released IP's
 	ipAddr, err := ip.Store.InMemory.PopFreeIp(ctx)
 	if err != nil {
@@ -50,7 +51,7 @@ func (ip *IPAllocator) GetFreeIp(ctx context.Context) (string, error) {
 			return "", err
 		} else {
 			// Fallback to db if there are no free relased IP's
-			ipAddr, err = ip.Store.Wireguard.GetNextMaxHostNumber(ctx)
+			err = ip.Store.Wireguard.AllocateNextMaxIP(ctx, uid, &models.WireguardType{PublicKey: pubKey})
 			if err != nil {
 				return "", err
 			}
