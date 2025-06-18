@@ -17,31 +17,41 @@ type IPAllocator struct {
 	WgStore    *store.WireguardStore
 }
 
+func CreateIpAllocator(cidr int, rs *store.RedisStore, wgs *store.WireguardStore) (*IPAllocator, error) {
+	if cidr > 24 || cidr < 8 || cidr%8 != 0 {
+		log.Println("Cannot generate IP for this cidr. Only supports /24, /16, and /8")
+		return nil, errors.New(status.INVALID_CIDR)
+	}
+
+	ipAllocator := &IPAllocator{
+		CidrValue:  cidr,
+		RedisStore: rs,
+		WgStore:    wgs,
+	}
+
+	return ipAllocator, nil
+}
+
 func (ip *IPAllocator) FindNoOfUsableHosts() int {
 	return int(math.Pow(2, float64(32-ip.CidrValue)) - 1)
 }
 
-func (ip *IPAllocator) GenerateIP(hostNumber int) (string, error) {
+func (ip *IPAllocator) GenerateIP(hostNumber int) string {
 	firstOctet, secondOctet, thirdOctet := 0, 0, 0
-
-	if ip.CidrValue > 24 || ip.CidrValue < 8 || ip.CidrValue%8 != 0 {
-		log.Println("Cannot generate IP for this cidr. Only supports /24, /16, and /8")
-		return "", errors.New(status.INVALID_CIDR)
-	}
 
 	c := hostNumber / 256
 
 	if c < 256 {
 		thirdOctet = hostNumber % 256
 		secondOctet = c
-		return fmt.Sprintf("10.%d.%d.%d", firstOctet, secondOctet, thirdOctet), nil
+		return fmt.Sprintf("10.%d.%d.%d", firstOctet, secondOctet, thirdOctet)
 	}
 
 	firstOctet = c / 256
 	secondOctet = c % 256
 	thirdOctet = hostNumber % 256
 
-	return fmt.Sprintf("10.%d.%d.%d", firstOctet, secondOctet, thirdOctet), nil
+	return fmt.Sprintf("10.%d.%d.%d", firstOctet, secondOctet, thirdOctet)
 }
 
 func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid string, pubKey string) (string, error) {
@@ -67,10 +77,7 @@ func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid string, pubKey st
 	}
 
 	// Generate IP address string from the host Number
-	ipString, err := ip.GenerateIP(ipAddr)
-	if err != nil {
-		return "", nil
-	}
+	ipString := ip.GenerateIP(ipAddr)
 
 	return ipString, nil
 }
