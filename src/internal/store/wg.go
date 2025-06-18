@@ -75,13 +75,13 @@ func (wg *WireguardStore) AllocateNextMaxIP(ctx context.Context, uid string, wgT
 		err = func() error {
 			defer tx.Rollback(ctx)
 
-			err := wg.Con.QueryRow(ctx, sqlSelect).Scan(&ip)
+			err := tx.QueryRow(ctx, sqlSelect).Scan(&ip)
 			if err != nil {
 				log.Println("Cannot find the max of the ip")
 				return err
 			}
 
-			_, err = wg.Con.Exec(ctx, sqlInsert,
+			_, err = tx.Exec(ctx, sqlInsert,
 				uid,
 				wgType.PublicKey,
 				ip+1,

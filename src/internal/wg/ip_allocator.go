@@ -47,7 +47,14 @@ func (ip *IPAllocator) GenerateIP(hostNumber int) (string, error) {
 func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid string, pubKey string) (string, error) {
 	// Check redis stack for any released IP's
 	ipAddr, err := ip.RedisStore.PopFreeIp(ctx)
-	if err != nil {
+
+	if err == nil { // If we successfully popped a free IP from the stack
+		// AddPeer/update the Database
+		err := ip.WgStore.AddPeer(ctx, uid, &models.WireguardType{PublicKey: pubKey})
+		if err != nil {
+			return "", err
+		}
+	} else {
 		if err.Error() != status.EMPTY_IP_STACK {
 			return "", err
 		} else {
