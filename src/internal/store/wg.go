@@ -16,7 +16,7 @@ type WireguardStore struct {
 	Con *pgxpool.Pool
 }
 
-func (wg *WireguardStore) AddPeer(ctx context.Context, uid string, wgType *models.WireguardType) error {
+func (wg *WireguardStore) AddPeer(ctx context.Context, uid int, wgType *models.WireguardType) error {
 	sql := `
 		INSERT INTO wgpeer (user_id, public_key, ip_address) VALUES ($1, $2, $3)
 	`
@@ -34,7 +34,7 @@ func (wg *WireguardStore) AddPeer(ctx context.Context, uid string, wgType *model
 	return nil
 }
 
-func (wg *WireguardStore) RemovePeer(ctx context.Context, uid string) error {
+func (wg *WireguardStore) RemovePeer(ctx context.Context, uid int) error {
 	sql := `
 		DELETE FROM wgpeer WHERE user_id = $1
 	`
@@ -54,7 +54,7 @@ func (wg *WireguardStore) RemovePeer(ctx context.Context, uid string) error {
 	return nil
 }
 
-func (wg *WireguardStore) AllocateNextFreeIP(ctx context.Context, maxHostNumber int, uid string, wgType *models.WireguardType) (int, error) {
+func (wg *WireguardStore) AllocateNextFreeIP(ctx context.Context, maxHostNumber int, uid int, wgType *models.WireguardType) (int, error) {
 	var ip int
 	maxRetries := 5
 

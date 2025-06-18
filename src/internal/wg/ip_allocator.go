@@ -33,7 +33,7 @@ func CreateIpAllocator(cidr int, rs *store.RedisStore, wgs *store.WireguardStore
 }
 
 func (ip *IPAllocator) FindNoOfUsableHosts() int {
-	return int(math.Pow(2, float64(32-ip.CidrValue)) - 1)
+	return int(math.Pow(2, float64(32-ip.CidrValue)))
 }
 
 func (ip *IPAllocator) GenerateIP(hostNumber int) string {
@@ -54,7 +54,7 @@ func (ip *IPAllocator) GenerateIP(hostNumber int) string {
 	return fmt.Sprintf("10.%d.%d.%d", firstOctet, secondOctet, thirdOctet)
 }
 
-func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid string, pubKey string) (string, error) {
+func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid int, pubKey string) (string, error) {
 	// Check redis stack for any released IP's
 	ipAddr, err := ip.RedisStore.PopFreeIp(ctx)
 

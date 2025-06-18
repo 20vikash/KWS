@@ -1,12 +1,15 @@
 package wg
 
 import (
+	"context"
 	"errors"
 	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	env "kws/kws/internal"
 	"log"
+	"net"
 	"os"
+	"time"
 
 	"github.com/vishvananda/netlink"
 	"golang.zx2c4.com/wireguard/wgctrl"
@@ -110,6 +113,50 @@ func (wg *WgOperations) ConfigureWireguard() error {
 	}
 
 	log.Println("Successfully configured the wireguard kernel module binded to the wg0 interface")
+
+	return nil
+}
+
+func (wg *WgOperations) AddPeer(ctx context.Context, uid int, pubKey string, ipAlloc *IPAllocator) error {
+	// Parse pub key.
+	peerPubKey, err := wgtypes.ParseKey(pubKey)
+	if err != nil {
+		log.Println("Cannot parse the public key (wg)")
+		return err
+	}
+
+	// Get Free IP
+	peerIP, err := ipAlloc.AllocateFreeIp(ctx, uid, pubKey) // At this point, DB is updated
+	if err != nil {
+		return err
+	}
+
+	// Allowed IP's of wireguard Peer
+	peerAllowedIP := net.IPNet{
+		IP:   net.ParseIP(peerIP),
+		Mask: net.CIDRMask(32, 32),
+	}
+
+	keepAlive := 25 * time.Second // 25 seconds poll
+
+	// Peer config
+	peerConf := wgtypes.PeerConfig{
+		PublicKey: peerPubKey,
+		AllowedIPs: []net.IPNet{
+			peerAllowedIP,
+		},
+		PersistentKeepaliveInterval: &keepAlive,
+		ReplaceAllowedIPs:           true,
+	}
+
+	// Configure peer and load it to the kernel module
+	err = wg.Con.ConfigureDevice(config.INTERFACE_NAME, wgtypes.Config{
+		Peers: []wgtypes.PeerConfig{peerConf},
+	})
+	if err != nil {
+		log.Println("Cannot add peer. Failed")
+		return err
+	}
 
 	return nil
 }
