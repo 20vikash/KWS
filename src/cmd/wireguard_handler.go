@@ -15,7 +15,7 @@ func (app *Application) RegisterDevice(w http.ResponseWriter, r *http.Request) {
 	// Read User ID from the session token
 	uid := app.SessionManager.GetInt(r.Context(), "id")
 
-	// Decode JSON body into struct
+	// Decode JSON body into struct to get the public key
 	err := json.NewDecoder(r.Body).Decode(&rb)
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
@@ -35,18 +35,20 @@ func (app *Application) RegisterDevice(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) RemoveDevice(w http.ResponseWriter, r *http.Request) {
+	var rb RequestBody
+
 	// Read User ID from the session token
 	uid := app.SessionManager.GetInt(r.Context(), "id")
 
-	// Get the public key based off the user id
-	pubKey, err := app.Store.Wireguard.GetPublicKey(r.Context(), uid)
+	// Decode JSON body into struct to get the public key
+	err := json.NewDecoder(r.Body).Decode(&rb)
 	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
 	// Remove peer
-	err = app.Wg.RemovePeer(r.Context(), pubKey, uid, app.IpAlloc)
+	err = app.Wg.RemovePeer(r.Context(), rb.PublicKey, uid, app.IpAlloc)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
