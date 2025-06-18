@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/models"
 	"log"
@@ -17,11 +18,31 @@ type WireguardStore struct {
 }
 
 func (wg *WireguardStore) AddPeer(ctx context.Context, uid int, wgType *models.WireguardType) error {
+	var numberOfDevices int
+
 	sql := `
+		SELECT COUNT(user_id) FROM wgpeer WHERE user_id = $1
+	`
+
+	err := wg.Con.QueryRow(ctx, sql, uid).Scan(&numberOfDevices)
+	if err != nil {
+		if err != pgx.ErrNoRows {
+			log.Println("Cannot find number of users")
+			return err
+		}
+		numberOfDevices = 0
+	}
+
+	if numberOfDevices == config.MAX_WG_DEVICES_PER_USER {
+		log.Println("Hit the max device count. Could not add more")
+		return errors.New(status.WG_DEVICE_LIMIT)
+	}
+
+	sql = `
 		INSERT INTO wgpeer (user_id, public_key, ip_address) VALUES ($1, $2, $3)
 	`
 
-	_, err := wg.Con.Exec(ctx, sql,
+	_, err = wg.Con.Exec(ctx, sql,
 		uid,
 		wgType.PublicKey,
 		wgType.IpAddress,

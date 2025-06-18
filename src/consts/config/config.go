@@ -18,4 +18,6 @@ const (
 	CIDR              = 24
 
 	STACK_KEY = "ip_stack"
+
+	MAX_WG_DEVICES_PER_USER = 3
 )

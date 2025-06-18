@@ -24,4 +24,6 @@ const (
 	HOST_EXHAUSTION = "host_exhaustion"
 
 	EMPTY_IP_STACK = "empty_ip_stack"
+
+	WG_DEVICE_LIMIT = "wg_device_limit"
 )
