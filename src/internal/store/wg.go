@@ -54,7 +54,7 @@ func (wg *WireguardStore) RemovePeer(ctx context.Context, uid string) error {
 	return nil
 }
 
-func (wg *WireguardStore) AllocateNextMaxIP(ctx context.Context, uid string, wgType *models.WireguardType) (int, error) {
+func (wg *WireguardStore) AllocateNextFreeIP(ctx context.Context, uid string, wgType *models.WireguardType) (int, error) {
 	var ip int
 	maxRetries := 5
 
