@@ -6,6 +6,9 @@ package main
 // Set IP forward Bit to 0
 // Revert all the ip table rules if done any.
 
+// TODO: Startup after boot
+// Load all the peer config to the wg kernel module.
+
 import (
 	"context"
 	"fmt"

@@ -16,7 +16,6 @@ const (
 	INTERFACE_NAME    = "wg0"
 	INTERFACE_ADDRESS = "10.0.0.1/24"
 	CIDR              = 24
-	DOCKER_ALLOWED_IP = "172.35.0.0"
 
 	STACK_KEY = "ip_stack"
 )
