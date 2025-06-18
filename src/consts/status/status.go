@@ -20,7 +20,8 @@ const (
 
 	PEER_DOES_NOT_EXIST = "peer_does_not_exist"
 
-	INVALID_CIDR = "invalid_cidr"
+	INVALID_CIDR    = "invalid_cidr"
+	HOST_EXHAUSTION = "host_exhaustion"
 
 	EMPTY_IP_STACK = "empty_ip_stack"
 )

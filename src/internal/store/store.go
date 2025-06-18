@@ -38,7 +38,7 @@ type Storage struct {
 	Wireguard interface {
 		AddPeer(ctx context.Context, uid string, wgType *models.WireguardType) error
 		RemovePeer(ctx context.Context, uid string) error
-		AllocateNextFreeIP(ctx context.Context, uid string, wgType *models.WireguardType) (int, error)
+		AllocateNextFreeIP(ctx context.Context, maxHostNumber int, uid string, wgType *models.WireguardType) (int, error)
 	}
 }
 

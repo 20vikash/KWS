@@ -54,7 +54,7 @@ func (wg *WireguardStore) RemovePeer(ctx context.Context, uid string) error {
 	return nil
 }
 
-func (wg *WireguardStore) AllocateNextFreeIP(ctx context.Context, uid string, wgType *models.WireguardType) (int, error) {
+func (wg *WireguardStore) AllocateNextFreeIP(ctx context.Context, maxHostNumber int, uid string, wgType *models.WireguardType) (int, error) {
 	var ip int
 	maxRetries := 5
 
@@ -86,6 +86,9 @@ func (wg *WireguardStore) AllocateNextFreeIP(ctx context.Context, uid string, wg
 				}
 			} else {
 				ip += 1
+				if ip > maxHostNumber {
+					return errors.New(status.HOST_EXHAUSTION)
+				}
 			}
 
 			_, err = tx.Exec(ctx, sqlInsert,
@@ -104,6 +107,11 @@ func (wg *WireguardStore) AllocateNextFreeIP(ctx context.Context, uid string, wg
 		if err == nil {
 			log.Println("Transaction successful")
 			break
+		}
+
+		if err.Error() == status.HOST_EXHAUSTION {
+			log.Println("Cannot allocate IP more than the host portion size")
+			return -1, err
 		}
 
 		if pgError, ok := err.(*pgconn.PgError); ok && pgError.Code == "40001" {
