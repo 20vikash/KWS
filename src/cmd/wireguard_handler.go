@@ -34,6 +34,25 @@ func (app *Application) RegisterDevice(w http.ResponseWriter, r *http.Request) {
 	// TODO: Return a JSON response with the allocated IP
 }
 
-func (app *Application) RemoveDevice(w http.ResponseWriter, r *http.Response) {
+func (app *Application) RemoveDevice(w http.ResponseWriter, r *http.Request) {
+	// Read User ID from the session token
+	uid := app.SessionManager.GetInt(r.Context(), "id")
 
+	// Get the public key based off the user id
+	pubKey, err := app.Store.Wireguard.GetPublicKey(r.Context(), uid)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	// Remove peer
+	err = app.Wg.RemovePeer(r.Context(), pubKey, uid, app.IpAlloc)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	// Success response
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Successfully removed a peer"))
 }
