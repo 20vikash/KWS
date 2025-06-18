@@ -34,6 +34,22 @@ func (wg *WireguardStore) AddPeer(ctx context.Context, uid int, wgType *models.W
 	return nil
 }
 
+func (wg *WireguardStore) GetPublicKey(ctx context.Context, uid int) (string, error) {
+	var pubKey string
+
+	sql := `
+		SELECT public_key FROM wgpeer WHERE user_id = $1
+	`
+
+	err := wg.Con.QueryRow(ctx, sql, uid).Scan(&pubKey)
+	if err != nil {
+		log.Println("Cannot get public key from the given user ID")
+		return "", err
+	}
+
+	return pubKey, nil
+}
+
 func (wg *WireguardStore) RemovePeer(ctx context.Context, uid int) error {
 	sql := `
 		DELETE FROM wgpeer WHERE user_id = $1

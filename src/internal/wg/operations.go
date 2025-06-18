@@ -161,6 +161,34 @@ func (wg *WgOperations) AddPeer(ctx context.Context, uid int, pubKey string, ipA
 	return nil
 }
 
+func (wg *WgOperations) RemovePeer(ctx context.Context, pubKey string, uid int) error {
+	// Parse pub key.
+	peerPubKey, err := wgtypes.ParseKey(pubKey)
+	if err != nil {
+		log.Println("Cannot parse the public key (wg)")
+		return err
+	}
+
+	// Remove peer
+	err = wg.Con.ConfigureDevice(config.INTERFACE_NAME, wgtypes.Config{
+		Peers: []wgtypes.PeerConfig{
+			{
+				PublicKey: peerPubKey,
+				Remove:    true,
+			},
+		},
+	})
+
+	if err != nil {
+		log.Println("Failed to remove peer:", err)
+		return err
+	}
+
+	log.Println("Peer removed:", pubKey)
+
+	return nil
+}
+
 func getIntPtr(no int) *int {
 	return &no
 }
