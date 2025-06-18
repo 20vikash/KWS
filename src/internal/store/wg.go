@@ -77,17 +77,25 @@ func (wg *WireguardStore) AllocateNextMaxIP(ctx context.Context, uid string, wgT
 
 			err := tx.QueryRow(ctx, sqlSelect).Scan(&ip)
 			if err != nil {
-				log.Println("Cannot find the max of the ip")
-				return err
+				if err == pgx.ErrNoRows {
+					log.Println("Cannot find the max of the ip. This is the start it seems")
+					ip = 2
+				} else {
+					log.Println("Cannot find max of the IP. Something went wrong.")
+					return err
+				}
+			} else {
+				ip += 1
 			}
 
 			_, err = tx.Exec(ctx, sqlInsert,
 				uid,
 				wgType.PublicKey,
-				ip+1,
+				ip,
 			)
 			if err != nil {
 				log.Println("Cannot insert ip+1 record")
+				return err
 			}
 
 			return tx.Commit(ctx)
