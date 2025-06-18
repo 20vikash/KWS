@@ -54,7 +54,7 @@ func (wg *WireguardStore) RemovePeer(ctx context.Context, uid string) error {
 	return nil
 }
 
-func (wg *WireguardStore) AllocateNextMaxIP(ctx context.Context, uid string, wgType *models.WireguardType) error {
+func (wg *WireguardStore) AllocateNextMaxIP(ctx context.Context, uid string, wgType *models.WireguardType) (int, error) {
 	var ip int
 	maxRetries := 5
 
@@ -69,7 +69,7 @@ func (wg *WireguardStore) AllocateNextMaxIP(ctx context.Context, uid string, wgT
 		tx, err := wg.Con.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
 		if err != nil {
 			log.Println("Cannot start transaction")
-			return err
+			return -1, err
 		}
 
 		err = func() error {
@@ -112,8 +112,8 @@ func (wg *WireguardStore) AllocateNextMaxIP(ctx context.Context, uid string, wgT
 		}
 
 		log.Println("Transaction failed. Not serializable error")
-		return err
+		return -1, err
 	}
 
-	return nil
+	return ip, nil
 }

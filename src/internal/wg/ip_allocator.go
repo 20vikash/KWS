@@ -59,7 +59,7 @@ func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid string, pubKey st
 			return "", err
 		} else {
 			// Fallback to db if there are no free relased IP's
-			err = ip.WgStore.AllocateNextMaxIP(ctx, uid, &models.WireguardType{PublicKey: pubKey})
+			ipAddr, err = ip.WgStore.AllocateNextMaxIP(ctx, uid, &models.WireguardType{PublicKey: pubKey})
 			if err != nil {
 				return "", err
 			}
