@@ -13,12 +13,12 @@ import (
 )
 
 type RedisStore struct {
-	ds *redis.Client
+	Ds *redis.Client
 }
 
 // Email
 func (r *RedisStore) SetEmailToken(ctx context.Context, email string, token string) error {
-	err := r.ds.Set(ctx, token, "email:"+email, 24*time.Hour).Err()
+	err := r.Ds.Set(ctx, token, "email:"+email, 24*time.Hour).Err()
 	if err != nil {
 		log.Println(err.Error())
 		log.Println("Failed to set email token")
@@ -29,7 +29,7 @@ func (r *RedisStore) SetEmailToken(ctx context.Context, email string, token stri
 }
 
 func (r *RedisStore) DeleteEmailToken(ctx context.Context, token string) error {
-	res, _ := r.ds.Del(ctx, token).Result()
+	res, _ := r.Ds.Del(ctx, token).Result()
 	if res == 0 {
 		return errors.New("key expired")
 	}
@@ -38,14 +38,14 @@ func (r *RedisStore) DeleteEmailToken(ctx context.Context, token string) error {
 }
 
 func (r *RedisStore) GetEmailFromToken(ctx context.Context, token string) string {
-	val := r.ds.Get(ctx, token).String()
+	val := r.Ds.Get(ctx, token).String()
 
 	return val
 }
 
 // Wireguard
 func (r *RedisStore) PushFreeIp(ctx context.Context, ip int) error {
-	err := r.ds.LPush(ctx, config.STACK_KEY, ip).Err()
+	err := r.Ds.LPush(ctx, config.STACK_KEY, ip).Err()
 	if err != nil {
 		log.Println("Cannot push free IP to the stack")
 		return err
@@ -55,7 +55,7 @@ func (r *RedisStore) PushFreeIp(ctx context.Context, ip int) error {
 }
 
 func (r *RedisStore) PopFreeIp(ctx context.Context) (int, error) {
-	val, err := r.ds.LPop(ctx, config.STACK_KEY).Result()
+	val, err := r.Ds.LPop(ctx, config.STACK_KEY).Result()
 	if err != nil {
 		if err == redis.Nil {
 			log.Println("Nothing to pop")

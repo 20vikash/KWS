@@ -38,6 +38,7 @@ type Application struct {
 	Docker         *docker.Docker
 	Mq             *store.MQ
 	Wg             *wg.WgOperations
+	IpAlloc        *wg.IPAllocator
 }
 
 func main() {
@@ -149,6 +150,13 @@ func main() {
 		PrivateKey: env.GetWireguardPrivateKey(),
 	}
 
+	// Create IPAllocator
+	ipAlloc := &wg.IPAllocator{
+		CidrValue:  config.CIDR,
+		RedisStore: &store.RedisStore{Ds: rc},
+		WgStore:    &store.WireguardStore{Con: connPool},
+	}
+
 	// Initialize Application
 	app := Application{
 		Port:           ":8080",
@@ -157,6 +165,7 @@ func main() {
 		Docker:         docker,
 		Mq:             mqType,
 		Wg:             wgOp,
+		IpAlloc:        ipAlloc,
 	}
 
 	// Initialize the server with the docker images
