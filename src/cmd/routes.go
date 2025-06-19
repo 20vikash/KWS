@@ -28,6 +28,8 @@ func NewRouter(app *Application) http.Handler {
 		protected.Get("/deploy", app.Deploy)
 		protected.Get("/stop", app.StopInstance)
 		protected.Get("/kill", app.DeleteInstance)
+		protected.Post("/register", app.RegisterDevice)
+		protected.Post("/remove", app.RemoveDevice)
 	})
 
 	// Public routes (no auth required)
