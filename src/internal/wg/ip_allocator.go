@@ -60,7 +60,7 @@ func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid int, pubKey strin
 
 	if err == nil { // If we successfully popped a free IP from the stack
 		// AddPeer/update the Database
-		err := ip.WgStore.AddPeer(ctx, uid, &models.WireguardType{PublicKey: pubKey})
+		err := ip.WgStore.AddPeer(ctx, uid, &models.WireguardType{PublicKey: pubKey, IpAddress: ipAddr})
 		if err != nil {
 			return "", err
 		}
