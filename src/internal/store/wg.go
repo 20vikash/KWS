@@ -17,7 +17,7 @@ type WireguardStore struct {
 	Con *pgxpool.Pool
 }
 
-func (wg *WireguardStore) AddPeer(ctx context.Context, uid int, wgType *models.WireguardType) error {
+func (wg *WireguardStore) HitMaxLimit(ctx context.Context, uid int) (bool, error) {
 	var numberOfDevices int
 
 	sql := `
@@ -27,15 +27,30 @@ func (wg *WireguardStore) AddPeer(ctx context.Context, uid int, wgType *models.W
 	err := wg.Con.QueryRow(ctx, sql, uid).Scan(&numberOfDevices)
 	if err != nil {
 		log.Println("Cannot find number of users")
-		return err
+		return false, err
 	}
 
 	if numberOfDevices == config.MAX_WG_DEVICES_PER_USER {
 		log.Println("Hit the max device count. Could not add more")
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (wg *WireguardStore) AddPeer(ctx context.Context, uid int, wgType *models.WireguardType) error {
+	// Before doing anything, check if the user hit the max device limit.
+	maxHit, err := wg.HitMaxLimit(ctx, uid)
+	if err != nil {
+		log.Println("Cannot check for the max limit")
+		return err
+	}
+
+	if maxHit {
 		return errors.New(status.WG_DEVICE_LIMIT)
 	}
 
-	sql = `
+	sql := `
 		INSERT INTO wgpeer (user_id, public_key, ip_address) VALUES ($1, $2, $3)
 	`
 
@@ -79,6 +94,18 @@ func (wg *WireguardStore) AllocateNextFreeIP(ctx context.Context, maxHostNumber 
 	var ip int
 	maxRetries := 5
 
+	// Before doing anything, check if the user hit the max device limit.
+	maxHit, err := wg.HitMaxLimit(ctx, uid)
+	if err != nil {
+		log.Println("Cannot check for the max limit")
+		return -1, err
+	}
+
+	if maxHit {
+		return -1, errors.New(status.WG_DEVICE_LIMIT)
+	}
+
+	// Transaction (serializable)
 	sqlSelect := `
 		SELECT ip_address FROM wgpeer ORDER BY ip_address DESC LIMIT 1
 	`
