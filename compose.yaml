@@ -1,8 +1,12 @@
 networks:
   kws_main:
     driver: bridge
-  kws_services:
+  kws_ins_s:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.35.0.0/24
+        - gateway: 172.35.0.1
   
 volumes:
   #Main
@@ -14,7 +18,7 @@ volumes:
   postgres_db_service_data:
 
 services:
-# ------------------------------Main-------------------------------
+  # ------------------------------Main-------------------------------
   postgres:
     image: postgres:alpine
     container_name: postgres_db_kws
@@ -95,4 +99,5 @@ services:
     volumes:
       - postgres_db_service_data:/var/lib/postgresql/data:rw
     networks:
-      - kws_services
+      kws_ins_s:
+        ipv4_address: 172.35.0.2

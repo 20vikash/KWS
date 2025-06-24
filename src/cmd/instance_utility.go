@@ -189,11 +189,12 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 			retries[queueMessage.JobID]++
 			mutex.Unlock()
 
-			if queueMessage.Action == config.DEPLOY {
+			switch queueMessage.Action {
+			case config.DEPLOY:
 				go app.deploy(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
-			} else if queueMessage.Action == config.STOP {
+			case config.STOP:
 				go app.stop(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
-			} else if queueMessage.Action == config.KILL {
+			case config.KILL:
 				go app.kill(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
 			}
 		}

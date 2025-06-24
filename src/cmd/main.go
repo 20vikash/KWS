@@ -174,12 +174,6 @@ func main() {
 		log.Fatal("Core image creation error")
 	}
 
-	// Initialize the server with custom bridge networks
-	err = docker.CreateCustomNetwork(context.Background())
-	if err != nil {
-		log.Fatal("Core network creation error")
-	}
-
 	// Create the main wg0 interface
 	err = app.Wg.CreateInterfaceWgMain()
 	if err != nil {

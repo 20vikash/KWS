@@ -367,49 +367,6 @@ func (d *Docker) CreateNamedVolume(ctx context.Context, volumeName string) error
 	return nil
 }
 
-// Custom network created at startup where user containers live.
-func (d *Docker) CreateCustomNetwork(ctx context.Context) error {
-	networkName := config.CORE_NETWORK_NAME
-
-	// Create a filter
-	filter := filters.NewArgs()
-	filter.Add("name", networkName)
-
-	// List out all the network names
-	networks, err := d.Con.NetworkList(ctx, network.ListOptions{Filters: filter})
-	if err != nil {
-		log.Println("Error listing out the networks")
-		return err
-	}
-
-	// Check if the network already exists
-	if len(networks) > 0 {
-		log.Println("Network already exists")
-		return nil
-	}
-
-	// Create the network if it dosent exist
-	_, err = d.Con.NetworkCreate(ctx, networkName, network.CreateOptions{
-		Driver: "bridge",
-		IPAM: &network.IPAM{
-			Config: []network.IPAMConfig{
-				{
-					Subnet:  config.CORE_NETWORK_SUBNET,
-					Gateway: config.CORE_NETWORK_GATEWAY,
-				},
-			},
-		},
-	})
-	if err != nil {
-		log.Println("Error creating a network")
-		return err
-	}
-
-	log.Println("Created network successfully")
-
-	return nil
-}
-
 func (d *Docker) RemoveNamedVolume(ctx context.Context, volumeName string) error {
 	// Check if the volume exist.
 	found := false
