@@ -87,21 +87,7 @@ services:
     working_dir: /app/data/cmd
     command: sh -c "apt-get update && apt-get install -y uuid-runtime && go run ."
 
-  # ------------------------------Services-------------------------------
-  proxy_pg:
-    image: golang:latest
-    container_name: kws_proxy_pg
-    volumes:
-      - ./proxy/:/app/data
-    networks:
-      kws_services:
-        ipv4_address: 172.25.0.2
-      kws_main:
-    ports:
-      - "9000:9000"
-    working_dir: /app/data
-    command: sh -c "go run ."
-  
+  # ------------------------------Services-------------------------------  
   postgres_service:
     image: postgres:alpine
     container_name: postgres.kws.services
@@ -112,6 +98,8 @@ services:
       POSTGRES_PASSWORD: ${PG_SERVICE_PASSWORD}
     volumes:
       - postgres_db_service_data:/var/lib/postgresql/data:rw
+    ports:
+      - "5433:5432"
     networks:
       kws_services:
         ipv4_address: 172.25.0.3
