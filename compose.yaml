@@ -1,13 +1,20 @@
 networks:
   kws_main:
     driver: bridge
+  kws_services:
+    driver: bridge
   
 volumes:
+  #Main
   postgres_db_data_kws:
   redis_db_data_kws:
   mq_kws:
 
+  #Services
+  postgres_db_service_data:
+
 services:
+# ------------------------------Main-------------------------------
   postgres:
     image: postgres:alpine
     container_name: postgres_db_kws
@@ -75,3 +82,17 @@ services:
       - rabbitmq
     working_dir: /app/data/cmd
     command: sh -c "apt-get update && apt-get install -y uuid-runtime && go run ."
+
+  # ------------------------------Services-------------------------------
+  postgres_service:
+    image: postgres:alpine
+    container_name: postgres.kws.services
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${PG_SERVICE_USERNAME}
+      POSTGRES_PASSWORD: ${PG_SERVICE_PASSWORD}
+    volumes:
+      - postgres_db_service_data:/var/lib/postgresql/data:rw
+    networks:
+      - kws_services
