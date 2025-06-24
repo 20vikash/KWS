@@ -195,7 +195,8 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 	// Network config.
 	networkConfig := &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
-			networkName: {},
+			networkName:                  {},
+			config.SERVICES_NETWORK_NAME: {},
 		},
 	}
 
