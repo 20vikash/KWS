@@ -17,6 +17,8 @@ import (
 	env "kws/kws/internal"
 	database "kws/kws/internal/database/connection"
 	"kws/kws/internal/docker"
+	"kws/kws/internal/docker/services"
+	serviceConn "kws/kws/internal/docker/services/connections"
 	"kws/kws/internal/mq"
 	"kws/kws/internal/store"
 	"kws/kws/internal/wg"
@@ -39,6 +41,7 @@ type Application struct {
 	Mq             *store.MQ
 	Wg             *wg.WgOperations
 	IpAlloc        *wg.IPAllocator
+	Services       *services.Services
 }
 
 func main() {
@@ -157,6 +160,24 @@ func main() {
 		WgStore:    &store.WireguardStore{Con: connPool},
 	}
 
+	// Initialize pg service
+	pgService := serviceConn.Pg{
+		User:     env.GetPGServiceUserName(),
+		Password: env.GetPGServicePassword(),
+		Host:     env.GetPGServiceHost(),
+		Port:     env.GetPGServicePort(),
+		Name:     env.GetPGServiceName(),
+	}
+
+	// Connect to the pg service
+	pgSConn, err := pgService.ConnectToPGServiceBackend(context.Background())
+	if err != nil {
+		log.Fatal("Failed to connect to pg backend service")
+	}
+
+	// Create services instance
+	services := services.CreateServices(pgSConn)
+
 	// Initialize Application
 	app := Application{
 		Port:           ":8080",
@@ -166,6 +187,7 @@ func main() {
 		Mq:             mqType,
 		Wg:             wgOp,
 		IpAlloc:        ipAlloc,
+		Services:       services,
 	}
 
 	// Initialize the server with the docker images

@@ -84,6 +84,7 @@ services:
       - postgres
       - redis
       - rabbitmq
+      - postgres_service
     working_dir: /app/data/cmd
     command: sh -c "apt-get update && apt-get install -y uuid-runtime && go run ."
 
@@ -96,10 +97,11 @@ services:
     environment:
       POSTGRES_USER: ${PG_SERVICE_USERNAME}
       POSTGRES_PASSWORD: ${PG_SERVICE_PASSWORD}
+      POSTGRES_DB: ${PG_SERVICE_DB}
     volumes:
       - postgres_db_service_data:/var/lib/postgresql/data:rw
     ports:
-      - "5433:5432"
+      - "${PG_SERVICE_PORT}:5432"
     networks:
       kws_services:
         ipv4_address: 172.25.0.3

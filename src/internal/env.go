@@ -16,6 +16,7 @@ func LoadEnv() {
 	}
 }
 
+// ------------------------------Main-------------------------------
 // Postgres
 func GetDBUserName() string {
 	return os.Getenv("DB_USERNAME")
@@ -88,4 +89,26 @@ func GetMqPassword() string {
 // Wireguard
 func GetWireguardPrivateKey() string {
 	return os.Getenv("WG_PRIVATE_KEY")
+}
+
+// ------------------------------Services-------------------------------
+// Postgres
+func GetPGServiceUserName() string {
+	return os.Getenv("PG_SERVICE_USERNAME")
+}
+
+func GetPGServicePassword() string {
+	return os.Getenv("PG_SERVICE_PASSWORD")
+}
+
+func GetPGServiceHost() string {
+	return os.Getenv("PG_SERVICE_HOST")
+}
+
+func GetPGServicePort() string {
+	return os.Getenv("PG_SERVICE_PORT")
+}
+
+func GetPGServiceName() string {
+	return os.Getenv("PG_SERVICE_DB")
 }
