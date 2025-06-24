@@ -92,7 +92,7 @@ services:
     image: golang:latest
     container_name: proxy.kws.services
     volumes:
-      - ./src/internal/docker/services/proxy:/app/data
+      - ./proxy/:/app/data
     networks:
       kws_ins_s:
         ipv4_address: 172.35.0.2
