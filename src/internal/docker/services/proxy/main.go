@@ -38,6 +38,8 @@ func handleConnection(client net.Conn) {
 	}
 	defer backend.Close()
 
+	log.Printf("Routing started between client and %s\n", target)
+
 	// Start bidirectional copy
 	go io.Copy(backend, client)
 	io.Copy(client, backend)
