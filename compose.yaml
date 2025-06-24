@@ -1,12 +1,12 @@
 networks:
   kws_main:
     driver: bridge
-  kws_ins_s:
+  kws_services:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.35.0.0/24
-        - gateway: 172.35.0.1
+        - subnet: 172.25.0.0/24
+        - gateway: 172.25.0.1
   
 volumes:
   #Main
@@ -94,8 +94,8 @@ services:
     volumes:
       - ./proxy/:/app/data
     networks:
-      kws_ins_s:
-        ipv4_address: 172.35.0.2
+      kws_services:
+        ipv4_address: 172.25.0.2
     ports:
       - "9000:9000"
     working_dir: /app/data
@@ -112,5 +112,5 @@ services:
     volumes:
       - postgres_db_service_data:/var/lib/postgresql/data:rw
     networks:
-      kws_ins_s:
-        ipv4_address: 172.35.0.3
+      kws_services:
+        ipv4_address: 172.25.0.3

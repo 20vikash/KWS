@@ -4,12 +4,10 @@ import (
 	"io"
 	"log"
 	"net"
-	"time"
 )
 
 func handleConnection(client net.Conn) {
 	defer client.Close()
-	client.SetReadDeadline(time.Now().Add(2 * time.Second))
 
 	// Read the header to find the correct service backend
 	header := make([]byte, 4)
