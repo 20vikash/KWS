@@ -21,10 +21,12 @@ func (pg *PGService) CreatePostgresUser(ctx context.Context, username, password 
 		`CREATE USER %s WITH PASSWORD $1 NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT`,
 		SanitizeIdentifier(username),
 	)
+
 	_, err := pg.Con.Exec(ctx, sql, password)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %w", err)
 	}
+
 	return nil
 }
 
@@ -44,6 +46,28 @@ func (pg *PGService) CreateDatabase(ctx context.Context, dbName string, owner st
 	)
 	if _, err := pg.Con.Exec(ctx, revokeSQL); err != nil {
 		return fmt.Errorf("failed to revoke public connect: %w", err)
+	}
+
+	return nil
+}
+
+func (pg *PGService) DropDatabase(ctx context.Context, dbName string) error {
+	sql := fmt.Sprintf("DROP DATABASE IF EXISTS %s", SanitizeIdentifier(dbName))
+
+	_, err := pg.Con.Exec(ctx, sql)
+	if err != nil {
+		return fmt.Errorf("failed to drop database: %w", err)
+	}
+
+	return nil
+}
+
+func (pg *PGService) DropPostgresUser(ctx context.Context, username string) error {
+	sql := fmt.Sprintf("DROP USER IF EXISTS %s", SanitizeIdentifier(username))
+
+	_, err := pg.Con.Exec(ctx, sql)
+	if err != nil {
+		return fmt.Errorf("failed to drop user: %w", err)
 	}
 
 	return nil
