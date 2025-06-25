@@ -43,7 +43,7 @@ type Storage struct {
 
 	PgService interface {
 		AddUser(ctx context.Context, pgUser *models.PGServiceUser) error
-		AddDatabase(ctx context.Context, pgDatabase *models.PGServiceDatabase) error
+		AddDatabase(ctx context.Context, pgUser *models.PGServiceUser, pgDatabase *models.PGServiceDatabase) error
 	}
 }
 

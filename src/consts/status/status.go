@@ -28,5 +28,7 @@ const (
 	WG_DEVICE_LIMIT = "wg_device_limit"
 
 	PG_MAX_USER_LIMIT      = "pg_max_user_limit"
+	PG_MAX_DB_LIMIT        = "pg_max_db_limit"
 	PG_USER_ALREDAY_EXISTS = "pg_user_already_exists"
+	PG_DB_ALREDAY_EXISTS   = "pg_db_already_exists"
 )
