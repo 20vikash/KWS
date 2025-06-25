@@ -9,6 +9,7 @@ CREATE TABLE pg_service_user (
 CREATE TABLE pg_service_db (
     id SERIAL PRIMARY KEY,
     pid INTEGER NOT NULL REFERENCES pg_service_user(id) ON DELETE CASCADE,
-    db_name VARCHAR(100) NOT NULL UNIQUE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    db_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (pid, db_name)
 )
