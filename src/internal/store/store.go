@@ -42,8 +42,8 @@ type Storage struct {
 	}
 
 	PgService interface {
-		AddUser(pgUser *models.PGServiceUser) error
-		AddDatabase(pgDatabase *models.PGServiceDatabase) error
+		AddUser(ctx context.Context, pgUser *models.PGServiceUser) error
+		AddDatabase(ctx context.Context, pgDatabase *models.PGServiceDatabase) error
 	}
 }
 

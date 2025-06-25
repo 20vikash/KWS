@@ -26,4 +26,7 @@ const (
 	EMPTY_IP_STACK = "empty_ip_stack"
 
 	WG_DEVICE_LIMIT = "wg_device_limit"
+
+	PG_MAX_USER_LIMIT      = "pg_max_user_limit"
+	PG_USER_ALREDAY_EXISTS = "pg_user_already_exists"
 )
