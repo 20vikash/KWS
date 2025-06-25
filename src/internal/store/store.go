@@ -40,6 +40,11 @@ type Storage struct {
 		RemovePeer(ctx context.Context, pubKey string, uid int) (int, error)
 		AllocateNextFreeIP(ctx context.Context, maxHostNumber int, uid int, wgType *models.WireguardType) (int, error)
 	}
+
+	PgService interface {
+		AddUser(pgUser *models.PGServiceUser) error
+		AddDatabase(pgDatabase *models.PGServiceDatabase) error
+	}
 }
 
 func NewStore(pg *pgxpool.Pool, redis *redis.Client, mq *MQ) *Storage {
@@ -58,6 +63,9 @@ func NewStore(pg *pgxpool.Pool, redis *redis.Client, mq *MQ) *Storage {
 			Queue: mq.Queue,
 		},
 		Wireguard: &WireguardStore{
+			Con: pg,
+		},
+		PgService: &PgServiceStore{
 			Con: pg,
 		},
 	}
