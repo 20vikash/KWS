@@ -31,4 +31,6 @@ const (
 	PG_MAX_DB_LIMIT        = "pg_max_db_limit"
 	PG_USER_ALREDAY_EXISTS = "pg_user_already_exists"
 	PG_DB_ALREDAY_EXISTS   = "pg_db_already_exists"
+	PG_USER_NOT_FOUND      = "pg_user_not_found"
+	PG_DB_NOT_FOUND        = "pg_db_not_found"
 )
