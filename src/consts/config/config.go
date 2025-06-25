@@ -22,4 +22,7 @@ const (
 	STACK_KEY = "ip_stack"
 
 	MAX_WG_DEVICES_PER_USER = 3
+
+	MAX_SERVICE_DB_USERS = 5
+	MAX_SERVICE_DB_DB    = 10
 )
