@@ -31,7 +31,7 @@ services:
     volumes:
       - postgres_db_data_kws:/var/lib/postgresql/data:rw
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - "127.0.0.1:${DB_PORT}:${DB_PORT}"
     networks:
       - kws_main
   
@@ -45,8 +45,8 @@ services:
       - RABBITMQ_DEFAULT_USER=${MQ_USER}
       - RABBITMQ_DEFAULT_PASS=${MQ_PASSWORD}
     ports:
-      - "${MQ_SERVER_PORT}:${MQ_SERVER_PORT}"
-      - "${MQ_UI_PORT}:${MQ_UI_PORT}"
+      - "127.0.0.1:${MQ_SERVER_PORT}:${MQ_SERVER_PORT}"
+      - "127.0.0.1:${MQ_UI_PORT}:${MQ_UI_PORT}"
     volumes:
       - mq_kws:/var/lib/rabbitmq
     healthcheck:
@@ -63,7 +63,7 @@ services:
     volumes:
       - redis_db_data_kws:/data:rw
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "127.0.0.1:${REDIS_PORT}:${REDIS_PORT}"
     env_file:
       - .env
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
@@ -101,7 +101,7 @@ services:
     volumes:
       - postgres_db_service_data:/var/lib/postgresql/data:rw
     ports:
-      - "${PG_SERVICE_PORT}:5432"
+      - "127.0.0.1:${PG_SERVICE_PORT}:5432"
     networks:
       kws_services:
         ipv4_address: 172.25.0.2
