@@ -161,7 +161,7 @@ func (app *Application) RemovePgDatabase(w http.ResponseWriter, r *http.Request)
 	// Update the service database
 	err = app.Services.PgService.DropDatabase(r.Context(), dbName)
 	if err != nil {
-		http.Error(w, "failed to remove user", http.StatusInternalServerError)
+		http.Error(w, "failed to remove database", http.StatusInternalServerError)
 		return
 	}
 
