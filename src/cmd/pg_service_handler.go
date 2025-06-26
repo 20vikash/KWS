@@ -46,6 +46,8 @@ func (app *Application) CreatePGUser(w http.ResponseWriter, r *http.Request) {
 	err = app.Services.PgService.CreatePostgresUser(r.Context(), userName, password)
 	if err != nil {
 		http.Error(w, "failed to create pg user", http.StatusInternalServerError)
+		// Revert db state back.
+		app.Store.PgService.RemoveUser(r.Context(), models.CreatePgServiceUser(uid, userName, password))
 		return
 	}
 
@@ -93,6 +95,8 @@ func (app *Application) CreatePgDatabase(w http.ResponseWriter, r *http.Request)
 	err = app.Services.PgService.CreateDatabase(r.Context(), dbName, userName)
 	if err != nil {
 		http.Error(w, "failed to create database", http.StatusInternalServerError)
+		// Revert db state back.
+		app.Store.PgService.RemoveDatabase(r.Context(), models.CreatePgServiceUser(uid, userName, password), &models.PGServiceDatabase{DbName: dbName})
 		return
 	}
 
