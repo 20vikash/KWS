@@ -120,15 +120,15 @@ func (app *Application) RemovePgUser(w http.ResponseWriter, r *http.Request) {
 	userName := r.FormValue("user_name")
 	password := r.FormValue("password")
 
-	// Update the main db
-	err = app.Store.PgService.RemoveUser(r.Context(), models.CreatePgServiceUser(uid, userName, password))
+	// Update the service db
+	err = app.Services.PgService.DropPostgresUser(r.Context(), uid, userName, password)
 	if err != nil {
 		http.Error(w, "failed to remove user", http.StatusInternalServerError)
 		return
 	}
 
-	// Update the service db
-	err = app.Services.PgService.DropPostgresUser(r.Context(), uid, userName, password)
+	// Update the main db
+	err = app.Store.PgService.RemoveUser(r.Context(), models.CreatePgServiceUser(uid, userName, password))
 	if err != nil {
 		http.Error(w, "failed to remove user", http.StatusInternalServerError)
 		return
@@ -158,17 +158,17 @@ func (app *Application) RemovePgDatabase(w http.ResponseWriter, r *http.Request)
 	// Create PGServiceUser struct
 	pgUser := models.CreatePgServiceUser(uid, userName, password)
 
-	// Update the main DB
-	err = app.Store.PgService.RemoveDatabase(r.Context(), pgUser, &models.PGServiceDatabase{DbName: dbName})
-	if err != nil {
-		http.Error(w, "failed to remove pg database", http.StatusInternalServerError)
-		return
-	}
-
 	// Update the service database
 	err = app.Services.PgService.DropDatabase(r.Context(), dbName)
 	if err != nil {
 		http.Error(w, "failed to remove user", http.StatusInternalServerError)
+		return
+	}
+
+	// Update the main DB
+	err = app.Store.PgService.RemoveDatabase(r.Context(), pgUser, &models.PGServiceDatabase{DbName: dbName})
+	if err != nil {
+		http.Error(w, "failed to remove pg database", http.StatusInternalServerError)
 		return
 	}
 
