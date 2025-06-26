@@ -16,6 +16,26 @@ type PgServiceStore struct {
 	Con *pgxpool.Pool
 }
 
+func (pg *PgServiceStore) findPID(ctx context.Context, userName, password string) (int, error) {
+	var pid int
+
+	// Extract the ID from the pg username and pg password
+	sql := `
+		SELECT id FROM pg_service_user WHERE pg_user_name = $1 AND pg_user_password = $2
+	`
+
+	err := pg.Con.QueryRow(ctx, sql,
+		userName,
+		password,
+	).Scan(&pid)
+	if err != nil {
+		log.Println("Cannot find the id from the given pg username and pg password")
+		return -1, err
+	}
+
+	return pid, nil
+}
+
 func (pg *PgServiceStore) AddUser(ctx context.Context, pgUser *models.PGServiceUser) error {
 	var count int
 
@@ -58,26 +78,15 @@ func (pg *PgServiceStore) AddUser(ctx context.Context, pgUser *models.PGServiceU
 }
 
 func (pg *PgServiceStore) AddDatabase(ctx context.Context, pgUser *models.PGServiceUser, pgDatabase *models.PGServiceDatabase) error {
-	var pid int
-
-	// Extract the ID from the pg username and pg password
-	sql := `
-		SELECT id FROM pg_service_user WHERE pg_user_name = $1 AND pg_user_password = $2
-	`
-
-	err := pg.Con.QueryRow(ctx, sql,
-		pgUser.UserName,
-		pgUser.Password,
-	).Scan(&pid)
+	pid, err := pg.findPID(ctx, pgUser.UserName, pgUser.Password)
 	if err != nil {
-		log.Println("Cannot find the id from the given pg username and pg password")
 		return err
 	}
 
 	var dbCount int
 
 	// Check if the Database count limit has exceeded
-	sql = `
+	sql := `
 		SELECT COUNT(id) FROM pg_service_db WHERE pid = $1
 	`
 
@@ -168,4 +177,34 @@ func (pg *PgServiceStore) RemoveUser(ctx context.Context, pgUser *models.PGServi
 
 	log.Printf("Deleted PG user '%s' and their databases\n", pgUser.UserName)
 	return nil
+}
+
+func (pg *PgServiceStore) GetUserDatabases(ctx context.Context, userName, password string) ([]string, error) {
+	var dbName string
+	var dbNames = make([]string, 0)
+
+	pid, err := pg.findPID(ctx, userName, password)
+	if err != nil {
+		return nil, err
+	}
+
+	sql := `
+		SELECT db_name FROM pg_service_db WHERE pid = $1
+	`
+
+	rows, err := pg.Con.Query(ctx, sql, pid)
+	if err != nil {
+		log.Println("Cannot get all the databases of the user")
+		return nil, err
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&dbName); err != nil {
+			return nil, err
+		}
+
+		dbNames = append(dbNames, dbName)
+	}
+
+	return dbNames, nil
 }
