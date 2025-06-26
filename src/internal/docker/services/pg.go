@@ -65,9 +65,9 @@ func (pg *PGService) DropDatabase(ctx context.Context, dbName string) error {
 	return nil
 }
 
-func (pg *PGService) DropPostgresUser(ctx context.Context, username, password string) error {
+func (pg *PGService) DropPostgresUser(ctx context.Context, uid int, username, password string) error {
 	// Drop all the databases owned by the user before dropping the user.
-	dbs, err := pg.MainPg.GetUserDatabases(ctx, username, password)
+	dbs, err := pg.MainPg.GetUserDatabases(ctx, uid, username, password)
 	if err != nil {
 		return err
 	}

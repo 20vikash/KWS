@@ -16,17 +16,18 @@ type PgServiceStore struct {
 	Con *pgxpool.Pool
 }
 
-func (pg *PgServiceStore) findPID(ctx context.Context, userName, password string) (int, error) {
+func (pg *PgServiceStore) findPID(ctx context.Context, uid int, userName, password string) (int, error) {
 	var pid int
 
 	// Extract the ID from the pg username and pg password
 	sql := `
-		SELECT id FROM pg_service_user WHERE pg_user_name = $1 AND pg_user_password = $2
+		SELECT id FROM pg_service_user WHERE pg_user_name = $1 AND pg_user_password = $2 AND user_id = $3
 	`
 
 	err := pg.Con.QueryRow(ctx, sql,
 		userName,
 		password,
+		uid,
 	).Scan(&pid)
 	if err != nil {
 		log.Println("Cannot find the id from the given pg username and pg password")
@@ -78,7 +79,7 @@ func (pg *PgServiceStore) AddUser(ctx context.Context, pgUser *models.PGServiceU
 }
 
 func (pg *PgServiceStore) AddDatabase(ctx context.Context, pgUser *models.PGServiceUser, pgDatabase *models.PGServiceDatabase) error {
-	pid, err := pg.findPID(ctx, pgUser.UserName, pgUser.Password)
+	pid, err := pg.findPID(ctx, pgUser.Uid, pgUser.UserName, pgUser.Password)
 	if err != nil {
 		return err
 	}
@@ -179,11 +180,11 @@ func (pg *PgServiceStore) RemoveUser(ctx context.Context, pgUser *models.PGServi
 	return nil
 }
 
-func (pg *PgServiceStore) GetUserDatabases(ctx context.Context, userName, password string) ([]string, error) {
+func (pg *PgServiceStore) GetUserDatabases(ctx context.Context, uid int, userName, password string) ([]string, error) {
 	var dbName string
 	var dbNames = make([]string, 0)
 
-	pid, err := pg.findPID(ctx, userName, password)
+	pid, err := pg.findPID(ctx, uid, userName, password)
 	if err != nil {
 		return nil, err
 	}
