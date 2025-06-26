@@ -197,6 +197,7 @@ func (pg *PgServiceStore) GetUserDatabases(ctx context.Context, userName, passwo
 		log.Println("Cannot get all the databases of the user")
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		if err := rows.Scan(&dbName); err != nil {
@@ -204,6 +205,10 @@ func (pg *PgServiceStore) GetUserDatabases(ctx context.Context, userName, passwo
 		}
 
 		dbNames = append(dbNames, dbName)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return dbNames, nil
