@@ -4,7 +4,7 @@ CREATE TABLE pg_service_user (
     pg_user_name VARCHAR(100) NOT NULL UNIQUE,
     pg_user_password VARCHAR(100) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
-)
+);
 
 CREATE TABLE pg_service_db (
     id SERIAL PRIMARY KEY,
@@ -12,4 +12,4 @@ CREATE TABLE pg_service_db (
     db_name VARCHAR(100) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE (pid, db_name)
-)
+);
