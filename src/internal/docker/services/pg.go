@@ -3,12 +3,15 @@ package services
 import (
 	"context"
 	"fmt"
+	"kws/kws/internal/store"
+	"log"
 
 	"github.com/jackc/pgx/v5"
 )
 
 type PGService struct {
-	Con *pgx.Conn
+	Con    *pgx.Conn
+	MainPg *store.PgServiceStore
 }
 
 // SanitizeIdentifier ensures the identifier is valid (no injection)
@@ -62,10 +65,24 @@ func (pg *PGService) DropDatabase(ctx context.Context, dbName string) error {
 	return nil
 }
 
-func (pg *PGService) DropPostgresUser(ctx context.Context, username string) error {
+func (pg *PGService) DropPostgresUser(ctx context.Context, username, password string) error {
+	// Drop all the databases owned by the user before dropping the user.
+	dbs, err := pg.MainPg.GetUserDatabases(ctx, username, password)
+	if err != nil {
+		return err
+	}
+
+	for _, db := range dbs {
+		err = pg.DropDatabase(ctx, db)
+		if err != nil {
+			log.Printf("Cannot delete %s database of %s user", db, username)
+			return err
+		}
+	}
+
 	sql := fmt.Sprintf("DROP USER IF EXISTS %s", SanitizeIdentifier(username))
 
-	_, err := pg.Con.Exec(ctx, sql)
+	_, err = pg.Con.Exec(ctx, sql)
 	if err != nil {
 		return fmt.Errorf("failed to drop user: %w", err)
 	}
