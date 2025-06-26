@@ -176,7 +176,7 @@ func main() {
 	}
 
 	// Create services instance
-	services := services.CreateServices(pgSConn)
+	services := services.CreateServices(pgSConn, &store.PgServiceStore{Con: connPool})
 
 	// Initialize Application
 	app := Application{

@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"kws/kws/internal/store"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -15,8 +16,11 @@ type Services struct {
 	}
 }
 
-func CreateServices(con *pgx.Conn) *Services {
+func CreateServices(pgCcon *pgx.Conn, pgMainCon *store.PgServiceStore) *Services {
 	return &Services{
-		PgService: &PGService{Con: con},
+		PgService: &PGService{
+			Con:    pgCcon,
+			MainPg: pgMainCon,
+		},
 	}
 }

@@ -21,7 +21,7 @@ func SanitizeIdentifier(name string) string {
 
 func (pg *PGService) CreatePostgresUser(ctx context.Context, username, password string) error {
 	sql := fmt.Sprintf(
-		`CREATE USER %s WITH PASSWORD %s NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT`,
+		`CREATE USER %s WITH PASSWORD '%s' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT`,
 		SanitizeIdentifier(username),
 		password,
 	)
