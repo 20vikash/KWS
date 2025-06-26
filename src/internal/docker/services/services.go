@@ -1,16 +1,22 @@
 package services
 
 import (
+	"context"
+
 	"github.com/jackc/pgx/v5"
 )
 
 type Services struct {
 	PgService interface {
+		CreatePostgresUser(ctx context.Context, username, password string) error
+		CreateDatabase(ctx context.Context, dbName string, owner string) error
+		DropDatabase(ctx context.Context, dbName string) error
+		DropPostgresUser(ctx context.Context, username string) error
 	}
 }
 
 func CreateServices(con *pgx.Conn) *Services {
 	return &Services{
-		PgService: PGService{Con: con},
+		PgService: &PGService{Con: con},
 	}
 }
