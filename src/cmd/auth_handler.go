@@ -87,6 +87,8 @@ func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 		}
 	}(user.Email, token)
+
+	http.Redirect(w, r, "/kws_signin", http.StatusSeeOther)
 }
 
 // Verify the email token and verify the user.
@@ -112,8 +114,7 @@ func (a *Application) VerifyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Successfully verified the email"))
+	http.Redirect(w, r, "/kws_signin", http.StatusSeeOther)
 }
 
 func (app *Application) LoginUser(w http.ResponseWriter, r *http.Request) {
@@ -159,8 +160,7 @@ func (app *Application) LoginUser(w http.ResponseWriter, r *http.Request) {
 	app.SessionManager.Put(r.Context(), "user_name", userModel.User_name)
 	app.SessionManager.Put(r.Context(), "isAuthorized", true)
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Logged in successfully"))
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *Application) LogOutUser(w http.ResponseWriter, r *http.Request) {
@@ -183,5 +183,5 @@ func (app *Application) LogOutUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Redirect the user to the login page.
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/kws_signin", http.StatusSeeOther)
 }
