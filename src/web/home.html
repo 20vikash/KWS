@@ -105,10 +105,22 @@
         <a href="/" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Home</a>
       </nav>
     </div>
-    <div class="hidden md:block mt-6">
+    <div class="hidden md:block mt-6 space-y-2">
       <p class="text-sm text-gray-500">Logged in as</p>
-      <p class="text-sm text-white font-semibold">{{ .Username }}</p>
-    </div>
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-white font-semibold">{{ .Username }}</p>
+        <form action="/logout" method="POST">
+          <button type="submit" class="text-gray-400 hover:text-red-500 p-1 transition duration-200" title="Logout">
+            <!-- Logout Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10v1m0 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h6a2 2 0 002-2v-1" />
+            </svg>
+          </button>
+        </form>
+      </div>
+</div>
+
   </aside>
 
   <!-- Main Content -->
