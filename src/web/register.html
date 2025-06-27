@@ -88,60 +88,6 @@
   </style>
 </head>
 
-<script>
-  const form = document.querySelector("form");
-  const errorBox = document.getElementById("error-box");
-
-  form.addEventListener("submit", function (e) {
-    const email = form.email.value.trim();
-    const user_name = form.user_name.value.trim();
-    const first_name = form.first_name.value.trim();
-    const last_name = form.last_name.value.trim();
-    const password = form.password.value;
-
-    const emailRegex = /^[a-zA-Z0-9._%+\-]+@gmail\.com$/i;
-    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9._]{4,29}$/;
-    const nameRegex = /^[A-Za-z'.-]{2,30}$/;
-
-    const errors = [];
-
-    if (!emailRegex.test(email)) {
-      errors.push("• Email must be a valid Gmail address.");
-    }
-
-    if (!usernameRegex.test(user_name)) {
-      errors.push("• Username must start with a letter, 5–30 chars, using letters/numbers/._ only.");
-    }
-
-    if (!nameRegex.test(first_name)) {
-      errors.push("• First name must be 2–30 chars with valid letters.");
-    }
-
-    if (!nameRegex.test(last_name)) {
-      errors.push("• Last name must be 2–30 chars with valid letters.");
-    }
-
-    if (
-      password.length < 8 ||
-      !/[a-z]/.test(password) ||
-      !/[A-Z]/.test(password) ||
-      !/[0-9]/.test(password) ||
-      !/[!@#$%^&*()\-_=+\[\]{}|;:'\",.<>/?]/.test(password)
-    ) {
-      errors.push("• Password must have 8+ chars with uppercase, lowercase, number, and special char.");
-    }
-
-    if (errors.length > 0) {
-      e.preventDefault();
-
-      // Show styled error box
-      errorBox.innerHTML = errors.join("<br>");
-      errorBox.classList.remove("hidden", "opacity-0");
-      errorBox.classList.add("animate-fadeIn");
-    }
-  });
-</script>
-
 <body class="relative flex items-center justify-center">
   <!-- Sparkle background -->
   <div id="sparkle-container"></div>
@@ -203,6 +149,58 @@
       sparkle.style.animationDelay = Math.random() * 10 + 's';
       sparkleContainer.appendChild(sparkle);
     }
+
+    const form = document.querySelector("form");
+    const errorBox = document.getElementById("error-box");
+
+    form.addEventListener("submit", function (e) {
+      const email = form.email.value.trim();
+      const user_name = form.user_name.value.trim();
+      const first_name = form.first_name.value.trim();
+      const last_name = form.last_name.value.trim();
+      const password = form.password.value;
+
+      const emailRegex = /^[a-zA-Z0-9._%+\-]+@gmail\.com$/i;
+      const usernameRegex = /^[a-zA-Z][a-zA-Z0-9._]{4,29}$/;
+      const nameRegex = /^[A-Za-z'.-]{2,30}$/;
+
+      const errors = [];
+
+      if (!emailRegex.test(email)) {
+        errors.push("• Email must be a valid Gmail address.");
+      }
+
+      if (!usernameRegex.test(user_name)) {
+        errors.push("• Username must start with a letter, 5–30 chars, using letters/numbers/._ only.");
+      }
+
+      if (!nameRegex.test(first_name)) {
+        errors.push("• First name must be 2–30 chars with valid letters.");
+      }
+
+      if (!nameRegex.test(last_name)) {
+        errors.push("• Last name must be 2–30 chars with valid letters.");
+      }
+
+      if (
+        password.length < 8 ||
+        !/[a-z]/.test(password) ||
+        !/[A-Z]/.test(password) ||
+        !/[0-9]/.test(password) ||
+        !/[!@#$%^&*()\-_=+\[\]{}|;:'\",.<>/?]/.test(password)
+      ) {
+        errors.push("• Password must have 8+ chars with uppercase, lowercase, number, and special char.");
+      }
+
+      if (errors.length > 0) {
+        e.preventDefault();
+
+        // Show styled error box
+        errorBox.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden", "opacity-0");
+        errorBox.classList.add("animate-fadeIn");
+      }
+  });
   </script>
 </body>
 </html>
