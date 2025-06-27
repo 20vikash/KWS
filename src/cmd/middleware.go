@@ -7,8 +7,7 @@ func (app *Application) IsAuthorized(next http.Handler) http.Handler {
 		// Check if the request is authorized.
 		isAuthorized := app.SessionManager.GetBool(r.Context(), "isAuthorized")
 		if !isAuthorized {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Not authorized to access this page"))
+			http.Redirect(w, r, "/kws_signin", http.StatusSeeOther)
 			return
 		}
 

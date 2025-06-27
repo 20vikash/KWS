@@ -8,6 +8,12 @@ import (
 var templates = template.Must(template.ParseGlob("../web/*.html"))
 
 func (app *Application) RenderRegisterPage(w http.ResponseWriter, r *http.Request) {
+	isAuthorized := app.SessionManager.GetBool(r.Context(), "isAuthorized")
+	if isAuthorized {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	err := templates.ExecuteTemplate(w, "register", nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -15,6 +21,12 @@ func (app *Application) RenderRegisterPage(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *Application) RenderSignInPage(w http.ResponseWriter, r *http.Request) {
+	isAuthorized := app.SessionManager.GetBool(r.Context(), "isAuthorized")
+	if isAuthorized {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	err := templates.ExecuteTemplate(w, "signin", nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
