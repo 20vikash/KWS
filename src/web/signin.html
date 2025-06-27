@@ -45,18 +45,9 @@
     }
 
     @keyframes sparkle {
-      0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.3;
-      }
-      50% {
-        opacity: 0.6;
-        transform: translateY(-10px) scale(1.1);
-      }
-      100% {
-        transform: translateY(-100vh) scale(0.8);
-        opacity: 0;
-      }
+      0% { transform: translateY(0) scale(1); opacity: 0.3; }
+      50% { opacity: 0.6; transform: translateY(-10px) scale(1.1); }
+      100% { transform: translateY(-100vh) scale(0.8); opacity: 0; }
     }
 
     .glow-text {
@@ -97,7 +88,7 @@
       <h1 class="text-4xl font-bold text-blue-400 glow-text floating">KWS Cloud</h1>
       <p class="mt-2 text-sm text-gray-400">Welcome back, developer. Sign in to continue.</p>
     </div>
-    <form class="space-y-6" method="POST" action="/login">
+    <form id="signin-form" class="space-y-6">
       <div>
         <label class="block text-sm font-medium">Username</label>
         <input type="text" name="user_name" required placeholder="dev_username"
@@ -108,6 +99,7 @@
         <input type="password" name="password" required placeholder="••••••••"
           class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
       </div>
+      <div id="error-box" class="hidden bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 border border-red-600"></div>
       <button type="submit"
         class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition font-semibold text-center">
         Sign In
@@ -119,7 +111,6 @@
   </div>
 
   <script>
-    // Sparkle background animation generator
     const sparkleContainer = document.getElementById('sparkle-container');
     for (let i = 0; i < 160; i++) {
       const sparkle = document.createElement('div');
@@ -130,6 +121,49 @@
       sparkle.style.animationDelay = Math.random() * 10 + 's';
       sparkleContainer.appendChild(sparkle);
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("signin-form");
+      const errorBox = document.getElementById("error-box");
+
+      function showError(message) {
+        errorBox.innerHTML = `• ${message}`;
+        errorBox.classList.remove("hidden");
+      }
+
+      function hideError() {
+        errorBox.classList.add("hidden");
+        errorBox.innerHTML = "";
+      }
+
+      document.querySelectorAll("input").forEach(input => {
+        input.addEventListener("input", hideError);
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const data = new URLSearchParams(formData);
+
+        try {
+          const res = await fetch("/login", {
+            method: "POST",
+            body: data
+          });
+
+          const text = await res.text();
+
+          if (res.ok) {
+            window.location.href = "/dashboard";
+          } else {
+            showError(text);
+          }
+        } catch {
+          showError("Network error. Please try again.");
+        }
+      });
+    });
   </script>
 </body>
 </html>
