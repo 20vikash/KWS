@@ -155,6 +155,8 @@
           const text = await res.text();
 
           if (!res.ok) {
+            window.location.href = "/";
+          } else {
             showError(text);
           }
         } catch {
