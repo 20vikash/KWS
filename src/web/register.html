@@ -126,12 +126,10 @@
         <input name="password" type="password" required placeholder="••••••••"
           class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
       </div>
-      <div id="error-box" class="hidden bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 mb-4 border border-red-600"></div>
-      {{ if .Error }}
-        <div id="error-box" class="bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 mb-4 border border-red-600 animate-fadeIn">
-          {{ .Error }}
-        </div>
-      {{ else }}
+      <div id="error-box"
+          class="hidden bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 mb-4 border border-red-600 animate-fadeIn">
+        {{ .Error }}
+      </div>
         <div id="error-box" class="hidden bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 mb-4 border border-red-600"></div>
       {{ end }}
       <button type="submit"
@@ -157,62 +155,102 @@
       sparkleContainer.appendChild(sparkle);
     }
 
-    const form = document.querySelector("form");
-    const errorBox = document.getElementById("error-box");
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.querySelector("form");
+      const errorBox = document.getElementById("error-box");
 
-    form.addEventListener("submit", function (e) {
-      const email = form.email.value.trim();
-      const user_name = form.user_name.value.trim();
-      const first_name = form.first_name.value.trim();
-      const last_name = form.last_name.value.trim();
-      const password = form.password.value;
-
+      // Regex patterns
       const emailRegex = /^[a-zA-Z0-9._%+\-]+@gmail\.com$/i;
       const usernameRegex = /^[a-zA-Z][a-zA-Z0-9._]{4,29}$/;
       const nameRegex = /^[A-Za-z'.-]{2,30}$/;
+      const passwordRegex = {
+        length: /.{8,}/,
+        lower: /[a-z]/,
+        upper: /[A-Z]/,
+        digit: /[0-9]/,
+        special: /[!@#$%^&*()\-_=+\[\]{}|;:'",.<>/?]/
+      };
 
-      const errors = [];
-
-      if (!emailRegex.test(email)) {
-        errors.push("• Email must be a valid Gmail address.");
-      }
-
-      if (!usernameRegex.test(user_name)) {
-        errors.push("• Username must start with a letter, 5–30 chars, using letters/numbers/._ only.");
-      }
-
-      if (!nameRegex.test(first_name)) {
-        errors.push("• First name must be 2–30 chars with valid letters.");
-      }
-
-      if (!nameRegex.test(last_name)) {
-        errors.push("• Last name must be 2–30 chars with valid letters.");
-      }
-
-      if (
-        password.length < 8 ||
-        !/[a-z]/.test(password) ||
-        !/[A-Z]/.test(password) ||
-        !/[0-9]/.test(password) ||
-        !/[!@#$%^&*()\-_=+\[\]{}|;:'\",.<>/?]/.test(password)
-      ) {
-        errors.push("• Password must have 8+ chars with uppercase, lowercase, number, and special char.");
-      }
-
-      if (errors.length > 0) {
-        e.preventDefault();
-        errorBox.innerHTML = errors.join("<br>");
+      function showErrors(messages) {
+        errorBox.innerHTML = messages.join("<br>");
         errorBox.classList.remove("hidden", "opacity-0");
         errorBox.classList.add("animate-fadeIn");
       }
-    });
 
-    // Hide error box when user starts editing
-    document.querySelectorAll("input").forEach(input => {
-      input.addEventListener("input", () => {
-        if (!errorBox.classList.contains("hidden")) {
-          errorBox.classList.add("hidden");
-          errorBox.innerHTML = "";
+      function hideErrors() {
+        errorBox.classList.add("hidden");
+        errorBox.innerHTML = "";
+      }
+
+      // Clear error box on input change
+      document.querySelectorAll("input").forEach(input => {
+        input.addEventListener("input", hideErrors);
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault(); // prevent default form submission
+
+        const email = form.email.value.trim();
+        const username = form.user_name.value.trim();
+        const first = form.first_name.value.trim();
+        const last = form.last_name.value.trim();
+        const password = form.password.value;
+
+        const errors = [];
+
+        if (!emailRegex.test(email)) {
+          errors.push("• Email must be a valid Gmail address.");
+        }
+
+        if (!usernameRegex.test(username)) {
+          errors.push("• Username must start with a letter, 5–30 chars, using letters/numbers/._ only.");
+        }
+
+        if (!nameRegex.test(first)) {
+          errors.push("• First name must be 2–30 chars with valid characters.");
+        }
+
+        if (!nameRegex.test(last)) {
+          errors.push("• Last name must be 2–30 chars with valid characters.");
+        }
+
+        if (
+          !passwordRegex.length.test(password) ||
+          !passwordRegex.lower.test(password) ||
+          !passwordRegex.upper.test(password) ||
+          !passwordRegex.digit.test(password) ||
+          !passwordRegex.special.test(password)
+        ) {
+          errors.push("• Password must be 8+ characters with uppercase, lowercase, number, and special character.");
+        }
+
+        // Frontend validation failed
+        if (errors.length > 0) {
+          showErrors(errors);
+          return;
+        }
+
+        // Prepare and send POST request
+        const formData = new FormData(form);
+        const data = new URLSearchParams(formData);
+
+        try {
+          const res = await fetch("/create_user", {
+            method: "POST",
+            body: data,
+          });
+
+          const text = await res.text();
+
+          if (res.ok) {
+            // Redirect to login or dashboard
+            window.location.href = "/kws_signin";
+          } else {
+            // Server-side error (like "username or email already exists")
+            showErrors([`• ${text}`]);
+          }
+        } catch (err) {
+          showErrors(["• Network error. Please try again."]);
         }
       });
     });
