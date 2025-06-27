@@ -127,6 +127,13 @@
           class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
       </div>
       <div id="error-box" class="hidden bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 mb-4 border border-red-600"></div>
+      {{ if .Error }}
+        <div id="error-box" class="bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 mb-4 border border-red-600 animate-fadeIn">
+          {{ .Error }}
+        </div>
+      {{ else }}
+        <div id="error-box" class="hidden bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 mb-4 border border-red-600"></div>
+      {{ end }}
       <button type="submit"
         class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition font-semibold text-center">
         Register
@@ -194,13 +201,21 @@
 
       if (errors.length > 0) {
         e.preventDefault();
-
-        // Show styled error box
         errorBox.innerHTML = errors.join("<br>");
         errorBox.classList.remove("hidden", "opacity-0");
         errorBox.classList.add("animate-fadeIn");
       }
-  });
+    });
+
+    // Hide error box when user starts editing
+    document.querySelectorAll("input").forEach(input => {
+      input.addEventListener("input", () => {
+        if (!errorBox.classList.contains("hidden")) {
+          errorBox.classList.add("hidden");
+          errorBox.innerHTML = "";
+        }
+      });
+    });
   </script>
 </body>
 </html>
