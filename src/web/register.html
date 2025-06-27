@@ -147,6 +147,50 @@
       sparkle.style.animationDelay = Math.random() * 10 + 's';
       sparkleContainer.appendChild(sparkle);
     }
+
+
+    document.querySelector("form").addEventListener("submit", function (e) {
+      const email = this.email.value.trim();
+      const user_name = this.user_name.value.trim();
+      const first_name = this.first_name.value.trim();
+      const last_name = this.last_name.value.trim();
+      const password = this.password.value;
+
+      const emailRegex = /^[a-zA-Z0-9._%+\-]+@gmail\.com$/i;
+      const usernameRegex = /^[a-zA-Z][a-zA-Z0-9._]{4,29}$/;
+      const nameRegex = /^[A-Za-z'.-]{2,30}$/;
+
+      const errors = [];
+
+      if (!emailRegex.test(email)) {
+        errors.push("Email must be a valid Gmail address.");
+      }
+
+      if (!usernameRegex.test(user_name)) {
+        errors.push("Username must start with a letter, be 5-30 characters, and only contain letters, numbers, '.', or '_'.");
+      }
+
+      if (!nameRegex.test(first_name)) {
+        errors.push("First name must be 2-30 characters and contain only valid characters.");
+      }
+
+      if (!nameRegex.test(last_name)) {
+        errors.push("Last name must be 2-30 characters and contain only valid characters.");
+      }
+
+      if (password.length < 8 ||
+          !/[a-z]/.test(password) ||
+          !/[A-Z]/.test(password) ||
+          !/[0-9]/.test(password) ||
+          !/[!@#$%^&*()\-_=+\[\]{}|;:'",.<>/?]/.test(password)) {
+        errors.push("Password must be at least 8 characters with uppercase, lowercase, number, and special character.");
+      }
+
+      if (errors.length > 0) {
+        e.preventDefault();
+        alert(errors.join("\n"));
+      }
+    });
   </script>
 </body>
 </html>
