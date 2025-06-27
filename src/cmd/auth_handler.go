@@ -9,10 +9,6 @@ import (
 	"strings"
 )
 
-func (app *Application) HelloWorld(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello world"))
-}
-
 // Endpoint dedicated to web forms.
 func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// If already authorized, redirect to home page.

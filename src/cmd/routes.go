@@ -23,7 +23,6 @@ func NewRouter(app *Application) http.Handler {
 	// Define a sub-router for protected routes
 	r.Group(func(protected chi.Router) {
 		protected.Use(app.IsAuthorized)
-		protected.Get("/", app.HelloWorld)
 		protected.Get("/logout", app.LogOutUser)
 		protected.Get("/deploy", app.Deploy)
 		protected.Get("/stop", app.StopInstance)
@@ -34,12 +33,16 @@ func NewRouter(app *Application) http.Handler {
 		protected.Post("/createpgdb", app.CreatePgDatabase)
 		protected.Post("/deletepguser", app.RemovePgUser)
 		protected.Post("/deletepgdb", app.RemovePgDatabase)
+
+		protected.Get("/", app.HomeHandler)
 	})
 
 	// Public routes (no auth required)
 	r.Post("/create_user", app.CreateUser)
 	r.Get("/verify", app.VerifyUser)
 	r.Post("/login", app.LoginUser)
+	r.Get("/kws_register", app.RenderRegisterPage)
+	r.Get("/kws_signin", app.RenderSignInPage)
 
 	return r
 }

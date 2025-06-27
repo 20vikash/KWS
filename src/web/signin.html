@@ -1,3 +1,4 @@
+{{ define "signin" }}
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -13,6 +14,7 @@
       font-family: 'Fira Code', monospace;
       background: #0e1015;
       overflow: hidden;
+      position: relative;
     }
 
     body::before {
@@ -95,15 +97,15 @@
       <h1 class="text-4xl font-bold text-blue-400 glow-text floating">KWS Cloud</h1>
       <p class="mt-2 text-sm text-gray-400">Welcome back, developer. Sign in to continue.</p>
     </div>
-    <form class="space-y-6">
+    <form class="space-y-6" method="POST" action="/login">
       <div>
         <label class="block text-sm font-medium">Username</label>
-        <input type="text" required placeholder="dev_username"
+        <input type="text" name="user_name" required placeholder="dev_username"
           class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
       </div>
       <div>
         <label class="block text-sm font-medium">Password</label>
-        <input type="password" required placeholder="••••••••"
+        <input type="password" name="password" required placeholder="••••••••"
           class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
       </div>
       <button type="submit"
@@ -112,7 +114,7 @@
       </button>
     </form>
     <p class="text-center text-sm text-gray-500 pt-6">
-      New to KWS? <a href="register.html" class="text-blue-400 hover:underline">Register here</a>
+      New to KWS? <a href="/kws_register" class="text-blue-400 hover:underline">Register here</a>
     </p>
   </div>
 
@@ -131,3 +133,4 @@
   </script>
 </body>
 </html>
+{{ end }}

@@ -1,3 +1,4 @@
+{{ define "register" }}
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -13,6 +14,7 @@
       font-family: 'Fira Code', monospace;
       background: #0e1015;
       overflow: hidden;
+      position: relative;
     }
 
     body::before {
@@ -95,32 +97,32 @@
       <h1 class="text-4xl font-bold text-blue-400 glow-text floating">KWS Cloud</h1>
       <p class="mt-2 text-sm text-gray-400">Welcome developer. Register to launch your next big thing.</p>
     </div>
-    <form class="space-y-6">
+    <form class="space-y-6" method="post" action="/create_user">
       <div>
         <label class="block text-sm font-medium">Email</label>
-        <input type="email" required placeholder="example@gmail.com"
+        <input name="email" type="email" required placeholder="example@gmail.com"
           class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
       </div>
       <div>
         <label class="block text-sm font-medium">Username</label>
-        <input type="text" required placeholder="dev_username"
+        <input name="user_name" type="text" required placeholder="dev_username"
           class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
       </div>
       <div class="flex space-x-4">
         <div class="w-1/2">
           <label class="block text-sm font-medium">First Name</label>
-          <input type="text" required placeholder="Jane"
+          <input name="first_name" type="text" required placeholder="Jane"
             class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
         </div>
         <div class="w-1/2">
           <label class="block text-sm font-medium">Last Name</label>
-          <input type="text" required placeholder="Doe"
+          <input name="last_name" type="text" required placeholder="Doe"
             class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
         </div>
       </div>
       <div>
         <label class="block text-sm font-medium">Password</label>
-        <input type="password" required placeholder="••••••••"
+        <input name="password" type="password" required placeholder="••••••••"
           class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
       </div>
       <button type="submit"
@@ -129,7 +131,7 @@
       </button>
     </form>
     <p class="text-center text-sm text-gray-500 pt-6">
-      Already registered? <a href="signin.html" class="text-blue-400 hover:underline">Login here</a>
+      Already registered? <a href="/kws_signin" class="text-blue-400 hover:underline">Login here</a>
     </p>
   </div>
 
@@ -148,3 +150,4 @@
   </script>
 </body>
 </html>
+{{ end }}
