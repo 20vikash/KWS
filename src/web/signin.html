@@ -154,9 +154,7 @@
 
           const text = await res.text();
 
-          if (res.ok) {
-            window.location.href = "/dashboard";
-          } else {
+          if (!res.ok) {
             showError(text);
           }
         } catch {
