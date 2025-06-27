@@ -13,11 +13,8 @@ func (app *Application) RenderRegisterPage(w http.ResponseWriter, r *http.Reques
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	data := map[string]string{
-		"Error": "Username or email already exists",
-	}
 
-	err := templates.ExecuteTemplate(w, "register", data)
+	err := templates.ExecuteTemplate(w, "register", nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
