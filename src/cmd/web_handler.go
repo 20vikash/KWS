@@ -47,3 +47,16 @@ func (app *Application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
+func (app *Application) RenderDevicesPage(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Username string
+	}{
+		Username: app.SessionManager.GetString(r.Context(), "user_name"),
+	}
+
+	err := templates.ExecuteTemplate(w, "devices", data)
+	if err != nil {
+		http.Error(w, "Template rendering error", http.StatusInternalServerError)
+	}
+}
