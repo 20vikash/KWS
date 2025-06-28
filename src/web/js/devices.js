@@ -1,21 +1,49 @@
 document.addEventListener("DOMContentLoaded", () => {
     const MAX_DEVICES = 3;
     const deviceList = document.querySelector(".card-grid");
-    const addForm = document.getElementById("add-device-form");
-    const warning = document.getElementById("limit-warning");
+    const addForm = document.querySelector(".add-device-form"); // Changed to class selector
     const registerForm = document.getElementById("register-form");
     
-    // Changed to event delegation for remove forms
-    deviceList.addEventListener("submit", handleRemoveSubmit);
+    // Event delegation for remove forms
+    if (deviceList) {
+        deviceList.addEventListener("submit", handleRemoveSubmit);
+    }
 
     function updateUI() {
         const deviceCount = deviceList.querySelectorAll(".device-card").length;
+        
+        // Find or create the warning element
+        let warning = document.querySelector(".device-limit-warning");
+        if (!warning) {
+            warning = document.createElement("div");
+            warning.className = "bg-yellow-900/50 text-yellow-200 p-4 rounded-lg mb-6 border border-yellow-700/50 flex items-start device-limit-warning";
+            warning.innerHTML = `
+                <i class="fas fa-exclamation-circle mt-1 mr-3"></i>
+                <div>
+                    <p class="font-medium">Device Limit Reached</p>
+                    <p class="text-sm mt-1">You've reached the maximum device limit (${MAX_DEVICES}). Remove a device to add a new one.</p>
+                </div>
+            `;
+        }
+
+        const mainContent = document.querySelector('main > .max-w-6xl');
+        
         if (deviceCount >= MAX_DEVICES) {
-            addForm.classList.add("hidden");
-            warning.classList.remove("hidden");
+            // Hide add form and show warning
+            if (addForm) addForm.classList.add("hidden");
+            
+            // Insert warning if not already present
+            if (!document.querySelector(".device-limit-warning")) {
+                const header = document.querySelector('.flex.items-center.mb-8');
+                header.parentNode.insertBefore(warning, header.nextElementSibling);
+            }
         } else {
-            addForm.classList.remove("hidden");
-            warning.classList.add("hidden");
+            // Show add form and hide warning
+            if (addForm) addForm.classList.remove("hidden");
+            
+            // Remove warning if present
+            const existingWarning = document.querySelector(".device-limit-warning");
+            if (existingWarning) existingWarning.remove();
         }
     }
 
@@ -23,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     registerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const keyInput = document.getElementById("user_public_key");
+        const keyInput = document.getElementById("user_public_key"); // Corrected ID
         const publicKey = keyInput.value.trim();
         if (!publicKey) return;
 
@@ -36,7 +64,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res.ok) {
             const newDevice = await res.json();
 
-            // Updated to match HTML template structure
             const deviceCard = document.createElement("div");
             deviceCard.className = "device-card p-5 glow-effect";
             deviceCard.innerHTML = `
