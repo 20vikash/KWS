@@ -312,8 +312,8 @@
             </div>
             
             <div class="mt-4">
-              <form class="remove-form" method="POST" action="/remove">
-                <input type="hidden" name="device_id" value="{{ .ID }}" />
+              <form id="remove-device">
+                <input type="hidden" name="public_key" value="{{ .PublicKey }}" />
                 <button class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition flex items-center justify-center">
                   <i class="fas fa-trash mr-2"></i>Remove Device
                 </button>
@@ -338,7 +338,7 @@
           <h3 class="text-xl text-blue-300 font-semibold">Add New Device</h3>
         </div>
         
-        <form method="POST" action="/register">
+        <form id="register-form">
           <div class="mb-5">
             <label class="block text-sm text-gray-300 mb-2">WireGuard Public Key</label>
             <input type="text" name="public_key" required placeholder="Enter your public key"

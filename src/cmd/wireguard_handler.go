@@ -1,30 +1,26 @@
 package main
 
 import (
-	"encoding/json"
+	"log"
 	"net/http"
 )
 
-type RequestBody struct {
-	PublicKey string `json:"public_key"`
-}
-
 func (app *Application) RegisterDevice(w http.ResponseWriter, r *http.Request) {
-	var rb RequestBody
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		log.Println("There is an error parsing the form")
+	}
 
 	// Read User ID from the session token
 	uid := app.SessionManager.GetInt(r.Context(), "id")
 
-	// Decode JSON body into struct to get the public key
-	err := json.NewDecoder(r.Body).Decode(&rb)
-	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
+	// Read form value.
+	publicKey := r.FormValue("public_key")
 
-	err = app.Wg.AddPeer(r.Context(), uid, rb.PublicKey, app.IpAlloc)
+	err = app.Wg.AddPeer(r.Context(), uid, publicKey, app.IpAlloc)
 	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		http.Error(w, "Cannot add device", http.StatusInternalServerError)
 		return
 	}
 
@@ -35,20 +31,19 @@ func (app *Application) RegisterDevice(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) RemoveDevice(w http.ResponseWriter, r *http.Request) {
-	var rb RequestBody
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		log.Println("There is an error parsing the form")
+	}
 
 	// Read User ID from the session token
 	uid := app.SessionManager.GetInt(r.Context(), "id")
 
-	// Decode JSON body into struct to get the public key
-	err := json.NewDecoder(r.Body).Decode(&rb)
-	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
+	publicKey := r.FormValue("public_key")
 
 	// Remove peer
-	err = app.Wg.RemovePeer(r.Context(), rb.PublicKey, uid, app.IpAlloc)
+	err = app.Wg.RemovePeer(r.Context(), publicKey, uid, app.IpAlloc)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
