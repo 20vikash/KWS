@@ -111,11 +111,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const form = e.target.closest('form.remove-device');
         if (form) {
             e.preventDefault();
-            const formData = new FormData(form);
             
             const res = await fetch("/remove", {
                 method: "POST",
-                body: formData,
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ public_key: publicKey })
             });
 
             if (res.ok) {
