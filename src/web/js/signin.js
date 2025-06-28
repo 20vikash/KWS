@@ -1,53 +1,48 @@
-const sparkleContainer = document.getElementById('sparkle-container');
-for (let i = 0; i < 160; i++) {
-    const sparkle = document.createElement('div');
-    sparkle.classList.add('sparkle');
-    sparkle.style.left = Math.random() * 100 + 'vw';
-    sparkle.style.top = Math.random() * 100 + 'vh';
-    sparkle.style.animationDuration = 6 + Math.random() * 12 + 's';
-    sparkle.style.animationDelay = Math.random() * 10 + 's';
-    sparkleContainer.appendChild(sparkle);
-}
-
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("signin-form");
     const errorBox = document.getElementById("error-box");
+    const errorMessage = document.getElementById("error-message");
 
     function showError(message) {
-    errorBox.innerHTML = `• ${message}`;
-    errorBox.classList.remove("hidden");
+        errorMessage.textContent = message;
+        errorBox.classList.remove("hidden");
     }
 
     function hideError() {
-    errorBox.classList.add("hidden");
-    errorBox.innerHTML = "";
+        errorBox.classList.add("hidden");
+        errorMessage.textContent = "";
     }
 
+    // Hide error when any input is modified
     document.querySelectorAll("input").forEach(input => {
-    input.addEventListener("input", hideError);
+        input.addEventListener("input", hideError);
     });
 
     form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    const formData = new FormData(form);
-    const data = new URLSearchParams(formData);
+        const formData = new FormData(form);
+        const data = new URLSearchParams(formData);
 
-    try {
-        const res = await fetch("/login", {
-        method: "POST",
-        body: data
-        });
+        try {
+            const res = await fetch("/login", {
+                method: "POST",
+                body: data
+            });
 
-        const text = await res.text();
+            const text = await res.text();
 
-        if (res.ok) {
-        window.location.href = "/";
-        } else {
-        showError(text);
+            if (res.ok) {
+                // Successful login - redirect to home
+                window.location.href = "/";
+            } else {
+                // Show error message from server
+                showError(text);
+            }
+        } catch (error) {
+            // Handle network errors
+            showError("Network error. Please check your connection and try again.");
+            console.error("Login error:", error);
         }
-    } catch {
-        showError("Network error. Please try again.");
-    }
     });
 });

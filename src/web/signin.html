@@ -7,12 +7,20 @@
   <title>KWS Cloud | Sign In</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    :root {
+      --bg-primary: #0e1015;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --card-bg: rgba(30, 32, 38, 0.85);
+    }
+    
     html, body {
       height: 100%;
       margin: 0;
       font-family: 'Fira Code', monospace;
-      background: #0e1015;
+      background: var(--bg-primary);
       overflow: hidden;
       position: relative;
     }
@@ -31,8 +39,9 @@
 
     .glass {
       backdrop-filter: blur(16px);
-      background-color: rgba(30, 32, 38, 0.85);
+      background-color: var(--card-bg);
       animation: fadeIn 1.5s ease-in;
+      border: 1px solid rgba(59, 130, 246, 0.1);
     }
 
     .sparkle {
@@ -51,7 +60,7 @@
     }
 
     .glow-text {
-      text-shadow: 0 0 2px rgba(120, 180, 255, 0.2);
+      text-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
     }
 
     .floating {
@@ -68,49 +77,199 @@
       from { opacity: 0; transform: scale(0.98); }
       to { opacity: 1; transform: scale(1); }
     }
-
-    label {
-      color: #d1d5db;
+    
+    .btn-primary {
+      background: linear-gradient(to right, var(--accent), var(--accent-hover));
+      border: none;
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+      position: relative;
+      overflow: hidden;
     }
-
-    ::placeholder {
-      opacity: 0.4 !important;
+    
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 20px;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(25deg);
+      transition: all 0.5s;
+    }
+    
+    .btn-primary:hover::after {
+      left: 120%;
+    }
+    
+    .input-field {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .input-field:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    
+    .input-field::placeholder {
+      color: rgba(209, 213, 219, 0.5);
+    }
+    
+    .card-glow {
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.15);
+      transition: box-shadow 0.5s ease;
+    }
+    
+    .card-glow:hover {
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.25);
+    }
+    
+    .logo-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: rgba(59, 130, 246, 0.1);
+      margin-bottom: 20px;
+    }
+    
+    .pulse {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .pulse-active {
+      background: #10b981;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
   </style>
 </head>
-<body class="relative flex items-center justify-center">
+<body class="relative flex items-center justify-center min-h-screen">
   <!-- Sparkle background -->
   <div id="sparkle-container"></div>
 
   <!-- Sign In Card -->
-  <div class="relative z-10 max-w-md w-full p-10 rounded-2xl glass shadow-xl border border-gray-700 animate-fadeIn">
-    <div class="text-center mb-6">
-      <h1 class="text-4xl font-bold text-blue-400 glow-text floating">KWS Cloud</h1>
-      <p class="mt-2 text-sm text-gray-400">Welcome back, developer. Sign in to continue.</p>
+  <div class="relative z-10 max-w-md w-full p-10 rounded-2xl glass card-glow animate-fadeIn">
+    <div class="text-center mb-8">
+      <div class="logo-icon mx-auto">
+        <i class="fas fa-cloud text-blue-400 text-3xl"></i>
+      </div>
+      <h1 class="text-4xl font-bold text-white glow-text floating">KWS Cloud</h1>
+      <p class="mt-3 text-gray-400">Welcome back, developer. Sign in to your secure environment.</p>
     </div>
+    
     <form id="signin-form" class="space-y-6">
-      <div>
-        <label class="block text-sm font-medium">Username</label>
-        <input type="text" name="user_name" required placeholder="dev_username"
-          class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-300">Username</label>
+        <div class="relative">
+          <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+          <input type="text" name="user_name" required placeholder="dev_username"
+            class="input-field w-full pl-12" />
+        </div>
       </div>
-      <div>
-        <label class="block text-sm font-medium">Password</label>
-        <input type="password" name="password" required placeholder="••••••••"
-          class="w-full mt-1 p-3 rounded-md bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300" />
+      
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-300">Password</label>
+        <div class="relative">
+          <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+          <input type="password" name="password" required placeholder="••••••••"
+            class="input-field w-full pl-12" />
+        </div>
       </div>
-      <div id="error-box" class="hidden bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 border border-red-600"></div>
+      
+      <div id="error-box" class="hidden bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 border border-red-600 flex items-start">
+        <i class="fas fa-exclamation-circle mt-1 mr-3"></i>
+        <div id="error-message"></div>
+      </div>
+      
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <input id="remember-me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600 rounded bg-gray-800">
+          <label for="remember-me" class="ml-2 block text-sm text-gray-300">
+            Remember me
+          </label>
+        </div>
+        <a href="#" class="text-sm text-blue-400 hover:underline">Forgot password?</a>
+      </div>
+      
       <button type="submit"
-        class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition font-semibold text-center">
-        Sign In
+        class="btn-primary w-full text-white text-center flex items-center justify-center">
+        <i class="fas fa-sign-in-alt mr-3"></i> Sign In
       </button>
     </form>
-    <p class="text-center text-sm text-gray-500 pt-6">
-      New to KWS? <a href="/kws_register" class="text-blue-400 hover:underline">Register here</a>
-    </p>
+    
+    <div class="relative my-6">
+      <div class="absolute inset-0 flex items-center">
+        <div class="w-full border-t border-gray-700"></div>
+      </div>
+      <div class="relative flex justify-center text-sm">
+        <span class="px-2 text-gray-500 bg-gray-900">New to KWS?</span>
+      </div>
+    </div>
+    
+    <div class="text-center">
+      <a href="/kws_register" class="inline-flex items-center text-blue-400 hover:underline">
+        <i class="fas fa-user-plus mr-2"></i> Create your account
+      </a>
+    </div>
   </div>
 
   <script src="js/signin.js"></script>
+  
+  <script>
+    // Generate sparkles for background
+    document.addEventListener('DOMContentLoaded', function() {
+      const sparkleContainer = document.getElementById('sparkle-container');
+      const sparkleCount = 100;
+      
+      for (let i = 0; i < sparkleCount; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.classList.add('sparkle');
+        
+        // Random position
+        sparkle.style.left = `${Math.random() * 100}vw`;
+        sparkle.style.top = `${Math.random() * 100}vh`;
+        
+        // Random size
+        const size = 1 + Math.random() * 3;
+        sparkle.style.width = `${size}px`;
+        sparkle.style.height = `${size}px`;
+        
+        // Random animation delay
+        sparkle.style.animationDelay = `${Math.random() * 12}s`;
+        
+        sparkleContainer.appendChild(sparkle);
+      }
+    });
+  </script>
 </body>
 </html>
 {{ end }}
