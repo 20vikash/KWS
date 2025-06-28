@@ -112,7 +112,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (form) {
             e.preventDefault();
 
-            const publicKey = form.id.trim(); // get public key from form id
+            // Find the hidden input inside the form
+            const input = form.querySelector('input[name="public_key"]');
+            if (!input) {
+                alert("Missing public key input");
+                return;
+            }
+
+            const publicKey = input.value.trim();
 
             const res = await fetch("/remove", {
                 method: "POST",
