@@ -61,6 +61,7 @@ func (app *Application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) RenderDevicesPage(w http.ResponseWriter, r *http.Request) {
 	uid := app.SessionManager.GetInt(r.Context(), "id")
+	userName := app.SessionManager.GetString(r.Context(), "user_name")
 
 	// Fetch peers information
 	peers, err := app.Store.Wireguard.GetDevices(r.Context(), uid)
@@ -74,6 +75,8 @@ func (app *Application) RenderDevicesPage(w http.ResponseWriter, r *http.Request
 		ipAddress := app.IpAlloc.GenerateIP(peer.IpAddress)
 		data.Devices = append(data.Devices, Device{PublicKey: peer.PublicKey, IP: ipAddress, Active: false})
 	}
+
+	data.Username = userName
 
 	err = templates.ExecuteTemplate(w, "devices", data)
 	if err != nil {
