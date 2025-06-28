@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </div>
                     <div class="mt-4">
-                        <form class="remove-form">
+                        <form class="remove-device">
                             <input type="hidden" name="public_key" value="${newDevice.publicKey}" />
                             <button class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition flex items-center justify-center">
                                 <i class="fas fa-trash mr-2"></i>Remove Device
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     async function handleRemoveSubmit(e) {
-        const form = e.target.closest('form.remove-form');
+        const form = e.target.closest('form.remove-device');
         if (form) {
             e.preventDefault();
             const formData = new FormData(form);
