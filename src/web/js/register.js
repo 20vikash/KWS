@@ -1,4 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Generate sparkles for background
+    const sparkleContainer = document.getElementById('sparkle-container');
+    const sparkleCount = 60;
+    
+    for (let i = 0; i < sparkleCount; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.classList.add('sparkle');
+        sparkle.style.left = `${Math.random() * 100}vw`;
+        sparkle.style.top = `${Math.random() * 100}vh`;
+        const size = 1 + Math.random() * 2;
+        sparkle.style.width = `${size}px`;
+        sparkle.style.height = `${size}px`;
+        sparkle.style.animationDelay = `${Math.random() * 10}s`;
+        sparkleContainer.appendChild(sparkle);
+    }
+    
+    // Form validation and password strength
     const form = document.querySelector("form");
     const errorBox = document.getElementById("error-box");
     const errorMessage = document.getElementById("error-message");
@@ -20,6 +37,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function showError(message) {
         errorMessage.textContent = message;
         errorBox.classList.remove("hidden");
+        
+        // Auto-hide error after 5 seconds
+        setTimeout(() => {
+            errorBox.classList.add("hidden");
+        }, 5000);
     }
 
     function hideError() {
@@ -44,11 +66,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const password = passwordInput.value;
         let strength = 0;
         
+        // Calculate strength based on password criteria
         if (password.length >= 8) strength += 1;
         if (/[A-Z]/.test(password)) strength += 1;
         if (/[0-9]/.test(password)) strength += 1;
         if (/[^A-Za-z0-9]/.test(password)) strength += 1;
         
+        // Update the strength indicator
         passwordStrength.className = 'password-strength password-strength-' + strength;
     }
 
@@ -123,4 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
             showError("• Network error. Please try again.");
         }
     });
+
+    // Initialize password strength indicator
+    updatePasswordStrength();
+    
+    // Add event listener specifically for password input
+    passwordInput.addEventListener("input", updatePasswordStrength);
 });

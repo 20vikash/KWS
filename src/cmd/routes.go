@@ -18,7 +18,7 @@ func NewRouter(app *Application) http.Handler {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Use(sessionManager.LoadAndSave)
-	r.Use(app.LoginRateLimitMiddleware)
+	// r.Use(app.LoginRateLimitMiddleware)
 
 	// Define a sub-router for protected routes
 	r.Group(func(protected chi.Router) {
