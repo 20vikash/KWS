@@ -108,9 +108,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     async function handleRemoveSubmit(e) {
-        if (e.target.classList.contains('remove-form')) {
+        const form = e.target.closest('form.remove-form');
+        if (form) {
             e.preventDefault();
-            const form = e.target;
             const formData = new FormData(form);
             
             const res = await fetch("/remove", {
