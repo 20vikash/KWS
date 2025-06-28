@@ -1,164 +1,43 @@
 {{ define "home" }}
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KWS Cloud | Home</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: 'Fira Code', monospace;
-      background: #0e1015;
-      overflow: hidden;
-    }
+  {{ template "base" . }}
+{{ end }}
 
-    body::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 40% 40%, rgba(80, 130, 255, 0.08), transparent 50%),
-                  radial-gradient(circle at 60% 60%, rgba(100, 180, 255, 0.06), transparent 50%);
-      z-index: 0;
-    }
+{{ define "title" }}KWS Cloud | Home{{ end }}
 
-    .sparkle {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 50%;
-      animation: sparkle 12s linear infinite;
-    }
+{{ define "content" }}
+<div class="max-w-4xl mx-auto">
+  <h2 class="text-4xl font-bold text-blue-400 mb-6 floating">Welcome to KWS Cloud</h2>
+  <p class="text-gray-300 text-lg mb-4 leading-relaxed">
+    KWS Cloud is a modern, developer-first platform that provides secure, containerized environments for learning, testing, and experimentation. KWS empowers students and developers with isolated instances, VPN-secured access, and essential backend services on demand.
+  </p>
 
-    @keyframes sparkle {
-      0% { transform: translateY(0) scale(1); opacity: 0.3; }
-      50% { opacity: 0.6; transform: translateY(-10px) scale(1.1); }
-      100% { transform: translateY(-100vh) scale(0.8); opacity: 0; }
-    }
-
-    .floating {
-      animation: floating 6s ease-in-out infinite;
-    }
-
-    @keyframes floating {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-    }
-
-    .fadeIn {
-      animation: fadeIn 1.5s ease-in;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    @media (max-width: 768px) {
-      aside {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: auto;
-        padding: 1.5rem;
-        border-right: none;
-        border-bottom: 1px solid #2d2f36;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        z-index: 20;
-      }
-
-      aside nav {
-        display: flex;
-        gap: 1rem;
-      }
-
-      main {
-        margin-top: 180px;
-        padding: 1.5rem;
-      }
-    }
-  </style>
-</head>
-<body class="relative flex flex-col md:flex-row">
-  <!-- Sparkle background -->
-  <div id="sparkle-container"></div>
-
-  <!-- Sidebar -->
-  <aside class="relative z-10 w-full md:w-64 h-auto md:h-screen bg-[#12141a] border-b md:border-r border-gray-800 flex flex-col md:justify-between p-6">
-    <div class="flex flex-col md:block">
-      <h1 class="text-2xl font-bold text-blue-400 mb-4 md:mb-8">KWS Cloud</h1>
-      <nav class="space-y-0 md:space-y-4 flex md:block gap-4">
-        <a href="/instances" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Instances</a>
-        <a href="/wireguard" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Devices</a>
-        <a href="/services" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Services</a>
-        <a href="/" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Home</a>
-      </nav>
+  <div class="grid md:grid-cols-2 gap-8 mt-10">
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:shadow-xl transition duration-300">
+      <h3 class="text-xl text-blue-300 font-semibold mb-2">🔐 VPN-Secured Instances</h3>
+      <p class="text-gray-400 text-sm">Every user gets access to a VPN-protected instance to safely run experiments, deploy tools, or collaborate in hackathons.</p>
     </div>
-    <div class="hidden md:block mt-6 space-y-2">
-      <p class="text-sm text-gray-500">Logged in as</p>
-      <div class="flex items-center justify-between">
-        <p class="text-sm text-white font-semibold">{{ .Username }}</p>
-        <form action="/logout" method="get">
-          <button type="submit" class="text-gray-400 hover:text-red-500 p-1 transition duration-200" title="Logout">
-            <!-- Logout Icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10v1m0 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h6a2 2 0 002-2v-1" />
-            </svg>
-          </button>
-        </form>
-      </div>
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:shadow-xl transition duration-300">
+      <h3 class="text-xl text-blue-300 font-semibold mb-2">⚙️ Custom Instance Deployment</h3>
+      <p class="text-gray-400 text-sm">Spin up your own instances using predefined configurations, whether it's a coding IDE, Linux box, or a service sandbox. All managed securely by KWS infra.</p>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:shadow-xl transition duration-300">
+      <h3 class="text-xl text-blue-300 font-semibold mb-2">🗄️ Built-in Services</h3>
+      <p class="text-gray-400 text-sm">Need a PostgreSQL database? A Redis store? KWS provides managed developer tools and services directly inside your cloud environment.</p>
+    </div>
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:shadow-xl transition duration-300">
+      <h3 class="text-xl text-blue-300 font-semibold mb-2">🎓 Built for Hackathons & Learning</h3>
+      <p class="text-gray-400 text-sm">Run coding events, technical instances, or secure workshops with a platform that was built in a college, for colleges.</p>
+    </div>
+  </div>
+
+  <div class="mt-16 text-center">
+    <a href="/instances" class="inline-block px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-lg transition">
+      Launch Your First Instance
+    </a>
+  </div>
 </div>
+{{ end }}
 
-  </aside>
-
-  <!-- Main Content -->
-  <main class="relative z-10 flex-1 overflow-y-auto p-6 md:p-12 fadeIn">
-    <div class="max-w-4xl mx-auto">
-      <h2 class="text-4xl font-bold text-blue-400 mb-6 floating">Welcome to KWS Cloud</h2>
-      <p class="text-gray-300 text-lg mb-4 leading-relaxed">
-        KWS Cloud is a modern, developer-first platform that provides secure, containerized environments for learning, testing, and experimentation. KWS empowers students and developers with isolated instances, VPN-secured access, and essential backend services on demand.
-      </p>
-
-      <div class="grid md:grid-cols-2 gap-8 mt-10">
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:shadow-xl transition duration-300">
-          <h3 class="text-xl text-blue-300 font-semibold mb-2">🔐 VPN-Secured Instances</h3>
-          <p class="text-gray-400 text-sm">Every user gets access to a VPN-protected instance to safely run experiments, deploy tools, or collaborate in hackathons.</p>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:shadow-xl transition duration-300">
-          <h3 class="text-xl text-blue-300 font-semibold mb-2">⚙️ Custom Instance Deployment</h3>
-          <p class="text-gray-400 text-sm">Spin up your own instances using predefined configurations, whether it's a coding IDE, Linux box, or a service sandbox. All managed securely by KWS infra.</p>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:shadow-xl transition duration-300">
-          <h3 class="text-xl text-blue-300 font-semibold mb-2">🗄️ Built-in Services</h3>
-          <p class="text-gray-400 text-sm">Need a PostgreSQL database? A Redis store? KWS provides managed developer tools and services directly inside your cloud environment.</p>
-        </div>
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:shadow-xl transition duration-300">
-          <h3 class="text-xl text-blue-300 font-semibold mb-2">🎓 Built for Hackathons & Learning</h3>
-          <p class="text-gray-400 text-sm">Run coding events, technical instances, or secure workshops with a platform that was built in a college, for colleges.</p>
-        </div>
-      </div>
-
-      <div class="mt-16 text-center">
-        <a href="/instances" class="inline-block px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg rounded-lg transition">
-          Launch Your First Instance
-        </a>
-      </div>
-    </div>
-  </main>
-
-  <script src="js/home.js"></script>
-</body>
-</html>
+{{ define "scripts" }}
+<script src="/js/home.js"></script>
 {{ end }}
