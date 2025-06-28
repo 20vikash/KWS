@@ -34,6 +34,7 @@ func NewRouter(app *Application) http.Handler {
 		protected.Post("/deletepguser", app.RemovePgUser)
 		protected.Post("/deletepgdb", app.RemovePgDatabase)
 		protected.Get("/kws_devices", app.RenderDevicesPage)
+		protected.Get("/active", app.IsOnline)
 
 		protected.Get("/", app.HomeHandler)
 	})

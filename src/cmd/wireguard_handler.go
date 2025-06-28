@@ -12,6 +12,10 @@ type ResponseBody struct {
 	PublicKey string `json:"publicKey"`
 }
 
+type Active struct {
+	Active bool `json:"active"`
+}
+
 func (app *Application) RegisterDevice(w http.ResponseWriter, r *http.Request) {
 	// Parse the form
 	err := r.ParseForm()
@@ -64,4 +68,28 @@ func (app *Application) RemoveDevice(w http.ResponseWriter, r *http.Request) {
 	// Success response
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Successfully removed a peer"))
+}
+
+func (app *Application) IsOnline(w http.ResponseWriter, r *http.Request) {
+	// Parse the form
+	err := r.ParseForm()
+	if err != nil {
+		log.Println("There is an error parsing the form")
+	}
+
+	publicKey := r.FormValue("public_key")
+
+	isActive, err := app.Wg.IsOnline(publicKey)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	response := Active{
+		Active: isActive,
+	}
+
+	// Send success response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
