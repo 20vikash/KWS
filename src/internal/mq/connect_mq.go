@@ -19,7 +19,7 @@ type Mq struct {
 func (mq *Mq) ConnectToMq() (*amqp.Connection, error) {
 	var err error
 	var conn *amqp.Connection
-	for i := range 5 { // Retry for 5 times
+	for i := range 10 { // Retry for 10 times
 		log.Printf("Attempt mq connection: %d", i+1)
 		conn, err = amqp.Dial(fmt.Sprintf("amqp://%s:%s@%s:%s/", mq.User, mq.Pass, mq.Host, mq.Port))
 		if err != nil {
