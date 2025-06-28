@@ -117,18 +117,18 @@ func (wg *WgOperations) ConfigureWireguard() error {
 	return nil
 }
 
-func (wg *WgOperations) AddPeer(ctx context.Context, uid int, pubKey string, ipAlloc *IPAllocator) error {
+func (wg *WgOperations) AddPeer(ctx context.Context, uid int, pubKey string, ipAlloc *IPAllocator) (string, error) {
 	// Parse pub key.
 	peerPubKey, err := wgtypes.ParseKey(pubKey)
 	if err != nil {
 		log.Println("Cannot parse the public key (wg)")
-		return err
+		return "", err
 	}
 
 	// Get Free IP
 	peerIP, err := ipAlloc.AllocateFreeIp(ctx, uid, pubKey) // At this point, DB is updated
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Allowed IP's of wireguard Peer
@@ -155,10 +155,10 @@ func (wg *WgOperations) AddPeer(ctx context.Context, uid int, pubKey string, ipA
 	})
 	if err != nil {
 		log.Println("Cannot add peer. Failed")
-		return err
+		return "", err
 	}
 
-	return nil
+	return peerIP, nil
 }
 
 func (wg *WgOperations) RemovePeer(ctx context.Context, pubKey string, uid int, ipAlloc *IPAllocator) error {
