@@ -9,6 +9,49 @@ document.addEventListener("DOMContentLoaded", () => {
         deviceList.addEventListener("submit", handleRemoveSubmit);
     }
 
+    function startStatusPolling() {
+        setInterval(async () => {
+            const deviceCards = document.querySelectorAll('.device-card');
+
+            for (const card of deviceCards) {
+                const publicKeyElem = card.querySelector('input[name="public_key"]');
+                const statusElem = card.querySelector('.device-status');
+                const pulseElem = statusElem?.querySelector('.pulse');
+
+                if (!publicKeyElem || !statusElem || !pulseElem) continue;
+
+                const publicKey = publicKeyElem.value;
+
+                try {
+                    const res = await fetch("/is_online", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: new URLSearchParams({ public_key: publicKey })
+                    });
+
+                    if (!res.ok) throw new Error();
+
+                    const { active } = await res.json();
+
+                    // Update status text
+                    statusElem.textContent = active ? "Active" : "Disconnected";
+
+                    // Re-add pulse element (since setting textContent above removes it)
+                    const newPulse = document.createElement("span");
+                    newPulse.className = `pulse ${active ? "pulse-active" : "pulse-inactive"}`;
+                    statusElem.prepend(newPulse);
+
+                    // Update class
+                    statusElem.classList.remove("status-active", "status-inactive");
+                    statusElem.classList.add(active ? "status-active" : "status-inactive");
+                } catch (err) {
+                    console.warn(`Failed to update status for ${publicKey}`);
+                }
+            }
+        }, 5000); // Poll every 5 seconds
+    }
+
+
     function updateUI() {
         const deviceCount = deviceList.querySelectorAll(".device-card").length;
         
@@ -48,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     updateUI();
+    startStatusPolling();
 
     registerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
