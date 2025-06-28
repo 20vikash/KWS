@@ -2,6 +2,7 @@ package main
 
 import (
 	"html/template"
+	"log"
 	"net/http"
 )
 
@@ -27,7 +28,7 @@ func (app *Application) RenderRegisterPage(w http.ResponseWriter, r *http.Reques
 
 	err := templates.ExecuteTemplate(w, "register", nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 	}
 }
 
@@ -40,7 +41,7 @@ func (app *Application) RenderSignInPage(w http.ResponseWriter, r *http.Request)
 
 	err := templates.ExecuteTemplate(w, "signin", nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 	}
 }
 
@@ -55,7 +56,7 @@ func (app *Application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := templates.ExecuteTemplate(w, "home", data)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 	}
 }
 
@@ -72,8 +73,15 @@ func (app *Application) RenderDevicesPage(w http.ResponseWriter, r *http.Request
 	var data = new(Data)
 
 	for _, peer := range peers {
+		isActive, err := app.Wg.IsOnline(peer.PublicKey)
+		if err != nil {
+			log.Println("Cannot find online status")
+			http.Error(w, "something went wrong", http.StatusInternalServerError)
+			return
+		}
+
 		ipAddress := app.IpAlloc.GenerateIP(peer.IpAddress)
-		data.Devices = append(data.Devices, Device{PublicKey: peer.PublicKey, IP: ipAddress, Active: false})
+		data.Devices = append(data.Devices, Device{PublicKey: peer.PublicKey, IP: ipAddress, Active: isActive})
 	}
 
 	data.Username = userName
