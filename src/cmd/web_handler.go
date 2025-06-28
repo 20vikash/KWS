@@ -6,10 +6,14 @@ import (
 )
 
 type Device struct {
-	ID        string
 	PublicKey string
 	IP        string
 	Active    bool
+}
+
+type Data struct {
+	Username string
+	Devices  []Device
 }
 
 var templates = template.Must(template.ParseGlob("../web/*.html"))
@@ -56,15 +60,22 @@ func (app *Application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) RenderDevicesPage(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Username string
-		Devices  []Device // Use your actual Device model type
-	}{
-		Username: app.SessionManager.GetString(r.Context(), "user_name"),
-		Devices:  []Device{{ID: "a", PublicKey: "sassas", IP: "127.0.0.1", Active: true}},
+	uid := app.SessionManager.GetInt(r.Context(), "id")
+
+	// Fetch peers information
+	peers, err := app.Store.Wireguard.GetDevices(r.Context(), uid)
+	if err != nil {
+		http.Error(w, "cannot load this page right now", http.StatusInternalServerError)
 	}
 
-	err := templates.ExecuteTemplate(w, "devices", data)
+	var data = new(Data)
+
+	for _, peer := range peers {
+		ipAddress := app.IpAlloc.GenerateIP(peer.IpAddress)
+		data.Devices = append(data.Devices, Device{PublicKey: peer.PublicKey, IP: ipAddress, Active: false})
+	}
+
+	err = templates.ExecuteTemplate(w, "devices", data)
 	if err != nil {
 		http.Error(w, "Template rendering error", http.StatusInternalServerError)
 	}

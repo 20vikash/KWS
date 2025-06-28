@@ -17,6 +17,35 @@ type WireguardStore struct {
 	Con *pgxpool.Pool
 }
 
+func (wg *WireguardStore) GetDevices(ctx context.Context, uid int) ([]models.WireguardType, error) {
+	peers := make([]models.WireguardType, 0)
+
+	var publicKey string
+	var ipAddr int
+
+	sql := `
+		SELECT public_key, ip_address FROM wgpeer WHERE user_id = $1
+	`
+
+	rows, err := wg.Con.Query(ctx, sql, uid)
+	if err != nil {
+		log.Println("Failed to fetch wg peer details")
+		return nil, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&publicKey, &ipAddr)
+		if err != nil {
+			log.Println("Cannot scan publicIP and ipaddress")
+			return nil, err
+		}
+
+		peers = append(peers, models.WireguardType{PublicKey: publicKey, IpAddress: ipAddr})
+	}
+
+	return peers, nil
+}
+
 func (wg *WireguardStore) HitMaxLimit(ctx context.Context, uid int) (bool, error) {
 	var numberOfDevices int
 
