@@ -7,16 +7,28 @@
   <title>KWS Cloud | Devices</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
+    :root {
+      --bg-primary: #0e1015;
+      --bg-secondary: #12141a;
+      --border-color: #2d3748;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    
+    body {
+      background: var(--bg-primary);
       font-family: 'Fira Code', monospace;
-      background: #0e1015;
-      overflow: hidden;
+      color: #e2e8f0;
+      margin: 0;
+      overflow-x: hidden;
       position: relative;
     }
-
+    
     body::before {
       content: "";
       position: absolute;
@@ -26,28 +38,9 @@
       bottom: 0;
       background: radial-gradient(circle at 20% 30%, rgba(80, 130, 255, 0.1), transparent 50%),
                   radial-gradient(circle at 80% 70%, rgba(100, 180, 255, 0.08), transparent 50%);
-      z-index: 0;
+      z-index: -1;
     }
-
-    .floating {
-      animation: floating 6s ease-in-out infinite;
-    }
-
-    @keyframes floating {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-    }
-
-    .fadeIn {
-      animation: fadeIn 1.5s ease-in;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
+    
     .sparkle {
       position: absolute;
       width: 2px;
@@ -56,11 +49,172 @@
       border-radius: 50%;
       animation: sparkle 12s linear infinite;
     }
-
+    
     @keyframes sparkle {
       0% { transform: translateY(0) scale(1); opacity: 0.3; }
       50% { opacity: 0.6; transform: translateY(-10px) scale(1.1); }
       100% { transform: translateY(-100vh) scale(0.8); opacity: 0; }
+    }
+    
+    .floating {
+      animation: floating 6s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .fadeIn {
+      animation: fadeIn 1.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    .device-card {
+      background: linear-gradient(145deg, #1a1c23, #15171e);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .device-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent);
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.15);
+    }
+    
+    .device-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .status-active {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+    }
+    
+    .status-inactive {
+      background: rgba(113, 128, 150, 0.15);
+      color: #a0aec0;
+    }
+    
+    .key-display {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      padding: 10px 15px;
+      font-size: 0.85rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'Fira Code', monospace;
+    }
+    
+    .add-device-form {
+      background: linear-gradient(145deg, #1a1c23, #15171e);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .add-device-form:hover {
+      border-color: var(--accent);
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.15);
+    }
+    
+    .pulse {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .pulse-active {
+      background: var(--success);
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+    
+    .pulse-inactive {
+      background: #a0aec0;
+    }
+    
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .header-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: rgba(59, 130, 246, 0.1);
+      margin-bottom: 15px;
+    }
+    
+    .device-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .glow-effect {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .glow-effect::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2), transparent 70%);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .glow-effect:hover::after {
+      opacity: 1;
     }
   </style>
 </head>
@@ -73,10 +227,18 @@
     <div class="flex flex-col md:block">
       <h1 class="text-2xl font-bold text-blue-400 mb-4 md:mb-8">KWS Cloud</h1>
       <nav class="space-y-0 md:space-y-4 flex md:block gap-4">
-        <a href="/instances" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Instances</a>
-        <a href="/kws_devices" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Devices</a>
-        <a href="/services" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Services</a>
-        <a href="/" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Home</a>
+        <a href="/instances" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+          <i class="fas fa-server mr-2"></i>Instances
+        </a>
+        <a href="/kws_devices" class="block px-3 py-2 rounded-md bg-gray-800 text-white">
+          <i class="fas fa-laptop mr-2"></i>Devices
+        </a>
+        <a href="/services" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+          <i class="fas fa-database mr-2"></i>Services
+        </a>
+        <a href="/" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+          <i class="fas fa-home mr-2"></i>Home
+        </a>
       </nav>
     </div>
     <div class="hidden md:block mt-6 space-y-2">
@@ -96,61 +258,130 @@
   </aside>
 
   <!-- Main Content -->
-  <main class="relative z-10 flex-1 overflow-y-auto p-6 md:p-12 fadeIn">
-    <div class="max-w-3xl mx-auto">
-      <h2 class="text-3xl font-bold text-blue-400 mb-8 floating">Connected Devices</h2>
-
-      <!-- Warning for device limit -->
-      <div id="limit-warning" class="hidden bg-yellow-900 text-yellow-200 p-4 rounded-md mb-6 border border-yellow-700">
-        You've reached the maximum device limit (3). Remove a device to add a new one.
+  <main class="relative z-10 flex-1 overflow-y-auto p-6 md:p-8 fadeIn">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex items-center mb-8">
+        <div class="header-icon">
+          <i class="fas fa-laptop text-blue-400 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <h1 class="text-3xl font-bold text-white">Connected Devices</h1>
+          <p class="text-gray-400">Manage your authorized devices and VPN access</p>
+        </div>
       </div>
 
-      <!-- Device List -->
-      <div id="device-list" class="grid gap-6 mb-12">
+      <!-- Device Limit Notice -->
+      {{ if ge (len .Devices) 3 }}
+      <div class="bg-yellow-900/50 text-yellow-200 p-4 rounded-lg mb-6 border border-yellow-700/50 flex items-start">
+        <i class="fas fa-exclamation-circle mt-1 mr-3"></i>
+        <div>
+          <p class="font-medium">Device Limit Reached</p>
+          <p class="text-sm mt-1">You've reached the maximum device limit (3). Remove a device to add a new one.</p>
+        </div>
+      </div>
+      {{ end }}
+
+      <!-- Device Grid -->
+      <div class="card-grid">
         {{ range .Devices }}
-        <div class="device-box bg-gray-900 border border-gray-800 rounded-xl p-6 flex justify-between items-center">
-          <div>
-            <p class="text-sm text-gray-500 mb-1">Allocated IP</p>
-            <p class="text-lg font-mono text-blue-300">{{ .IP }}</p>
-            <p class="mt-3 text-sm">
-              <span class="font-semibold text-gray-400">Status:</span>
-              {{ if .Active }}
-                <span class="text-green-400 font-semibold">Active</span>
-              {{ else }}
-                <span class="text-gray-500 font-semibold">Disconnected</span>
-              {{ end }}
-            </p>
+        <div class="device-card p-5 glow-effect">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="device-icon mb-3">
+                {{ if .Active }}
+                <i class="fas fa-laptop-code text-blue-400"></i>
+                {{ else }}
+                <i class="fas fa-laptop text-gray-500"></i>
+                {{ end }}
+              </div>
+              <h3 class="text-lg font-bold text-white">Device</h3>
+              <p class="text-gray-400 text-sm mt-1">Allocated IP: {{ .IP }}</p>
+            </div>
+            <span class="device-status {{ if .Active }}status-active{{ else }}status-inactive{{ end }}">
+              <span class="pulse {{ if .Active }}pulse-active{{ else }}pulse-inactive{{ end }}"></span>
+              {{ if .Active }}Active{{ else }}Disconnected{{ end }}
+            </span>
           </div>
-          <form class="remove-form" method="POST" action="/remove">
-            <input type="hidden" name="device_id" value="{{ .ID }}" />
-            <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-              Remove
-            </button>
-          </form>
+          
+          <div class="mt-5">
+            <div>
+              <p class="text-gray-500 text-sm mb-1">Public Key</p>
+              <div class="key-display text-gray-300">
+                {{ .PublicKey }}
+              </div>
+            </div>
+            
+            <div class="mt-4">
+              <form class="remove-form" method="POST" action="/remove">
+                <input type="hidden" name="device_id" value="{{ .ID }}" />
+                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition flex items-center justify-center">
+                  <i class="fas fa-trash mr-2"></i>Remove Device
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {{ else }}
+        <div class="bg-gray-900/50 border border-dashed border-gray-700 rounded-xl p-10 text-center">
+          <i class="fas fa-laptop text-gray-600 text-4xl mb-4"></i>
+          <h3 class="text-xl text-gray-400 font-medium">No Devices Connected</h3>
+          <p class="text-gray-500 mt-2">Add your first device to get started</p>
         </div>
         {{ end }}
       </div>
 
-      <!-- Add Device Form -->
-      <div id="add-device-form" class="hidden bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-        <h3 class="text-xl text-blue-300 font-semibold">Add New Device</h3>
-        <form id="register-form" method="POST">
-          <div>
-            <label class="block text-sm text-gray-300 mb-1">WireGuard Public Key</label>
-            <input id="public-key-input" type="text" name="public_key" required
-              class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500" />
+      <!-- Add New Device Form -->
+      {{ if lt (len .Devices) 3 }}
+      <div class="add-device-form mt-10 p-6">
+        <div class="flex items-center mb-4">
+          <i class="fas fa-plus-circle text-blue-400 text-xl mr-3"></i>
+          <h3 class="text-xl text-blue-300 font-semibold">Add New Device</h3>
+        </div>
+        
+        <form method="POST" action="/register">
+          <div class="mb-5">
+            <label class="block text-sm text-gray-300 mb-2">WireGuard Public Key</label>
+            <input type="text" name="public_key" required placeholder="Enter your public key"
+              class="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+            <p class="text-gray-500 text-sm mt-2">Generate a WireGuard key pair on your device</p>
           </div>
+          
           <button type="submit"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md">
-            Register Device
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center">
+            <i class="fas fa-plus mr-2"></i>Register Device
           </button>
         </form>
       </div>
+      {{ end }}
     </div>
   </main>
 
-  <script src="/js/home.js"></script>
-  <script src="/js/devices.js"></script>
+  <script>
+    // Generate sparkles for background
+    document.addEventListener('DOMContentLoaded', function() {
+      const sparkleContainer = document.getElementById('sparkle-container');
+      const sparkleCount = 50;
+      
+      for (let i = 0; i < sparkleCount; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.classList.add('sparkle');
+        
+        // Random position
+        sparkle.style.left = `${Math.random() * 100}vw`;
+        sparkle.style.top = `${Math.random() * 100}vh`;
+        
+        // Random size
+        const size = 1 + Math.random() * 2;
+        sparkle.style.width = `${size}px`;
+        sparkle.style.height = `${size}px`;
+        
+        // Random animation delay
+        sparkle.style.animationDelay = `${Math.random() * 12}s`;
+        
+        sparkleContainer.appendChild(sparkle);
+      }
+    });
+  </script>
 </body>
 </html>
 {{ end }}
