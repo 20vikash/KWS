@@ -196,6 +196,32 @@ func (wg *WgOperations) RemovePeer(ctx context.Context, pubKey string, uid int, 
 	return nil
 }
 
+func (wg *WgOperations) IsOnline(publicKey string) (bool, error) {
+	pubKey, err := wgtypes.ParseKey(publicKey)
+	if err != nil {
+		log.Fatalf("Invalid public key: %v", err)
+	}
+
+	device, err := wg.Con.Device("wg0")
+	if err != nil {
+		log.Println("Cannot get the wg0 device")
+		return false, err
+	}
+
+	for _, peer := range device.Peers {
+		if peer.PublicKey == pubKey {
+			if !peer.LastHandshakeTime.IsZero() && time.Since(peer.LastHandshakeTime) < 2*time.Minute {
+				log.Println("The peer is active", publicKey)
+				return true, nil
+			}
+			break
+		}
+	}
+
+	log.Println("The peer is disconnected", publicKey)
+	return false, nil
+}
+
 func getIntPtr(no int) *int {
 	return &no
 }
