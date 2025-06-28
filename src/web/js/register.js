@@ -1,14 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
     // Generate sparkles for background
     const sparkleContainer = document.getElementById('sparkle-container');
-    const sparkleCount = 60;
+    const sparkleCount = 100;
     
     for (let i = 0; i < sparkleCount; i++) {
         const sparkle = document.createElement('div');
         sparkle.classList.add('sparkle');
         sparkle.style.left = `${Math.random() * 100}vw`;
         sparkle.style.top = `${Math.random() * 100}vh`;
-        const size = 1 + Math.random() * 2;
+        const size = 1 + Math.random() * 3;
         sparkle.style.width = `${size}px`;
         sparkle.style.height = `${size}px`;
         sparkle.style.animationDelay = `${Math.random() * 10}s`;
