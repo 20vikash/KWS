@@ -7,137 +7,60 @@
   <title>KWS Cloud | Devices</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: 'Fira Code', monospace;
-      background: #0e1015;
-      overflow: hidden;
-      position: relative;
-    }
-
-    body::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 20% 30%, rgba(80, 130, 255, 0.1), transparent 50%),
-                  radial-gradient(circle at 80% 70%, rgba(100, 180, 255, 0.08), transparent 50%);
-      z-index: 0;
-    }
-
-    .floating {
-      animation: floating 6s ease-in-out infinite;
-    }
-
-    @keyframes floating {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-    }
-
-    .fadeIn {
-      animation: fadeIn 1.5s ease-in;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
-    }
-  </style>
 </head>
-<body class="relative flex flex-col md:flex-row">
-  <!-- Sparkle background -->
-  <div id="sparkle-container"></div>
+<body class="bg-[#0e1015] text-white font-mono overflow-hidden">
+  <div class="max-w-3xl mx-auto mt-12 p-6">
+    <h2 class="text-3xl font-bold text-blue-400 mb-8">Connected Devices</h2>
 
-  <!-- Sidebar -->
-  <aside class="relative z-10 w-full md:w-64 h-auto md:h-screen bg-[#12141a] border-b md:border-r border-gray-800 flex flex-col md:justify-between p-6">
-    <div class="flex flex-col md:block">
-      <h1 class="text-2xl font-bold text-blue-400 mb-4 md:mb-8">KWS Cloud</h1>
-      <nav class="space-y-0 md:space-y-4 flex md:block gap-4">
-        <a href="/instances" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Instances</a>
-        <a href="/kws_devices" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Devices</a>
-        <a href="/services" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Services</a>
-        <a href="/" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">Home</a>
-      </nav>
+    <!-- Warning for device limit -->
+    <div id="limit-warning" class="hidden bg-yellow-900 text-yellow-200 p-4 rounded-md mb-6 border border-yellow-700">
+      You've reached the maximum device limit (3). Remove a device to add a new one.
     </div>
-    <div class="hidden md:block mt-6 space-y-2">
-      <p class="text-sm text-gray-500">Logged in as</p>
-      <div class="flex items-center justify-between">
-        <p class="text-sm text-white font-semibold">{{ .Username }}</p>
-        <form action="/logout" method="get">
-          <button type="submit" class="text-gray-400 hover:text-red-500 p-1 transition duration-200" title="Logout">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10v1m0 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h6a2 2 0 002-2v-1"/>
-            </svg>
+
+    <!-- Device List -->
+    <div id="device-list" class="grid gap-6">
+      {{ range .Devices }}
+      <div class="device-box bg-gray-900 border border-gray-800 rounded-xl p-6 flex justify-between items-center">
+        <div>
+          <p class="text-sm text-gray-500 mb-1">Allocated IP</p>
+          <p class="text-lg font-mono text-blue-300">{{ .IP }}</p>
+          <p class="mt-3 text-sm">
+            <span class="font-semibold text-gray-400">Status:</span>
+            {{ if .Active }}
+              <span class="text-green-400 font-semibold">Active</span>
+            {{ else }}
+              <span class="text-gray-500 font-semibold">Disconnected</span>
+            {{ end }}
+          </p>
+        </div>
+        <form class="remove-form" method="POST" action="/remove">
+          <input type="hidden" name="device_id" value="{{ .ID }}" />
+          <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+            Remove
           </button>
         </form>
       </div>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="relative z-10 flex-1 overflow-y-auto p-6 md:p-12 fadeIn">
-    <div class="max-w-3xl mx-auto">
-      <h2 class="text-3xl font-bold text-blue-400 mb-8 floating">Connected Devices</h2>
-
-      <!-- Device Limit Notice -->
-      {{ if ge (len .Devices) 3 }}
-        <div class="bg-yellow-900 text-yellow-200 p-4 rounded-md mb-6 border border-yellow-700">
-          You've reached the maximum device limit (3). Remove a device to add a new one.
-        </div>
       {{ end }}
+    </div>
 
-      <!-- Device List -->
-      <div class="grid gap-6">
-        {{ range .Devices }}
-        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 flex justify-between items-center hover:shadow-md transition duration-300">
-          <div>
-            <p class="text-sm text-gray-500 mb-1">Allocated IP</p>
-            <p class="text-lg font-mono text-blue-300">{{ .IP }}</p>
-            <input type="hidden" value="{{ .PublicKey }}" name="public_key" />
-            <p class="mt-3 text-sm">
-              <span class="font-semibold text-gray-400">Status:</span>
-              {{ if .Active }}
-                <span class="text-green-400 font-semibold">Active</span>
-              {{ else }}
-                <span class="text-gray-500 font-semibold">Disconnected</span>
-              {{ end }}
-            </p>
-          </div>
-          <form method="POST" action="/remove">
-            <input type="hidden" name="device_id" value="{{ .ID }}" />
-            <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition">
-              Remove
-            </button>
-          </form>
-        </div>
-        {{ else }}
-        <p class="text-gray-500 text-center">No devices connected yet.</p>
-        {{ end }}
-      </div>
-
-      <!-- Add New Device -->
-      {{ if lt (len .Devices) 3 }}
-      <form class="mt-12 bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4" method="POST" action="/register">
-        <h3 class="text-xl text-blue-300 font-semibold">Add New Device</h3>
+    <!-- Add Device Form -->
+    <div id="add-device-form" class="hidden mt-12 bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+      <h3 class="text-xl text-blue-300 font-semibold">Add New Device</h3>
+      <form id="register-form" method="POST">
         <div>
           <label class="block text-sm text-gray-300 mb-1">WireGuard Public Key</label>
-          <input type="text" name="public_key" required
-            class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+          <input id="public-key-input" type="text" name="public_key" required
+            class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500" />
         </div>
         <button type="submit"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition">
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md">
           Register Device
         </button>
       </form>
-      {{ end }}
     </div>
-  </main>
+  </div>
 </body>
+<script src="js/home.js"></script>
+<script src="js/devices.js"></script>
 </html>
 {{ end }}
