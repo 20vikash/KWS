@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="mt-4">
                         <form class="remove-device">
-                            <input type="hidden" name="public_key" value="${newDevice.publicKey}" />
+                            <input id="${newDevice.publicKey}" type="hidden" name="public_key" value="${newDevice.publicKey}" />
                             <button class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition flex items-center justify-center">
                                 <i class="fas fa-trash mr-2"></i>Remove Device
                             </button>
@@ -111,7 +111,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const form = e.target.closest('form.remove-device');
         if (form) {
             e.preventDefault();
-            
+
+            const publicKey = form.id.trim(); // get public key from form id
+
             const res = await fetch("/remove", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
