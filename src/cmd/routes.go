@@ -33,6 +33,7 @@ func NewRouter(app *Application) http.Handler {
 		protected.Post("/createpgdb", app.CreatePgDatabase)
 		protected.Post("/deletepguser", app.RemovePgUser)
 		protected.Post("/deletepgdb", app.RemovePgDatabase)
+		protected.Get("/kws_devices", app.RenderDevicesPage)
 
 		protected.Get("/", app.HomeHandler)
 	})
