@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     registerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const keyInput = document.getElementById("public-key-input");
+        const keyInput = document.getElementById("user_public_key");
         const publicKey = keyInput.value.trim();
         if (!publicKey) return;
 
