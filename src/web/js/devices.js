@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const publicKey = publicKeyElem.value;
 
                 try {
-                    const res = await fetch("/is_online", {
+                    const res = await fetch("/active", {
                         method: "POST",
                         headers: { "Content-Type": "application/x-www-form-urlencoded" },
                         body: new URLSearchParams({ public_key: publicKey })
