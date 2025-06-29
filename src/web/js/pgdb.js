@@ -1,5 +1,6 @@
+// Corrected JavaScript for pgdb.js
 window.showDeleteModal = function(dbName) {
-    console.log("dbname", dbName)
+  console.log("dbname", dbName)
   const dbNameToDelete = document.getElementById('dbNameToDelete');
   const deleteModal = document.getElementById('deleteModal');
   if (dbNameToDelete && deleteModal) {
@@ -8,7 +9,6 @@ window.showDeleteModal = function(dbName) {
     deleteModal.classList.remove('hidden');
   }
 };
-
 
 document.addEventListener('DOMContentLoaded', function () {
   const sparkleContainer = document.getElementById('sparkle-container');
@@ -41,30 +41,26 @@ document.addEventListener('DOMContentLoaded', function () {
   if (closeModal) closeModal.addEventListener('click', closeDeleteModal);
   if (cancelDelete) cancelDelete.addEventListener('click', closeDeleteModal);
 
-  const updateStats = (total, limit) => {
-    document.querySelectorAll('.text-white').forEach(el => {
-      if (el.innerText === `${total - 1}` || el.innerText === `${total + 1}` || el.innerText === `${total}`) {
-        el.innerText = `${total}`;
-      }
-    });
+  // Get references to all stat elements
+  const totalDatabasesEl = document.querySelector('.text-white.font-bold.text-2xl');
+  const availableSlotsEl = document.querySelectorAll('.text-white.font-bold.text-2xl')[2];
+  const usageTextEl = document.querySelector('.text-sm.text-gray-400 + .text-white');
+  const showingTextEl = document.querySelector('.text-sm .text-white');
+  const progressFillEl = document.querySelector('.progress-fill');
+  const usagePercentTextEl = document.querySelector('.text-sm.text-gray-400:last-child');
 
+  // Better updateStats function using element references
+  const updateStats = (total, limit) => {
     const available = limit - total;
     const percent = Math.round((total / limit) * 100);
-
-    document.querySelectorAll('.text-white').forEach(el => {
-      if (el.innerText.includes('/')) {
-        el.innerText = `${total}/${limit}`;
-      }
-    });
-
-    document.querySelectorAll('.text-white').forEach(el => {
-      if (el.innerText.includes('%')) {
-        el.innerText = `${percent}% used`;
-      }
-    });
-
-    const progress = document.querySelector('.progress-fill');
-    if (progress) progress.style.width = `${percent}%`;
+    
+    // Update all stat elements
+    if (totalDatabasesEl) totalDatabasesEl.textContent = total;
+    if (availableSlotsEl) availableSlotsEl.textContent = available;
+    if (usageTextEl) usageTextEl.textContent = `${total}/${limit}`;
+    if (showingTextEl) showingTextEl.textContent = `${total} of ${total}`;
+    if (progressFillEl) progressFillEl.style.width = `${percent}%`;
+    if (usagePercentTextEl) usagePercentTextEl.textContent = `${percent}% used`;
   };
 
   const createDbBtn = document.getElementById('createDbBtn');
@@ -107,13 +103,14 @@ document.addEventListener('DOMContentLoaded', function () {
             </td>`;
           tbody.appendChild(newRow);
 
-          // Update stats
+          // Update stats with actual values
           const totalNow = tbody.children.length;
-          const limit = parseInt(document.querySelector('.db-limit').innerText.match(/\d+/)[0]);
+          const limit = parseInt(document.querySelector('.db-limit').textContent.match(/\d+/)[0]);
           updateStats(totalNow, limit);
 
           document.getElementById('dbName').value = '';
         } else {
+          const result = await response.json();
           alert(`Error: ${result.error || "Unknown error occurred"}`);
         }
       } catch (err) {
@@ -148,19 +145,20 @@ document.addEventListener('DOMContentLoaded', function () {
           const tbody = document.querySelector('.database-table tbody');
           const rows = Array.from(tbody.querySelectorAll('tr'));
           for (const row of rows) {
-            if (row.innerText.includes(dbName)) {
+            if (row.querySelector('td:first-child').textContent === dbName) {
               row.remove();
               break;
             }
           }
 
-          // Update stats
+          // Update stats with actual values
           const totalNow = tbody.children.length;
-          const limit = parseInt(document.querySelector('.db-limit').innerText.match(/\d+/)[0]);
+          const limit = parseInt(document.querySelector('.db-limit').textContent.match(/\d+/)[0]);
           updateStats(totalNow, limit);
 
           closeDeleteModal();
         } else {
+          const result = await response.json();
           alert("Failed to delete database: " + (result.error || "Unknown error"));
         }
       } catch (err) {
