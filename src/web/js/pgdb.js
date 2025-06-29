@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         const result = await response.json();
-        if (result.success) {
+        if (response.status == 201) {
           const tbody = document.querySelector('.database-table tbody');
           const newRow = document.createElement('tr');
           newRow.innerHTML = `
