@@ -6,6 +6,7 @@ import (
 	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/models"
+	"kws/kws/models/web"
 	"log"
 	"strings"
 
@@ -213,4 +214,37 @@ func (pg *PgServiceStore) GetUserDatabases(ctx context.Context, uid int, userNam
 	}
 
 	return dbNames, nil
+}
+
+func (pg *PgServiceStore) GetUsers(ctx context.Context, uid int) ([]web.User, error) {
+	var users = new([]web.User)
+	var id int
+	var userName string
+	var password string
+
+	sql := `
+		SELECT id, pg_user_name, pg_user_password FROM pg_service_user WHERE user_id = $1
+	`
+
+	rows, err := pg.Con.Query(ctx, sql, uid)
+	if err != nil {
+		log.Println("Cannot get all the pg users")
+		return nil, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&id, &userName, &password)
+		if err != nil {
+			log.Println("Error scanning the pg_service_user users")
+			return nil, err
+		}
+
+		*users = append(*users, web.User{
+			Username: userName,
+			Password: password,
+			ID:       id,
+		})
+	}
+
+	return *users, nil
 }

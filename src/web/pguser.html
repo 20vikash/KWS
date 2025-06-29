@@ -357,6 +357,52 @@
       height: 40px;
       object-fit: contain;
     }
+
+    .password-display {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-family: 'Fira Code', monospace;
+      max-width: 180px;
+    }
+    
+    .password-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #93c5fd;
+      font-size: 0.85rem;
+      padding-right: 25px;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 8px;
+      cursor: pointer;
+      color: #93c5fd;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    
+    .password-copy {
+      position: absolute;
+      right: 32px;
+      cursor: pointer;
+      color: #93c5fd;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    
+    .password-field-wrapper {
+      position: relative;
+      display: inline-block;
+    }
   </style>
 </head>
 <body class="relative flex flex-col md:flex-row">
@@ -460,6 +506,7 @@
             <thead>
               <tr>
                 <th>Username</th>
+                <th>Password</th> 
                 <th>Permissions</th>
                 <th>Actions</th>
               </tr>
@@ -469,14 +516,30 @@
             <tr>
             <td class="font-mono">{{ .Username }}</td>
             <td>
+                <div class="password-field-wrapper">
+                <div class="password-display">
+                    <!-- Add a hidden input to store the actual password securely -->
+                    <input type="hidden" id="real-password-{{ .Username }}" value="{{ .Password }}">
+                    <input type="hidden" id="user-id-{{ .Username }}" value="{{ .ID }}">
+                    <span class="password-text" id="password-{{ .Username }}">••••••••</span>
+                    <button class="password-copy" data-username="{{ .Username }}" title="Copy password">
+                    <i class="fas fa-copy text-sm"></i>
+                    </button>
+                    <button class="password-toggle" data-username="{{ .Username }}" title="Show password">
+                    <i class="fas fa-eye-slash text-sm"></i>
+                    </button>
+                </div>
+                </div>
+            </td>
+            <td>
                 <span class="status-badge status-active">{{ .Permissions }}</span>
             </td>
             <td>
                 <button class="action-btn remove-btn">
-                <i class="fas fa-trash mr-1"></i> Remove
+                    <i class="fas fa-trash mr-1"></i> Remove
                 </button>
                 <button class="action-btn manage-btn">
-                <i class="fas fa-database mr-1"></i> Manage
+                    <i class="fas fa-database mr-1"></i> Manage
                 </button>
             </td>
             </tr>

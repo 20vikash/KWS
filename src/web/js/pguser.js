@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Generate sparkles for background
-    const sparkleContainer = document.getElementById('sparkle-container');
-    const sparkleCount = 60;
-    
-    for (let i = 0; i < sparkleCount; i++) {
+  // Generate sparkles for background
+  const sparkleContainer = document.getElementById('sparkle-container');
+  const sparkleCount = 60;
+  
+  for (let i = 0; i < sparkleCount; i++) {
     const sparkle = document.createElement('div');
     sparkle.classList.add('sparkle');
     sparkle.style.left = `${Math.random() * 100}vw`;
@@ -13,52 +13,90 @@ document.addEventListener('DOMContentLoaded', function() {
     sparkle.style.height = `${size}px`;
     sparkle.style.animationDelay = `${Math.random() * 10}s`;
     sparkleContainer.appendChild(sparkle);
-    }
-    
-    // Copy functionality
-    const copyButtons = document.querySelectorAll('.copy-btn');
-    copyButtons.forEach(button => {
+  }
+  
+  // Copy functionality for connection info
+  const copyButtons = document.querySelectorAll('.copy-btn');
+  copyButtons.forEach(button => {
     button.addEventListener('click', function() {
-        const text = this.getAttribute('data-copy');
-        navigator.clipboard.writeText(text);
-        
-        // Visual feedback
-        const icon = this.querySelector('i');
-        icon.className = 'fas fa-check';
-        this.classList.add('copied');
-        
-        // Reset after 2 seconds
-        setTimeout(() => {
+      const text = this.getAttribute('data-copy');
+      navigator.clipboard.writeText(text);
+      
+      // Visual feedback
+      const icon = this.querySelector('i');
+      icon.className = 'fas fa-check';
+      this.classList.add('copied');
+      
+      // Reset after 2 seconds
+      setTimeout(() => {
         icon.className = 'fas fa-copy';
         this.classList.remove('copied');
-        }, 2000);
+      }, 2000);
     });
-    });
-    
-    // Toggle password visibility
-    const togglePassword = document.getElementById('togglePassword');
-    const password = document.getElementById('password');
-    const passwordStrength = document.getElementById('passwordStrength');
-    
-    if (togglePassword && password) {
+  });
+  
+  // Toggle password visibility in form
+  const togglePassword = document.getElementById('togglePassword');
+  const password = document.getElementById('password');
+  const passwordStrength = document.getElementById('passwordStrength');
+  
+  if (togglePassword && password) {
     togglePassword.addEventListener('click', function() {
-        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-        password.setAttribute('type', type);
-        this.querySelector('i').classList.toggle('fa-eye');
-        this.querySelector('i').classList.toggle('fa-eye-slash');
+      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+      password.setAttribute('type', type);
+      this.querySelector('i').classList.toggle('fa-eye');
+      this.querySelector('i').classList.toggle('fa-eye-slash');
     });
-    }
-    
-    // Password strength indicator
-    if (password && passwordStrength) {
+  }
+  
+  // Password strength indicator
+  if (password && passwordStrength) {
     password.addEventListener('input', function() {
-        const strength = calculatePasswordStrength(this.value);
-        passwordStrength.style.width = strength.percentage + '%';
-        passwordStrength.className = 'password-strength-fill ' + strength.class;
+      const strength = calculatePasswordStrength(this.value);
+      passwordStrength.style.width = strength.percentage + '%';
+      passwordStrength.className = 'password-strength-fill ' + strength.class;
     });
-    }
-    
-    function calculatePasswordStrength(password) {
+  }
+  
+  // Password toggle for table rows
+  document.querySelectorAll('.password-toggle').forEach(button => {
+    button.addEventListener('click', function() {
+      const username = this.getAttribute('data-username');
+      const passwordSpan = document.getElementById(`password-${username}`);
+      const hiddenPassword = document.getElementById(`real-password-${username}`);
+      const icon = this.querySelector('i');
+      
+      if (passwordSpan.textContent === '••••••••') {
+        // Show the actual password
+        passwordSpan.textContent = hiddenPassword.value;
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      } else {
+        // Hide the password
+        passwordSpan.textContent = '••••••••';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      }
+    });
+  });
+
+  // Password copy for table rows
+  document.querySelectorAll('.password-copy').forEach(button => {
+    button.addEventListener('click', function() {
+      const username = this.getAttribute('data-username');
+      const hiddenPassword = document.getElementById(`real-password-${username}`);
+      const icon = this.querySelector('i');
+
+      navigator.clipboard.writeText(hiddenPassword.value);
+      
+      // Visual feedback
+      icon.className = 'fas fa-check';
+      setTimeout(() => {
+        icon.className = 'fas fa-copy';
+      }, 2000);
+    });
+  });
+
+  
+  function calculatePasswordStrength(password) {
     let strength = 0;
     
     // Length check
@@ -74,16 +112,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Classify strength
     let strengthClass = '';
     if (strength < 50) {
-        strengthClass = '';
+      strengthClass = '';
     } else if (strength < 75) {
-        strengthClass = 'medium';
+      strengthClass = 'medium';
     } else {
-        strengthClass = 'strong';
+      strengthClass = 'strong';
     }
     
     return {
-        percentage: strength,
-        class: strengthClass
+      percentage: strength,
+      class: strengthClass
     };
-    }
+  }
 });
