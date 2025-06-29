@@ -38,7 +38,7 @@ func (pg *PgServiceStore) findPID(ctx context.Context, uid int, userName, passwo
 	return pid, nil
 }
 
-func (pg *PgServiceStore) AddUser(ctx context.Context, pgUser *models.PGServiceUser) error {
+func (pg *PgServiceStore) AddUser(ctx context.Context, pgUser *models.PGServiceUser) (int, error) {
 	var count int
 
 	// Check if the user count limit exceeds
@@ -49,34 +49,36 @@ func (pg *PgServiceStore) AddUser(ctx context.Context, pgUser *models.PGServiceU
 	err := pg.Con.QueryRow(ctx, sql, pgUser.Uid).Scan(&count)
 	if err != nil {
 		log.Println("Cannot find the number of pg users")
-		return err
+		return -1, err
 	}
 
 	if count >= config.MAX_SERVICE_DB_USERS {
 		log.Println("Exceeded the pg user limit")
-		return errors.New(status.PG_MAX_USER_LIMIT)
+		return -1, errors.New(status.PG_MAX_USER_LIMIT)
 	}
 
 	// Insert db record
 	sql = `
-		INSERT INTO pg_service_user (user_id, pg_user_name, pg_user_password) VALUES ($1, $2, $3)
+		INSERT INTO pg_service_user (user_id, pg_user_name, pg_user_password) VALUES ($1, $2, $3) RETURNING id
 	`
 
-	_, err = pg.Con.Exec(ctx, sql, pgUser.Uid, pgUser.UserName, pgUser.Password)
+	var insertedID int
+	err = pg.Con.QueryRow(ctx, sql, pgUser.Uid, pgUser.UserName, pgUser.Password).Scan(&insertedID)
+
 	if err != nil {
 		// Check if the username already exists.
 		if strings.Contains(err.Error(), "23505") {
 			log.Println("PG User already exists")
-			return errors.New(status.PG_USER_ALREDAY_EXISTS)
+			return -1, errors.New(status.PG_USER_ALREDAY_EXISTS)
 		}
 
 		log.Println("Cannot insert pg user data")
-		return err
+		return -1, err
 	}
 
 	log.Println("Successfully created pg user")
 
-	return nil
+	return insertedID, nil
 }
 
 func (pg *PgServiceStore) AddDatabase(ctx context.Context, pgUser *models.PGServiceUser, pgDatabase *models.PGServiceDatabase) error {

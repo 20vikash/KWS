@@ -45,7 +45,7 @@ type Storage struct {
 
 	PgService interface {
 		GetUsers(ctx context.Context, uid int) ([]web.User, error)
-		AddUser(ctx context.Context, pgUser *models.PGServiceUser) error
+		AddUser(ctx context.Context, pgUser *models.PGServiceUser) (int, error)
 		AddDatabase(ctx context.Context, pgUser *models.PGServiceUser, pgDatabase *models.PGServiceDatabase) error
 		RemoveUser(ctx context.Context, pgUser *models.PGServiceUser) error
 		RemoveDatabase(ctx context.Context, pgUser *models.PGServiceUser, pgDatabase *models.PGServiceDatabase) error

@@ -94,7 +94,163 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 2000);
     });
   });
+  
+  // Add event listener to Create User button
+  const createUserBtn = document.querySelector('.btn-primary');
+  if (createUserBtn) {
+    createUserBtn.addEventListener('click', createNewUser);
+  }
 
+  async function createNewUser() {
+    const usernameInput = document.querySelector('.form-input[placeholder="Enter username"]');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.querySelector('.form-input[placeholder="Confirm your password"]');
+    
+    // Basic validation
+    if (!usernameInput.value || !passwordInput.value) {
+      alert('Please fill in all fields');
+      return;
+    }
+    
+    if (passwordInput.value !== confirmPasswordInput.value) {
+      alert('Passwords do not match!');
+      return;
+    }
+
+    try {
+      // Send POST request to create user
+      const response = await fetch('/createpguser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          user_name: usernameInput.value,
+          password: passwordInput.value
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const newUser = await response.json();
+
+      // Update the table
+      addUserToTable(newUser);
+
+      // Update user count
+      const userCountElement = document.querySelector('.text-white.ml-2');
+      if (userCountElement) {
+        const currentCount = parseInt(userCountElement.textContent.split('/')[0]);
+        userCountElement.textContent = `${currentCount + 1}/${newUser.UserLimit}`;
+      }
+
+      // Reset form
+      usernameInput.value = '';
+      passwordInput.value = '';
+      confirmPasswordInput.value = '';
+      document.getElementById('passwordStrength').style.width = '0%';
+
+      alert('User created successfully!');
+
+    } catch (error) {
+      console.error('Error creating user:', error);
+      alert('Error creating user. Please try again.');
+    }
+  }
+
+  function addUserToTable(user) {
+    const tbody = document.querySelector('.user-table tbody');
+    
+    // Create new table row
+    const newRow = document.createElement('tr');
+    
+    // Username cell
+    const usernameCell = document.createElement('td');
+    usernameCell.className = 'font-mono';
+    usernameCell.textContent = user.Username;
+    
+    // Password cell
+    const passwordCell = document.createElement('td');
+    passwordCell.innerHTML = `
+      <div class="password-field-wrapper">
+        <div class="password-display">
+          <input type="hidden" id="real-password-${user.Username}" value="${user.Password}">
+          <input type="hidden" id="user-id-${user.Username}" value="${user.ID}">
+          <span class="password-text" id="password-${user.Username}">••••••••</span>
+          <button class="password-copy" data-username="${user.Username}" title="Copy password">
+            <i class="fas fa-copy text-sm"></i>
+          </button>
+          <button class="password-toggle" data-username="${user.Username}" title="Show password">
+            <i class="fas fa-eye-slash text-sm"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    
+    // Permissions cell
+    const permissionsCell = document.createElement('td');
+    permissionsCell.innerHTML = `
+      <span class="status-badge status-active">${user.Permissions}</span>
+    `;
+    
+    // Actions cell
+    const actionsCell = document.createElement('td');
+    actionsCell.innerHTML = `
+      <button class="action-btn remove-btn">
+        <i class="fas fa-trash mr-1"></i> Remove
+      </button>
+      <button class="action-btn manage-btn">
+        <i class="fas fa-database mr-1"></i> Manage
+      </button>
+    `;
+    
+    // Assemble row
+    newRow.appendChild(usernameCell);
+    newRow.appendChild(passwordCell);
+    newRow.appendChild(permissionsCell);
+    newRow.appendChild(actionsCell);
+    
+    // Add to table
+    tbody.appendChild(newRow);
+    
+    // Attach event listeners to new password controls
+    attachPasswordListeners(newRow);
+  }
+
+  function attachPasswordListeners(row) {
+    // Toggle password visibility
+    row.querySelector('.password-toggle')?.addEventListener('click', function() {
+      const username = this.getAttribute('data-username');
+      const passwordSpan = document.getElementById(`password-${username}`);
+      const hiddenPassword = document.getElementById(`real-password-${username}`);
+      const icon = this.querySelector('i');
+      
+      if (passwordSpan.textContent === '••••••••') {
+        passwordSpan.textContent = hiddenPassword.value;
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      } else {
+        passwordSpan.textContent = '••••••••';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      }
+    });
+
+    // Copy password
+    row.querySelector('.password-copy')?.addEventListener('click', function() {
+      const username = this.getAttribute('data-username');
+      const hiddenPassword = document.getElementById(`real-password-${username}`);
+      const icon = this.querySelector('i');
+
+      navigator.clipboard.writeText(hiddenPassword.value);
+      
+      // Visual feedback
+      icon.className = 'fas fa-check';
+      setTimeout(() => {
+        icon.className = 'fas fa-copy';
+      }, 2000);
+    });
+  }
   
   function calculatePasswordStrength(password) {
     let strength = 0;

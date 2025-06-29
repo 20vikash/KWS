@@ -1,11 +1,21 @@
 package main
 
 import (
+	"encoding/json"
+	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/models"
 	"log"
 	"net/http"
 )
+
+type ResponseCreateUser struct {
+	ID          int
+	UserName    string
+	Password    string
+	Permissions string
+	UserLimit   int
+}
 
 func (app *Application) CreatePGUser(w http.ResponseWriter, r *http.Request) {
 	// Get the user ID
@@ -27,7 +37,7 @@ func (app *Application) CreatePGUser(w http.ResponseWriter, r *http.Request) {
 	pgUser := models.CreatePgServiceUser(uid, userName, password)
 
 	// Update the main DB
-	err = app.Store.PgService.AddUser(r.Context(), pgUser)
+	id, err := app.Store.PgService.AddUser(r.Context(), pgUser)
 	if err != nil {
 		if err.Error() == status.PG_MAX_USER_LIMIT {
 			http.Error(w, "user limit exceeded", http.StatusBadRequest)
@@ -51,8 +61,16 @@ func (app *Application) CreatePGUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Successfully created pg user"))
+	response := ResponseCreateUser{
+		ID:          id,
+		UserName:    userName,
+		Password:    password,
+		Permissions: "Limited",
+		UserLimit:   config.MAX_SERVICE_DB_USERS,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 func (app *Application) CreatePgDatabase(w http.ResponseWriter, r *http.Request) {
