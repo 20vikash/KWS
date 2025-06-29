@@ -1,6 +1,4 @@
-// Corrected JavaScript for pgdb.js
-window.showDeleteModal = function(dbName) {
-  console.log("dbname", dbName)
+window.showDeleteModal = function (dbName) {
   const dbNameToDelete = document.getElementById('dbNameToDelete');
   const deleteModal = document.getElementById('deleteModal');
   if (dbNameToDelete && deleteModal) {
@@ -41,27 +39,37 @@ document.addEventListener('DOMContentLoaded', function () {
   if (closeModal) closeModal.addEventListener('click', closeDeleteModal);
   if (cancelDelete) cancelDelete.addEventListener('click', closeDeleteModal);
 
-  // Get references to all stat elements
-  const totalDatabasesEl = document.querySelector('.text-white.font-bold.text-2xl');
-  const availableSlotsEl = document.querySelectorAll('.text-white.font-bold.text-2xl')[2];
-  const usageTextEl = document.querySelector('.text-sm.text-gray-400 + .text-white');
-  const showingTextEl = document.querySelector('.text-sm .text-white');
-  const progressFillEl = document.querySelector('.progress-fill');
-  const usagePercentTextEl = document.querySelector('.text-sm.text-gray-400:last-child');
-
-  // Better updateStats function using element references
-  const updateStats = (total, limit) => {
+  function updateSummaryStats(total, limit) {
     const available = limit - total;
     const percent = Math.round((total / limit) * 100);
-    
-    // Update all stat elements
-    if (totalDatabasesEl) totalDatabasesEl.textContent = total;
-    if (availableSlotsEl) availableSlotsEl.textContent = available;
-    if (usageTextEl) usageTextEl.textContent = `${total}/${limit}`;
-    if (showingTextEl) showingTextEl.textContent = `${total} of ${total}`;
-    if (progressFillEl) progressFillEl.style.width = `${percent}%`;
-    if (usagePercentTextEl) usagePercentTextEl.textContent = `${percent}% used`;
-  };
+
+    // Update Total Databases and Available counts
+    document.querySelectorAll('.info-card').forEach(card => {
+      const label = card.querySelector('p.text-xs')?.textContent?.trim();
+      const valueEl = card.querySelector('p.text-white');
+      if (!label || !valueEl) return;
+
+      if (label === 'Total Databases') valueEl.textContent = total;
+      if (label === 'Available') valueEl.textContent = available;
+    });
+
+    // Update Database usage text
+    const usageText = document.querySelector('.card .text-sm span.text-white');
+    if (usageText) usageText.textContent = `${total}/${limit}`;
+
+    // Update usage percentage
+    const usagePercentText = document.querySelector('.card .flex.justify-between.mb-2 span:last-child');
+    if (usagePercentText) usagePercentText.textContent = `${percent}% used`;
+
+    const progress = document.querySelector('.progress-fill');
+    if (progress) progress.style.width = `${percent}%`;
+
+    // Update "Showing X of X"
+    const showingCount = document.getElementById('showingCount');
+    if (showingCount) {
+        showingCount.innerText = `${total} of ${total}`;
+    }
+  }
 
   const createDbBtn = document.getElementById('createDbBtn');
   if (createDbBtn) {
@@ -92,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (response.status === 201) {
           const tbody = document.querySelector('.database-table tbody');
+
           const newRow = document.createElement('tr');
           newRow.innerHTML = `
             <td class="font-mono">${dbName}</td>
@@ -101,16 +110,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 <i class="fas fa-trash mr-1"></i> Remove
               </button>
             </td>`;
+
           tbody.appendChild(newRow);
 
-          // Update stats with actual values
           const totalNow = tbody.children.length;
-          const limit = parseInt(document.querySelector('.db-limit').textContent.match(/\d+/)[0]);
-          updateStats(totalNow, limit);
+          const limit = parseInt(document.querySelector('.db-limit').innerText.match(/\d+/)[0]);
 
+          updateSummaryStats(totalNow, limit);
           document.getElementById('dbName').value = '';
         } else {
-          const result = await response.json();
           alert(`Error: ${result.error || "Unknown error occurred"}`);
         }
       } catch (err) {
@@ -145,20 +153,19 @@ document.addEventListener('DOMContentLoaded', function () {
           const tbody = document.querySelector('.database-table tbody');
           const rows = Array.from(tbody.querySelectorAll('tr'));
           for (const row of rows) {
-            if (row.querySelector('td:first-child').textContent === dbName) {
+            const dbCell = row.querySelector('td');
+            if (dbCell && dbCell.textContent.trim() === dbName) {
               row.remove();
               break;
             }
           }
 
-          // Update stats with actual values
           const totalNow = tbody.children.length;
-          const limit = parseInt(document.querySelector('.db-limit').textContent.match(/\d+/)[0]);
-          updateStats(totalNow, limit);
+          const limit = parseInt(document.querySelector('.db-limit').innerText.match(/\d+/)[0]);
 
+          updateSummaryStats(totalNow, limit);
           closeDeleteModal();
         } else {
-          const result = await response.json();
           alert("Failed to delete database: " + (result.error || "Unknown error"));
         }
       } catch (err) {
