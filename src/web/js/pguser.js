@@ -78,6 +78,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     });
 
+    // Add event listener to manage buttons
+    document.querySelectorAll('.manage-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const pid = this.getAttribute('data-id');
+            if (!pid) return;
+            window.location.href = `/kws_services/postgres/db?pid=${encodeURIComponent(pid)}`;
+        });
+    });
   
   // Toggle password visibility in form
   const togglePassword = document.getElementById('togglePassword');
@@ -245,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="action-btn remove-btn" data-username="${user.Username}" data-password="${user.Password}">
         <i class="fas fa-trash mr-1"></i> Remove
       </button>
-      <button class="action-btn manage-btn" data-username="${user.Username}" data-password="${user.Password}" data-ID="${user.ID}">
+      <button class="action-btn manage-btn" data-username="${user.Username}" data-password="${user.Password}" data-id="${user.ID}">
         <i class="fas fa-database mr-1"></i> Manage
       </button>
     `;
@@ -298,6 +306,14 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Error deleting user.');
     }
     });
+
+    // Add manage event to the dynamically created button
+    actionsCell.querySelector('.manage-btn')?.addEventListener('click', function () {
+        const pid = this.getAttribute('data-id');
+        if (!pid) return;
+        window.location.href = `/kws_services/postgres/db?pid=${encodeURIComponent(pid)}`;
+    });
+
     
     // Attach event listeners to new password controls
     attachPasswordListeners(newRow);
