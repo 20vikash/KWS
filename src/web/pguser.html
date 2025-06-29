@@ -359,15 +359,15 @@
     }
 
     .password-display {
-      position: relative;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       background: rgba(30, 41, 59, 0.4);
       border: 1px solid rgba(59, 130, 246, 0.2);
       border-radius: 8px;
       padding: 6px 12px;
       font-family: 'Fira Code', monospace;
-      max-width: 180px;
+      gap: 8px;
+      max-width: 100%;
     }
     
     .password-text {
@@ -376,29 +376,21 @@
       white-space: nowrap;
       color: #93c5fd;
       font-size: 0.85rem;
-      padding-right: 25px;
+      flex-grow: 1;
     }
-    
+
+    .password-copy,
     .password-toggle {
-      position: absolute;
-      right: 8px;
       cursor: pointer;
       color: #93c5fd;
       background: none;
       border: none;
-      padding: 0;
+      padding: 0 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    
-    .password-copy {
-      position: absolute;
-      right: 32px;
-      cursor: pointer;
-      color: #93c5fd;
-      background: none;
-      border: none;
-      padding: 0;
-    }
-    
+
     .password-field-wrapper {
       position: relative;
       display: inline-block;
