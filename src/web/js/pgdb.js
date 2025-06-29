@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
       try {
         const payload = new URLSearchParams({
           db_name: dbName,
-          owner: ownerFromURL,
+          user_name: ownerFromURL,
           password: dbPassword,
           encoding: dbEncoding
         });
