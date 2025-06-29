@@ -1,6 +1,7 @@
 package services
 
 type WebService struct {
+	ServiceName string
 	Name        string
 	Description string
 	IconURL     string
@@ -11,6 +12,7 @@ type WebService struct {
 
 var Services = []WebService{
 	{
+		ServiceName: "postgres",
 		Name:        "PostgreSQL",
 		Description: "Relational database service",
 		IconURL:     "https://www.postgresql.org/media/img/about/press/elephant.png",
