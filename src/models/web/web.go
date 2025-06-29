@@ -16,3 +16,8 @@ type PGUserPageData struct {
 	UserLimit    int
 	Users        []User
 }
+
+type Databases struct {
+	Name  string
+	Owner string
+}
