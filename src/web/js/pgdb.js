@@ -94,7 +94,6 @@ document.addEventListener('DOMContentLoaded', function () {
           body: payload
         });
 
-        const result = await response.json();
         if (response.status === 201) {
           const tbody = document.querySelector('.database-table tbody');
           const newRow = document.createElement('tr');
@@ -145,8 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
           body: payload
         });
 
-        const result = await response.json();
-        if (response.ok && result.success) {
+        if (response.ok) {
           const tbody = document.querySelector('.database-table tbody');
           const rows = Array.from(tbody.querySelectorAll('tr'));
           for (const row of rows) {

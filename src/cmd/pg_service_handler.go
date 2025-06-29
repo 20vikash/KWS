@@ -190,6 +190,6 @@ func (app *Application) RemovePgDatabase(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Successfully removed database"))
 }
