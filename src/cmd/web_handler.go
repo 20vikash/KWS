@@ -91,3 +91,7 @@ func (app *Application) RenderDevicesPage(w http.ResponseWriter, r *http.Request
 		http.Error(w, "Template rendering error", http.StatusInternalServerError)
 	}
 }
+
+func (app *Application) RenderServicesPage(w http.ResponseWriter, r *http.Request) {
+
+}
