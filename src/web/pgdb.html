@@ -498,7 +498,7 @@
                 <td class="font-mono">{{ .Name }}</td>
                 <td><span class="owner-badge">{{ .Owner }}</span></td>
                 <td>
-                <button class="action-btn remove-btn" onclick="showDeleteModal('{{ .Name }}')">
+                <button class="action-btn remove-btn">
                     <i class="fas fa-trash mr-1"></i> Remove
                 </button>
                 </td>
@@ -574,6 +574,38 @@
       </div>
     </div>
   </div>
+
+  <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+  <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold text-white">Confirm Deletion</h3>
+      <button id="closeModal" class="text-gray-400 hover:text-white">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <p class="text-gray-300 mb-4">
+      Are you sure you want to delete the database <span id="dbNameToDelete" class="font-mono font-bold text-red-400"></span>?
+      This action is irreversible and will permanently delete all data in this database.
+    </p>
+    
+    <!-- Password verification field -->
+    <div class="form-group mb-4">
+      <label class="form-label">Enter Password to Confirm</label>
+      <input type="password" class="form-input" id="passwordInput" placeholder="Your account password">
+      <p id="passwordError" class="text-xs text-red-400 mt-1 hidden">Incorrect password</p>
+    </div>
+    
+    <div class="flex justify-end space-x-3">
+      <button id="cancelDelete" class="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 transition">
+        Cancel
+      </button>
+      <button id="confirmDelete" class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition">
+        <i class="fas fa-trash mr-2"></i> Delete Database
+      </button>
+    </div>
+  </div>
+</div>
 
 <script src="js/pgdb.js"></script>
 </body>
