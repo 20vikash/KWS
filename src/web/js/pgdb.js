@@ -1,4 +1,5 @@
 window.showDeleteModal = function(dbName) {
+    console.log("dbname", dbName)
   const dbNameToDelete = document.getElementById('dbNameToDelete');
   const deleteModal = document.getElementById('deleteModal');
   if (dbNameToDelete && deleteModal) {
@@ -124,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (confirmDelete) {
     confirmDelete.addEventListener('click', async function () {
-      const dbName = pendingDeleteName;
+      const dbName = window.pendingDeleteName;
       const urlParams = new URLSearchParams(window.location.search);
       const userName = urlParams.get("owner");
       const password = document.getElementById('pg-user-password').value;
