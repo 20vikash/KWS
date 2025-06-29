@@ -11,7 +11,7 @@ import (
 
 type ResponseCreateUser struct {
 	ID          int
-	UserName    string
+	Username    string
 	Password    string
 	Permissions string
 	UserLimit   int
@@ -63,7 +63,7 @@ func (app *Application) CreatePGUser(w http.ResponseWriter, r *http.Request) {
 
 	response := ResponseCreateUser{
 		ID:          id,
-		UserName:    userName,
+		Username:    userName,
 		Password:    password,
 		Permissions: "Limited",
 		UserLimit:   config.MAX_SERVICE_DB_USERS,
