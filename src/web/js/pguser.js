@@ -34,6 +34,50 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 2000);
     });
   });
+
+    // Add event listener to remove buttons
+    document.querySelectorAll('.remove-btn').forEach(button => {
+    button.addEventListener('click', async function () {
+        const icon = this.querySelector('i');
+        const username = icon.getAttribute('data-username');
+        const password = icon.getAttribute('data-password');
+
+        if (!confirm(`Are you sure you want to delete user '${username}'?`)) return;
+
+        const formData = new URLSearchParams();
+        formData.append('user_name', username);
+        formData.append('password', password);
+
+        try {
+        const response = await fetch('/deletepguser', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData.toString()
+        });
+
+        if (!response.ok) throw new Error(`Failed to delete user. Status: ${response.status}`);
+        
+        // Remove the row
+        const row = this.closest('tr');
+        row.remove();
+
+        // Update the count
+        const userCountElement = document.querySelector('.text-white.ml-2');
+        if (userCountElement) {
+            const parts = userCountElement.textContent.split('/');
+            const newCount = parseInt(parts[0]) - 1;
+            userCountElement.textContent = `${newCount}/${parts[1]}`;
+        }
+
+        } catch (err) {
+        console.error(err);
+        alert('Error deleting user.');
+        }
+    });
+    });
+
   
   // Toggle password visibility in form
   const togglePassword = document.getElementById('togglePassword');
@@ -198,13 +242,55 @@ document.addEventListener('DOMContentLoaded', function() {
     // Actions cell
     const actionsCell = document.createElement('td');
     actionsCell.innerHTML = `
-      <button class="action-btn remove-btn">
+      <button class="action-btn remove-btn" data-username="${user.Username}" data-password="${user.Password}>
         <i class="fas fa-trash mr-1"></i> Remove
       </button>
-      <button class="action-btn manage-btn">
+      <button class="action-btn manage-btn" data-username="${user.Username}" data-password="${user.Password}" data-ID="${user.ID}">
         <i class="fas fa-database mr-1"></i> Manage
       </button>
     `;
+
+    // Add remove event to the dynamically created button
+    actionsCell.querySelector('.remove-btn')?.addEventListener('click', async function () {
+    const icon = this.querySelector('i');
+    const username = icon.getAttribute('data-username');
+    const password = icon.getAttribute('data-password');
+
+    if (!confirm(`Are you sure you want to delete user '${username}'?`)) return;
+
+    const formData = new URLSearchParams();
+    formData.append('user_name', username);
+    formData.append('password', password);
+
+    try {
+        const response = await fetch('/deletepguser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData.toString()
+        });
+
+        if (!response.ok) throw new Error(`Failed to delete user. Status: ${response.status}`);
+        
+        // Remove the row
+        row.remove();
+
+        // Update the count
+        const userCountElement = document.querySelector('.text-white.ml-2');
+        if (userCountElement) {
+        const parts = userCountElement.textContent.split('/');
+        const newCount = parseInt(parts[0]) - 1;
+        userCountElement.textContent = `${newCount}/${parts[1]}`;
+        }
+
+        alert(`User '${username}' deleted successfully.`);
+    } catch (err) {
+        console.error(err);
+        alert('Error deleting user.');
+    }
+    });
+
     
     // Assemble row
     newRow.appendChild(usernameCell);
