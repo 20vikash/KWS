@@ -50,7 +50,7 @@ func NewRouter(app *Application) http.Handler {
 	r.Get("/kws_signin", app.RenderSignInPage)
 
 	// Serve static files
-	r.Handle("/js/*", http.StripPrefix("/js/", http.FileServer(http.Dir("../web/js"))))
+	r.Handle("*/js/*", http.StripPrefix("/js/", http.FileServer(http.Dir("../web/js"))))
 
 	return r
 }
