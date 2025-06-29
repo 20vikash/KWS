@@ -482,6 +482,8 @@
             <span class="text-white ml-2">{{ .TotalDatabases }} of {{ .TotalDatabases }}</span>
           </div>
         </div>
+
+        <input type="hidden" id="pg-user-password" value="{{ .Password }}">
         
         <div class="overflow-x-auto">
           <table class="database-table">

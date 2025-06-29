@@ -44,6 +44,7 @@ type Storage struct {
 	}
 
 	PgService interface {
+		GetPassword(ctx context.Context, pid int) (string, error)
 		GetDatabases(ctx context.Context, pid, uid int) (int, []web.Database, error)
 		GetUsers(ctx context.Context, uid int) ([]web.User, error)
 		AddUser(ctx context.Context, pgUser *models.PGServiceUser) (int, error)

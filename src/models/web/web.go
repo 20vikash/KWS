@@ -23,6 +23,7 @@ type Database struct {
 }
 
 type PgDatabase struct {
+	Password       string
 	HostName       string
 	Username       string
 	TotalDatabases int

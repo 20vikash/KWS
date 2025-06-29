@@ -170,7 +170,14 @@ func (app *Application) RenderPgDatabasesPage(w http.ResponseWriter, r *http.Req
 
 	pg := services.GetPgServiceData()
 
+	password, err := app.Store.PgService.GetPassword(r.Context(), pid)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
 	pgDB := web.PgDatabase{
+		Password:       password,
 		HostName:       pg.Hostname,
 		Username:       userName,
 		Owner:          owner,

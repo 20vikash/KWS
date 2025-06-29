@@ -282,3 +282,19 @@ func (pg *PgServiceStore) GetDatabases(ctx context.Context, pid, uid int) (int, 
 
 	return count, *dbs, nil
 }
+
+func (pg *PgServiceStore) GetPassword(ctx context.Context, pid int) (string, error) {
+	var password string
+
+	sql := `
+		SELECT pg_user_password FROM pg_service_user WHERE id = $1
+	`
+
+	err := pg.Con.QueryRow(ctx, sql, pid).Scan(&password)
+	if err != nil {
+		log.Println("Cannot get the password")
+		return "", err
+	}
+
+	return password, nil
+}
