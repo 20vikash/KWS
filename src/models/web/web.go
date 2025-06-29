@@ -17,7 +17,18 @@ type PGUserPageData struct {
 	Users        []User
 }
 
-type Databases struct {
+type Database struct {
 	Name  string
 	Owner string
+}
+
+type PgDatabase struct {
+	HostName       string
+	Username       string
+	TotalDatabases int
+	Owner          string
+	AvailableSlots int
+	Limit          int
+	UsagePercent   int
+	Databases      []Database
 }

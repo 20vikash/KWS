@@ -252,20 +252,22 @@ func (pg *PgServiceStore) GetUsers(ctx context.Context, uid int) ([]web.User, er
 	return *users, nil
 }
 
-func (pg *PgServiceStore) GetDatabases(ctx context.Context, pid int) ([]web.Databases, error) {
-	var dbs = new([]web.Databases)
+func (pg *PgServiceStore) GetDatabases(ctx context.Context, pid, uid int) (int, []web.Database, error) {
+	var dbs = new([]web.Database)
 
 	var userName string
 	var dbName string
 
+	var count int = 0
+
 	sql := `
-		SELECT u.pg_user_name, d.db_name FROM pg_service_user u INNER JOIN pg_service_db d ON u.id = d.pid
+		SELECT u.pg_user_name, d.db_name FROM pg_service_user u INNER JOIN pg_service_db d ON u.id = d.pid WHERE u.user_id = $1
 	`
 
-	rows, err := pg.Con.Query(ctx, sql)
+	rows, err := pg.Con.Query(ctx, sql, uid)
 	if err != nil {
 		log.Println("Cannot get databases based on the pid")
-		return nil, err
+		return 0, nil, err
 	}
 
 	for rows.Next() {
@@ -274,8 +276,9 @@ func (pg *PgServiceStore) GetDatabases(ctx context.Context, pid int) ([]web.Data
 			log.Println("Error scanning (get databases)")
 		}
 
-		*dbs = append(*dbs, web.Databases{Owner: userName, Name: dbName})
+		*dbs = append(*dbs, web.Database{Owner: userName, Name: dbName})
+		count++
 	}
 
-	return *dbs, nil
+	return count, *dbs, nil
 }

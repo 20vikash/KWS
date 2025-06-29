@@ -7,6 +7,7 @@ import (
 	"kws/kws/models/web"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type Device struct {
@@ -142,6 +143,44 @@ func (app *Application) RenderPgUsersPage(w http.ResponseWriter, r *http.Request
 	}
 
 	err = templates.ExecuteTemplate(w, "pgusers", pgData)
+	if err != nil {
+		http.Error(w, "Template rendering error", http.StatusInternalServerError)
+	}
+}
+
+func (app *Application) RenderPgDatabasesPage(w http.ResponseWriter, r *http.Request) {
+	// Get the pid from the query
+	pidStr := r.URL.Query().Get("pid")
+	uid := app.SessionManager.GetInt(r.Context(), "id")
+	userName := app.SessionManager.GetString(r.Context(), "user_name")
+
+	// Convert to int
+	pid, err := strconv.Atoi(pidStr)
+	if err != nil {
+		http.Error(w, "Invalid pid", http.StatusBadRequest)
+		return
+	}
+
+	count, dbs, err := app.Store.PgService.GetDatabases(r.Context(), pid, uid)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	pg := services.GetPgServiceData()
+
+	pgDB := web.PgDatabase{
+		HostName:       pg.Hostname,
+		Username:       userName,
+		Owner:          dbs[0].Name,
+		TotalDatabases: count,
+		Limit:          config.MAX_SERVICE_DB_DB,
+		AvailableSlots: config.MAX_SERVICE_DB_DB - count,
+		Databases:      dbs,
+		UsagePercent:   int(float64(count) / float64(config.MAX_SERVICE_DB_DB) * 100),
+	}
+
+	err = templates.ExecuteTemplate(w, "db_management", pgDB)
 	if err != nil {
 		http.Error(w, "Template rendering error", http.StatusInternalServerError)
 	}

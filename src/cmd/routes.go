@@ -38,6 +38,7 @@ func NewRouter(app *Application) http.Handler {
 		protected.Route("/kws_services", func(r chi.Router) {
 			r.Get("/", app.RenderServicesPage)
 			r.Get("/postgres/users", app.RenderPgUsersPage)
+			r.Get("/postgres/db", app.RenderPgDatabasesPage)
 		})
 		protected.Get("/", app.HomeHandler)
 	})
