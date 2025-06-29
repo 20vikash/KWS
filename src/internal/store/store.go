@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"kws/kws/models"
+	"kws/kws/models/web"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -43,6 +44,7 @@ type Storage struct {
 	}
 
 	PgService interface {
+		GetUsers(ctx context.Context, uid int) ([]web.User, error)
 		AddUser(ctx context.Context, pgUser *models.PGServiceUser) error
 		AddDatabase(ctx context.Context, pgUser *models.PGServiceUser, pgDatabase *models.PGServiceDatabase) error
 		RemoveUser(ctx context.Context, pgUser *models.PGServiceUser) error

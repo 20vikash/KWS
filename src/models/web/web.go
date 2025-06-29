@@ -8,11 +8,10 @@ type User struct {
 }
 
 type PGUserPageData struct {
-	HostName       string
-	ServiceIP      string
-	Port           string
-	ActiveInstance string
-	LoggedInUser   string
-	UserLimit      int
-	Users          []User
+	HostName     string
+	ServiceIP    string
+	Port         string
+	LoggedInUser string
+	UserLimit    int
+	Users        []User
 }

@@ -2,7 +2,9 @@ package main
 
 import (
 	"html/template"
+	"kws/kws/consts/config"
 	"kws/kws/consts/services"
+	"kws/kws/models/web"
 	"log"
 	"net/http"
 )
@@ -111,6 +113,35 @@ func (app *Application) RenderServicesPage(w http.ResponseWriter, r *http.Reques
 	}
 
 	err := templates.ExecuteTemplate(w, "services", webServices)
+	if err != nil {
+		http.Error(w, "Template rendering error", http.StatusInternalServerError)
+	}
+}
+
+func (app *Application) RenderPgUsersPage(w http.ResponseWriter, r *http.Request) {
+	// Get uid and username
+	uid := app.SessionManager.GetInt(r.Context(), "id")
+	userName := app.SessionManager.GetString(r.Context(), "user_name")
+
+	// Get all the users list
+	users, err := app.Store.PgService.GetUsers(r.Context(), uid)
+	if err != nil {
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	pg := services.GetPgServiceData()
+
+	pgData := web.PGUserPageData{
+		HostName:     pg.Hostname,
+		ServiceIP:    pg.IP,
+		Port:         "5432",
+		LoggedInUser: userName,
+		UserLimit:    config.MAX_SERVICE_DB_USERS,
+		Users:        users,
+	}
+
+	err = templates.ExecuteTemplate(w, "pgusers", pgData)
 	if err != nil {
 		http.Error(w, "Template rendering error", http.StatusInternalServerError)
 	}

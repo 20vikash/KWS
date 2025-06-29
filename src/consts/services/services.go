@@ -23,3 +23,7 @@ var Services = []WebService{
 func GetServiceList() []WebService {
 	return Services
 }
+
+func GetPgServiceData() WebService {
+	return Services[0]
+}
