@@ -154,8 +154,6 @@ document.addEventListener('DOMContentLoaded', function() {
       confirmPasswordInput.value = '';
       document.getElementById('passwordStrength').style.width = '0%';
 
-      alert('User created successfully!');
-
     } catch (error) {
       console.error('Error creating user:', error);
       alert('Error creating user. Please try again.');
