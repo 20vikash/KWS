@@ -261,10 +261,10 @@ func (pg *PgServiceStore) GetDatabases(ctx context.Context, pid, uid int) (int, 
 	var count int = 0
 
 	sql := `
-		SELECT u.pg_user_name, d.db_name FROM pg_service_user u INNER JOIN pg_service_db d ON u.id = d.pid WHERE u.user_id = $1
+		SELECT u.pg_user_name, d.db_name FROM pg_service_user u INNER JOIN pg_service_db d ON u.id = d.pid WHERE u.user_id = $1 AND u.id = $2
 	`
 
-	rows, err := pg.Con.Query(ctx, sql, uid)
+	rows, err := pg.Con.Query(ctx, sql, uid, pid)
 	if err != nil {
 		log.Println("Cannot get databases based on the pid")
 		return 0, nil, err
