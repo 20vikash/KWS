@@ -21,66 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeModal = document.getElementById('closeModal');
     const cancelDelete = document.getElementById('cancelDelete');
     const confirmDelete = document.getElementById('confirmDelete');
-    const passwordInput = document.getElementById('passwordInput');
-    const passwordError = document.getElementById('passwordError');
-    
-    // State variables
-    let currentDbToDelete = '';
-    
-    // Add event listeners to all remove buttons
-    document.querySelectorAll('.remove-btn').forEach(button => {
-        button.addEventListener('click', function() {
-        // Get database name from table row
-        const dbRow = this.closest('tr');
-        const dbName = dbRow.querySelector('td:first-child').textContent;
-        
-        // Set modal content
-        currentDbToDelete = dbName;
-        dbNameToDelete.textContent = dbName;
-        
-        // Reset password field and error
-        passwordInput.value = '';
-        passwordError.classList.add('hidden');
-        
-        // Show modal
-        deleteModal.classList.remove('hidden');
-        });
-    });
-    
-    // Close modal handlers
-    document.getElementById('closeModal').addEventListener('click', closeModal);
-    document.getElementById('cancelDelete').addEventListener('click', closeModal);
-    
-    // Confirm delete handler
-    document.getElementById('confirmDelete').addEventListener('click', function() {
-        const password = passwordInput.value.trim();
-        
-        if (!password) {
-        showPasswordError('Please enter your password');
-        return;
-        }
-        
-        // Here you would normally make a request to verify password
-        // For DOM-only implementation, we'll just show an example
-        showPasswordError('Password verification would happen here');
-        
-        // In a real implementation, you would:
-        // 1. Send password to server for verification
-        // 2. If valid: proceed with deletion
-        // 3. If invalid: show error message
-    });
-    
-    function closeModal() {
-        deleteModal.classList.add('hidden');
-        passwordInput.value = '';
-        passwordError.classList.add('hidden');
-        currentDbToDelete = '';
-    }
-    
-    function showPasswordError(message) {
-        passwordError.textContent = message;
-        passwordError.classList.remove('hidden');
-    }
     
     function showDeleteModal(dbName) {
     dbNameToDelete.textContent = dbName;
