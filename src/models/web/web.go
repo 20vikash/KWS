@@ -1,6 +1,7 @@
 package web
 
 type User struct {
+	Role        string
 	Username    string
 	Password    string
 	ID          int

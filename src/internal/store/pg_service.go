@@ -242,6 +242,7 @@ func (pg *PgServiceStore) GetUsers(ctx context.Context, uid int) ([]web.User, er
 		}
 
 		*users = append(*users, web.User{
+			Role:     "Limited",
 			Username: userName,
 			Password: password,
 			ID:       id,
