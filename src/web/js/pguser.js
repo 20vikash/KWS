@@ -249,6 +249,15 @@ document.addEventListener('DOMContentLoaded', function() {
         <i class="fas fa-database mr-1"></i> Manage
       </button>
     `;
+    
+    // Assemble row
+    newRow.appendChild(usernameCell);
+    newRow.appendChild(passwordCell);
+    newRow.appendChild(permissionsCell);
+    newRow.appendChild(actionsCell);
+    
+    // Add to table
+    tbody.appendChild(newRow);
 
     // Add remove event to the dynamically created button
     actionsCell.querySelector('.remove-btn')?.addEventListener('click', async function () {
@@ -290,16 +299,6 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Error deleting user.');
     }
     });
-
-    
-    // Assemble row
-    newRow.appendChild(usernameCell);
-    newRow.appendChild(passwordCell);
-    newRow.appendChild(permissionsCell);
-    newRow.appendChild(actionsCell);
-    
-    // Add to table
-    tbody.appendChild(newRow);
     
     // Attach event listeners to new password controls
     attachPasswordListeners(newRow);
