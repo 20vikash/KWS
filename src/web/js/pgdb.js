@@ -1,3 +1,14 @@
+window.showDeleteModal = function(dbName) {
+  const dbNameToDelete = document.getElementById('dbNameToDelete');
+  const deleteModal = document.getElementById('deleteModal');
+  if (dbNameToDelete && deleteModal) {
+    dbNameToDelete.textContent = dbName;
+    window.pendingDeleteName = dbName;
+    deleteModal.classList.remove('hidden');
+  }
+};
+
+
 document.addEventListener('DOMContentLoaded', function () {
   const sparkleContainer = document.getElementById('sparkle-container');
   const sparkleCount = 60;
@@ -20,12 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const confirmDelete = document.getElementById('confirmDelete');
 
   let pendingDeleteName = '';
-
-  function showDeleteModal(dbName) {
-    dbNameToDelete.textContent = dbName;
-    pendingDeleteName = dbName;
-    deleteModal.classList.remove('hidden');
-  }
 
   function closeDeleteModal() {
     deleteModal.classList.add('hidden');
