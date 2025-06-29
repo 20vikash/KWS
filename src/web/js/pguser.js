@@ -282,6 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!response.ok) throw new Error(`Failed to delete user. Status: ${response.status}`);
         
         // Remove the row
+        const row = this.closest('tr');
         row.remove();
 
         // Update the count
@@ -292,7 +293,6 @@ document.addEventListener('DOMContentLoaded', function() {
         userCountElement.textContent = `${newCount}/${parts[1]}`;
         }
 
-        alert(`User '${username}' deleted successfully.`);
     } catch (err) {
         console.error(err);
         alert('Error deleting user.');
