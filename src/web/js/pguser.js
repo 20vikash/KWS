@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Actions cell
     const actionsCell = document.createElement('td');
     actionsCell.innerHTML = `
-      <button class="action-btn remove-btn" data-username="${user.Username}" data-password="${user.Password}>
+      <button class="action-btn remove-btn" data-username="${user.Username}" data-password="${user.Password}">
         <i class="fas fa-trash mr-1"></i> Remove
       </button>
       <button class="action-btn manage-btn" data-username="${user.Username}" data-password="${user.Password}" data-ID="${user.ID}">
@@ -261,9 +261,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add remove event to the dynamically created button
     actionsCell.querySelector('.remove-btn')?.addEventListener('click', async function () {
-    const icon = this.querySelector('i');
-    const username = icon.getAttribute('data-username');
-    const password = icon.getAttribute('data-password');
+    const username = this.getAttribute('data-username');
+    const password = this.getAttribute('data-password');
 
     if (!confirm(`Are you sure you want to delete user '${username}'?`)) return;
 
