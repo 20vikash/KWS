@@ -119,15 +119,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     try {
       // Send POST request to create user
+      const formData = new URLSearchParams();
+      formData.append('user_name', usernameInput.value);
+      formData.append('password', passwordInput.value);
+
       const response = await fetch('/createpguser', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: JSON.stringify({
-          user_name: usernameInput.value,
-          password: passwordInput.value
-        })
+        body: formData.toString()
       });
 
       if (!response.ok) {
@@ -135,6 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       const newUser = await response.json();
+      console.log(newUser)
 
       // Update the table
       addUserToTable(newUser);
