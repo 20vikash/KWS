@@ -52,6 +52,7 @@ func NewRouter(app *Application) http.Handler {
 
 	// Serve static files
 	r.Handle("/js/*", http.StripPrefix("/js/", http.FileServer(http.Dir("../web/js"))))
+	r.Handle("/css/*", http.StripPrefix("/css/", http.FileServer(http.Dir("../web/css"))))
 
 	return r
 }
