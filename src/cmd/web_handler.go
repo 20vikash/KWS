@@ -2,6 +2,7 @@ package main
 
 import (
 	"html/template"
+	"kws/kws/consts/services"
 	"log"
 	"net/http"
 )
@@ -15,6 +16,11 @@ type Device struct {
 type Data struct {
 	Username string
 	Devices  []Device
+}
+
+type ServicesData struct {
+	Username string
+	Services []services.WebService
 }
 
 var templates = template.Must(template.ParseGlob("../web/*.html"))
@@ -93,5 +99,19 @@ func (app *Application) RenderDevicesPage(w http.ResponseWriter, r *http.Request
 }
 
 func (app *Application) RenderServicesPage(w http.ResponseWriter, r *http.Request) {
+	// Get services list
+	services := services.GetServiceList()
 
+	// Get the username
+	userName := app.SessionManager.GetString(r.Context(), "user_name")
+
+	webServices := ServicesData{
+		Username: userName,
+		Services: services,
+	}
+
+	err := templates.ExecuteTemplate(w, "services", webServices)
+	if err != nil {
+		http.Error(w, "Template rendering error", http.StatusInternalServerError)
+	}
 }
