@@ -151,6 +151,7 @@ func (app *Application) RenderPgUsersPage(w http.ResponseWriter, r *http.Request
 func (app *Application) RenderPgDatabasesPage(w http.ResponseWriter, r *http.Request) {
 	// Get the pid from the query
 	pidStr := r.URL.Query().Get("pid")
+	owner := r.URL.Query().Get("owner")
 	uid := app.SessionManager.GetInt(r.Context(), "id")
 	userName := app.SessionManager.GetString(r.Context(), "user_name")
 
@@ -172,7 +173,7 @@ func (app *Application) RenderPgDatabasesPage(w http.ResponseWriter, r *http.Req
 	pgDB := web.PgDatabase{
 		HostName:       pg.Hostname,
 		Username:       userName,
-		Owner:          dbs[0].Name,
+		Owner:          owner,
 		TotalDatabases: count,
 		Limit:          config.MAX_SERVICE_DB_DB,
 		AvailableSlots: config.MAX_SERVICE_DB_DB - count,

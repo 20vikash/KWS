@@ -82,8 +82,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.manage-btn').forEach(button => {
         button.addEventListener('click', function () {
             const pid = this.getAttribute('data-id');
+            const owner = this.getAttribute("data-username");
             if (!pid) return;
-            window.location.href = `/kws_services/postgres/db?pid=${encodeURIComponent(pid)}`;
+            window.location.href = `/kws_services/postgres/db?pid=${encodeURIComponent(pid)}&owner=${encodeURIComponent(owner)}`;
         });
     });
   
@@ -310,8 +311,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add manage event to the dynamically created button
     actionsCell.querySelector('.manage-btn')?.addEventListener('click', function () {
         const pid = this.getAttribute('data-id');
+        const owner = this.getAttribute("data-username");
         if (!pid) return;
-        window.location.href = `/kws_services/postgres/db?pid=${encodeURIComponent(pid)}`;
+        window.location.href = `/kws_services/postgres/db?pid=${encodeURIComponent(pid)}&owner=${encodeURIComponent(owner)}`;
     });
 
     
