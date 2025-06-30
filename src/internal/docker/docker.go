@@ -215,7 +215,7 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 	return resp.ID, nil
 }
 
-func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
+func (d *Docker) StartContainer(ctx context.Context, containerID, userName, password string, exists bool) error {
 	// Check if the container is already running.
 	containers, err := d.Con.ContainerList(ctx, container.ListOptions{All: false})
 	if err != nil {
@@ -234,6 +234,19 @@ func (d *Docker) StartContainer(ctx context.Context, containerID string) error {
 	if err := d.Con.ContainerStart(ctx, containerID, container.StartOptions{}); err != nil {
 		log.Println("Failed to start the container with the ID", containerID)
 		return err
+	}
+
+	// Create user, and install vscode server if it dosent exist
+	if !exists {
+		err = d.CreateUserWithSudo(containerID, userName, password)
+		if err != nil {
+			return err
+		}
+
+		err = d.InstallAndConfigureCodeServer(containerID, userName, password)
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Println("Container started successfully")
@@ -463,6 +476,46 @@ func (d *Docker) CreateUserWithSudo(containerID, username, password string) erro
 	// Add user to sudo group
 	if err := d.ExecAndPrint(ctx, containerID, []string{"usermod", "-aG", "sudo", username}); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// Install code-server, configure it, and set password for a specific user
+func (d *Docker) InstallAndConfigureCodeServer(containerID, username, vscodePassword string) error {
+	ctx := context.Background()
+
+	// Install code-server
+	installCmd := []string{
+		"bash", "-c",
+		"curl -fsSL https://code-server.dev/install.sh | sh",
+	}
+	if err := d.ExecAndPrint(ctx, containerID, installCmd); err != nil {
+		return fmt.Errorf("failed to install code-server: %w", err)
+	}
+
+	// Create config directory
+	configDir := fmt.Sprintf("/home/%s/.config/code-server", username)
+	if err := d.ExecAndPrint(ctx, containerID, []string{"mkdir", "-p", configDir}); err != nil {
+		return fmt.Errorf("failed to create config directory: %w", err)
+	}
+
+	// Write config.yaml content
+	configYaml := fmt.Sprintf(`bind-addr: 0.0.0.0:8099
+								auth: password
+								password: %s
+								cert: false
+							`, vscodePassword)
+
+	writeCmd := fmt.Sprintf(`echo "%s" > %s/config.yaml`, configYaml, configDir)
+	if err := d.ExecAndPrint(ctx, containerID, []string{"bash", "-c", writeCmd}); err != nil {
+		return fmt.Errorf("failed to write config.yaml: %w", err)
+	}
+
+	// Start code-server as the non-root user (no chown needed)
+	startCmd := fmt.Sprintf("su - %s -c 'code-server &'", username)
+	if err := d.ExecAndPrint(ctx, containerID, []string{"bash", "-c", startCmd}); err != nil {
+		return fmt.Errorf("failed to start code-server as user: %w", err)
 	}
 
 	return nil

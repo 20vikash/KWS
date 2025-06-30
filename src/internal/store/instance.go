@@ -118,3 +118,23 @@ func (i *InstanceStore) StopInstance(ctx context.Context, uid int) error {
 
 	return nil
 }
+
+func (i *InstanceStore) Exists(ctx context.Context, uid int) (bool, error) {
+	var c int
+
+	sql := `
+		SELECT COUNT(id) FROM instance WHERE user_id  = $1
+	`
+
+	err := i.db.QueryRow(ctx, sql, uid).Scan(&c)
+	if err != nil {
+		log.Println("Failed to check instance existance")
+		return false, err
+	}
+
+	if c != 1 {
+		return false, nil
+	}
+
+	return true, nil
+}

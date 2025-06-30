@@ -29,7 +29,7 @@ func generateHashedJobID(uid int, username string) string {
 }
 
 // Raw deploy logic which will be called as a goroutine.
-func (app *Application) deploy(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string) {
+func (app *Application) deploy(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string, insUser, insPass string) {
 	containerExists := false
 
 	// Create the container.
@@ -48,8 +48,15 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 		}
 	}
 
+	// Check if the instance already exists.
+	exists, err := app.Store.Instance.Exists(ctx, uid)
+	if err != nil {
+		d.Nack(false, false) // Send to retry queue
+		return
+	}
+
 	// Start the container
-	err = app.Docker.StartContainer(ctx, id)
+	err = app.Docker.StartContainer(ctx, id, insUser, insPass, exists)
 	if err != nil {
 		if err.Error() != status.CONTAINER_ALREADY_RUNNING {
 			d.Nack(false, false) // Send to retry queue
@@ -191,7 +198,7 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 
 			switch queueMessage.Action {
 			case config.DEPLOY:
-				go app.deploy(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
+				go app.deploy(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID, queueMessage.InsUser, queueMessage.InsPassword)
 			case config.STOP:
 				go app.stop(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
 			case config.KILL:
