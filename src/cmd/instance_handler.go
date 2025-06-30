@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"kws/kws/consts/config"
 	"kws/kws/internal/store"
+	"kws/kws/models"
 	"net/http"
 )
 
@@ -30,6 +31,17 @@ func (app *Application) handleInstanceAction(w http.ResponseWriter, r *http.Requ
 
 		insUser = r.FormValue("insUser")
 		insPassword = r.FormValue("insPassword")
+
+		// Validate
+		user := models.User{
+			User_name: insUser,
+			Password:  insPassword,
+		}
+
+		if !user.ValidateUserName() || !user.ValidatePassword() {
+			http.Error(w, "input wrong format", http.StatusBadRequest)
+			return
+		}
 	}
 
 	// Generate a job ID
