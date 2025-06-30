@@ -26,7 +26,7 @@ type Storage struct {
 	}
 
 	Instance interface {
-		CreateInstance(ctx context.Context, uid int, userName string) error
+		CreateInstance(ctx context.Context, uid int, userName, insUser, insPassword string) error
 		RemoveInstance(ctx context.Context, uid int) error
 		StopInstance(ctx context.Context, uid int) error
 		StartInstance(ctx context.Context, uid int) error

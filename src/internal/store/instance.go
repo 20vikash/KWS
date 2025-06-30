@@ -15,11 +15,11 @@ type InstanceStore struct {
 }
 
 // Database level function: Insert an instance record related to the user
-func (i *InstanceStore) CreateInstance(ctx context.Context, uid int, userName string) error {
+func (i *InstanceStore) CreateInstance(ctx context.Context, uid int, userName, insUser, insPassword string) error {
 	instance := models.CreateInstanceType(uid, userName)
 
 	sql := `
-		INSERT INTO instance (user_id, volume_name, container_name, instance_type, is_running) VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO instance (user_id, volume_name, container_name, instance_type, is_running, ins_user, ins_password) VALUES ($1, $2, $3, $4, $5)
 	`
 
 	_, err := i.db.Exec(ctx, sql,
@@ -28,6 +28,8 @@ func (i *InstanceStore) CreateInstance(ctx context.Context, uid int, userName st
 		instance.ContainerName,
 		instance.InstanceType,
 		true,
+		insUser,
+		insPassword,
 	)
 	if err != nil {
 		log.Println("Cannot insert row into instance table")
