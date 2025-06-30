@@ -500,12 +500,11 @@ func (d *Docker) InstallAndConfigureCodeServer(containerID, username, vscodePass
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
-	// Write config.yaml content
 	configYaml := fmt.Sprintf(`bind-addr: 0.0.0.0:8099
-								auth: password
-								password: %s
-								cert: false
-							`, vscodePassword)
+auth: password
+password: %s
+cert: false
+`, vscodePassword)
 
 	writeCmd := fmt.Sprintf(`echo "%s" > %s/config.yaml`, configYaml, configDir)
 	if err := d.ExecAndPrint(ctx, containerID, []string{"bash", "-c", writeCmd}); err != nil {
