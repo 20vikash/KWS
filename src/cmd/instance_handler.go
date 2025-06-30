@@ -17,21 +17,26 @@ func (app *Application) handleInstanceAction(w http.ResponseWriter, r *http.Requ
 	uid := app.SessionManager.GetInt(r.Context(), "id")
 	userName := app.SessionManager.GetString(r.Context(), "user_name")
 
-	// Collect username and password if its deploy
-	err := r.ParseForm()
-	if err != nil {
-		http.Error(w, "failed to parse form", http.StatusBadRequest)
-		return
-	}
+	var insUser string
+	var insPassword string
 
-	insUser := r.FormValue("insUser")
-	insPassword := r.FormValue("insPassword")
+	// Collect username and password if its deploy
+	if action == config.DEPLOY {
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "failed to parse form", http.StatusBadRequest)
+			return
+		}
+
+		insUser = r.FormValue("insUser")
+		insPassword = r.FormValue("insPassword")
+	}
 
 	// Generate a job ID
 	jid := generateHashedJobID(uid, userName)
 
 	// Push the message to the queue.
-	err = app.Store.MessageQueue.PushMessageInstance(r.Context(), &store.QueueMessage{
+	err := app.Store.MessageQueue.PushMessageInstance(r.Context(), &store.QueueMessage{
 		InsUser:     insUser,
 		InsPassword: insPassword,
 		UserID:      uid,
