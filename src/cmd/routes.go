@@ -24,9 +24,9 @@ func NewRouter(app *Application) http.Handler {
 	r.Group(func(protected chi.Router) {
 		protected.Use(app.IsAuthorized)
 		protected.Get("/logout", app.LogOutUser)
-		protected.Get("/deploy", app.Deploy)
-		protected.Get("/stop", app.StopInstance)
-		protected.Get("/kill", app.DeleteInstance)
+		protected.Post("/deploy", app.Deploy)
+		protected.Post("/stop", app.StopInstance)
+		protected.Post("/kill", app.DeleteInstance)
 		protected.Post("/register", app.RegisterDevice)
 		protected.Post("/remove", app.RemoveDevice)
 		protected.Post("/createpguser", app.CreatePGUser)
