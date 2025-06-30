@@ -1,12 +1,29 @@
 FROM ubuntu:latest
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-server && \
-    mkdir -p /var/run/sshd && \
-    echo 'root:password' | chpasswd && \
-    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+ENV DEBIAN_FRONTEND=noninteractive
 
+# Update and install everything
+RUN apt-get update && \
+    apt-get install -y \
+        openssh-server openssh-client \
+        nano vim less \
+        htop psmisc procps \
+        curl wget net-tools iproute2 dnsutils telnet iputils-ping \
+        tree zip unzip file lsb-release \
+        neofetch lsof strace \
+        software-properties-common apt-utils \
+        bash-completion man time cron \
+        ncdu iotop iftop && \
+    mkdir -p /var/run/sshd
+
+# Set root password (for container shell, not SSH)
+RUN echo 'root:password' | chpasswd
+
+# Update sshd_config: root only via key, users via password
+RUN sed -i 's/#\?PermitRootLogin .*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config && \
+    sed -i 's/#\?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+
+# Entry point script to ensure ssh keys
 RUN echo '#!/bin/bash\n\
 if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then\n\
     ssh-keygen -A\n\
