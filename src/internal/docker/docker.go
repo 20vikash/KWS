@@ -191,6 +191,9 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 				Target: "/root", // TODO:Change it in the future by creating a dedicated user.
 			},
 		},
+		RestartPolicy: container.RestartPolicy{
+			Name: "unless-stopped",
+		},
 	}
 
 	// Network config.
