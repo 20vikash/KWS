@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"kws/kws/consts/config"
@@ -439,4 +440,51 @@ func (d *Docker) RemoveNamedVolume(ctx context.Context, volumeName string) error
 	}
 
 	return nil
+}
+
+// Create user with password and sudo
+func (d *Docker) CreateUserWithSudo(containerID, username, password string) error {
+	ctx := context.Background()
+
+	// Create user with home directory
+	if err := d.ExecAndPrint(ctx, containerID, []string{"useradd", "-m", username}); err != nil {
+		return err
+	}
+
+	// Set the password
+	chpasswdCmd := fmt.Sprintf("echo '%s:%s' | chpasswd", username, password)
+	if err := d.ExecAndPrint(ctx, containerID, []string{"bash", "-c", chpasswdCmd}); err != nil {
+		return err
+	}
+
+	// Add user to sudo group
+	if err := d.ExecAndPrint(ctx, containerID, []string{"usermod", "-aG", "sudo", username}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Docker exec
+func (d *Docker) ExecAndPrint(ctx context.Context, containerID string, cmd []string) error {
+	execConfig := container.ExecOptions{
+		Cmd:          cmd,
+		AttachStdout: true,
+		AttachStderr: true,
+		Privileged:   true,
+	}
+	execResp, err := d.Con.ContainerExecCreate(ctx, containerID, execConfig)
+	if err != nil {
+		return fmt.Errorf("exec create failed: %w", err)
+	}
+
+	attachResp, err := d.Con.ContainerExecAttach(ctx, execResp.ID, container.ExecAttachOptions{})
+	if err != nil {
+		return fmt.Errorf("exec attach failed: %w", err)
+	}
+	defer attachResp.Close()
+
+	// Print output
+	_, err = io.Copy(os.Stdout, attachResp.Reader)
+	return err
 }

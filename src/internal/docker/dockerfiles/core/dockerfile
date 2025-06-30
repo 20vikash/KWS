@@ -2,7 +2,6 @@ FROM ubuntu:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update and install everything
 RUN apt-get update && \
     apt-get install -y \
         openssh-server openssh-client \
@@ -13,7 +12,8 @@ RUN apt-get update && \
         neofetch lsof strace \
         software-properties-common apt-utils \
         bash-completion man time cron \
-        ncdu iotop iftop && \
+        ncdu iotop iftop \
+        sudo && \
     mkdir -p /var/run/sshd
 
 # Set root password (for container shell, not SSH)
