@@ -19,7 +19,7 @@ func (i *InstanceStore) CreateInstance(ctx context.Context, uid int, userName, i
 	instance := models.CreateInstanceType(uid, userName)
 
 	sql := `
-		INSERT INTO instance (user_id, volume_name, container_name, instance_type, is_running, ins_user, ins_password) VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO instance (user_id, volume_name, container_name, instance_type, is_running, ins_user, ins_password) VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
 	_, err := i.db.Exec(ctx, sql,
