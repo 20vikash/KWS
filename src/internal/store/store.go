@@ -31,6 +31,7 @@ type Storage struct {
 		StopInstance(ctx context.Context, uid int) error
 		StartInstance(ctx context.Context, uid int) error
 		Exists(ctx context.Context, uid int) (bool, error)
+		GetData(ctx context.Context, uid int) (*web.InsData, error)
 	}
 
 	MessageQueue interface {

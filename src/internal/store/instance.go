@@ -5,8 +5,10 @@ import (
 	"errors"
 	"kws/kws/consts/status"
 	"kws/kws/models"
+	"kws/kws/models/web"
 	"log"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -139,4 +141,43 @@ func (i *InstanceStore) Exists(ctx context.Context, uid int) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (i *InstanceStore) GetData(ctx context.Context, uid int) (*web.InsData, error) {
+	var insData = new(web.InsData)
+	var isRunning bool
+
+	sql := `
+		SELECT ins_user, ins_password, container_name, is_running
+		FROM instances
+		WHERE user_id = $1
+	`
+
+	err := i.db.QueryRow(ctx, sql, uid).Scan(
+		&insData.Instance.Username,
+		&insData.Instance.Password,
+		&insData.ContainerName,
+		&isRunning,
+	)
+
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			insData.InstanceStatus = "inactive"
+			insData.Active = "no"
+			return insData, nil
+		}
+
+		log.Println("Cannot find instance data:", err)
+		return nil, err
+	}
+
+	if isRunning {
+		insData.InstanceStatus = "active"
+		insData.Active = "exists"
+	} else {
+		insData.InstanceStatus = "stopped"
+		insData.Active = "no"
+	}
+
+	return insData, nil
 }

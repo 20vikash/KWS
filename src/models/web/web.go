@@ -33,3 +33,17 @@ type PgDatabase struct {
 	UsagePercent   int
 	Databases      []Database
 }
+
+type Instance struct {
+	Username string
+	Password string
+	IP       string
+}
+
+type InsData struct {
+	ContainerName  string
+	Username       string
+	InstanceStatus string // "inactive", "active", "stopped"
+	Active         string // "exists", "no"
+	Instance       Instance
+}

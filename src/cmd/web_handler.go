@@ -195,22 +195,26 @@ func (app *Application) RenderPgDatabasesPage(w http.ResponseWriter, r *http.Req
 }
 
 func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Username       string
-		InstanceStatus string
-		Active         string
-		Instance       struct {
-			Username string
-			Password string
-			IP       string
-		}
-	}{
-		Username:       "admin_user",
-		Active:         "no",
-		InstanceStatus: "inactive",
+	uid := app.SessionManager.GetInt(r.Context(), "id")
+	userName := app.SessionManager.GetString(r.Context(), "user_name")
+
+	data, err := app.Store.Instance.GetData(r.Context(), uid)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
 	}
 
-	err := templates.ExecuteTemplate(w, "instance_management", data)
+	data.Username = userName
+
+	ip, err := app.Docker.FindContainerIP(r.Context(), data.ContainerName)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	data.Instance.IP = ip
+
+	err = templates.ExecuteTemplate(w, "instance_management", data)
 	if err != nil {
 		http.Error(w, "something went wrong", http.StatusInternalServerError)
 	}
