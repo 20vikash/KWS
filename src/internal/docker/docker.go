@@ -356,7 +356,7 @@ func (d *Docker) DeleteContainer(ctx context.Context, containerName string, uid 
 func (d *Docker) FindContainerIP(ctx context.Context, containerName string) (string, error) {
 	containerJSON, err := d.Con.ContainerInspect(ctx, containerName)
 	if err != nil {
-		return "", fmt.Errorf("failed to inspect container: %w", err)
+		return "", nil
 	}
 
 	for netName, netSettings := range containerJSON.NetworkSettings.Networks {
