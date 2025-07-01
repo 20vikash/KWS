@@ -85,8 +85,41 @@ document.addEventListener('DOMContentLoaded', function () {
   // Set initial state
   updateUIFromState();
 
+  // Disable all buttons except the clicked one
+  function lockButtonsExcept(activeButton) {
+    // Disable all buttons
+    deployBtn.disabled = true;
+    killBtn.disabled = true;
+    stopBtn.disabled = true;
+    codeBtn.disabled = true;
+    
+    // Remove blinking from all buttons
+    deployBtn.classList.remove("action-blinking");
+    killBtn.classList.remove("action-blinking");
+    stopBtn.classList.remove("action-blinking");
+    codeBtn.classList.remove("action-blinking");
+    
+    // Re-enable and add blinking to active button
+    activeButton.disabled = false;
+    activeButton.classList.add("action-blinking");
+  }
+  
+  // Re-enable all buttons and remove blinking
+  function unlockAllButtons() {
+    // Remove blinking from all buttons
+    deployBtn.classList.remove("action-blinking");
+    killBtn.classList.remove("action-blinking");
+    stopBtn.classList.remove("action-blinking");
+    codeBtn.classList.remove("action-blinking");
+    
+    // Re-enable buttons based on current state
+    updateButtonStates();
+  }
+
   // Button event handlers
   deployBtn.addEventListener('click', function () {
+    lockButtonsExcept(this);
+    
     if (stateInput.value === 'inactive') {
       deployModal.classList.remove('hidden');
     } else if (stateInput.value === 'stopped') {
@@ -97,8 +130,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  closeModal.addEventListener('click', () => deployModal.classList.add('hidden'));
-  cancelDeploy.addEventListener('click', () => deployModal.classList.add('hidden'));
+  closeModal.addEventListener('click', () => {
+    deployModal.classList.add('hidden');
+    unlockAllButtons();
+  });
+  
+  cancelDeploy.addEventListener('click', () => {
+    deployModal.classList.add('hidden');
+    unlockAllButtons();
+  });
 
   confirmDeploy.addEventListener('click', function () {
     const username = document.getElementById('deploy-username').value.trim();
@@ -120,10 +160,12 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   killBtn.addEventListener('click', function () {
+    lockButtonsExcept(this);
     startAction('kill');
   });
 
   stopBtn.addEventListener('click', function () {
+    lockButtonsExcept(this);
     startAction('stop');
   });
 
@@ -146,23 +188,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // Helper functions
-  function lockActionButtons() {
-    deployBtn.classList.add("action-blinking");
-    killBtn.classList.add("action-blinking");
-    stopBtn.classList.add("action-blinking");
-  }
-
-  function unlockActionButtons() {
-    deployBtn.classList.remove("action-blinking");
-    killBtn.classList.remove("action-blinking");
-    stopBtn.classList.remove("action-blinking");
-    updateButtonStates();
-  }
-
   function startDeployWithCredentials(username, password) {
-    lockActionButtons();
-
     const formData = new URLSearchParams();
     formData.append("insUser", username);
     formData.append("insPassword", password);
@@ -182,13 +208,11 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .catch(err => {
         alert(err.message);
-        unlockActionButtons();
+        unlockAllButtons();
       });
   }
 
   function startAction(type) {
-    lockActionButtons();
-
     fetch(`/${type}`, {
       method: "GET"
     })
@@ -202,14 +226,14 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .catch(err => {
         alert(err.message);
-        unlockActionButtons();
+        unlockAllButtons();
       });
   }
 
   function pollDeployResult(jobID, attempts = 0) {
     if (attempts > 20) {
       alert("Deployment timed out.");
-      unlockActionButtons();
+      unlockAllButtons();
       return;
     }
 
@@ -232,18 +256,18 @@ document.addEventListener('DOMContentLoaded', function () {
         
         stateInput.value = 'active';
         updateUIFromState();
-        unlockActionButtons();
+        unlockAllButtons();
       })
       .catch(err => {
         console.error("Polling failed:", err);
-        unlockActionButtons();
+        unlockAllButtons();
       });
   }
 
   function pollSKResult(type, jobID, attempts = 0) {
     if (attempts > 20) {
       alert(`${type} action timed out.`);
-      unlockActionButtons();
+      unlockAllButtons();
       return;
     }
 
@@ -261,17 +285,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!data.Success) {
           alert(`${type.charAt(0).toUpperCase() + type.slice(1)} failed.`);
-          unlockActionButtons();
+          unlockAllButtons();
           return;
         }
 
         stateInput.value = type === 'kill' ? 'inactive' : 'stopped';
         updateUIFromState();
-        unlockActionButtons();
+        unlockAllButtons();
       })
       .catch(err => {
         console.error(`${type} polling failed:`, err);
-        unlockActionButtons();
+        unlockAllButtons();
       });
   }
 });
