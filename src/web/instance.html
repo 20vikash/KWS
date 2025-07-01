@@ -89,7 +89,6 @@
       </div>
 
       <!-- Instance Details -->
-      {{ if eq .InstanceStatus "active" }}
       <div id="instance-details" class="{{ if ne .InstanceStatus "active" }}hidden{{ end }}">
         <div class="flex items-center mb-6">
           <div class="terminal-icon">
@@ -128,8 +127,6 @@
           </div>
         </div>
       </div>
-      {{ else }}
-      <!-- Empty State -->
       <div id="empty-state" class="{{ if eq .InstanceStatus "active" }}hidden{{ end }} text-center py-16">
         <i class="fas fa-cloud text-gray-600 text-6xl mb-6"></i>
         <h3 class="text-2xl font-bold text-gray-400 mb-2">No Instance Deployed</h3>
@@ -137,7 +134,6 @@
           Deploy your first instance to get started. Click the "Deploy" button above to launch a new cloud instance.
         </p>
       </div>
-      {{ end }}
 
     </div>
   </main>

@@ -143,34 +143,44 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   }
 
-  function updateInstanceDetails(instance) {
-    instanceDetails.classList.remove('hidden');
-    emptyState.classList.add('hidden');
+    function updateInstanceDetails(instance) {
+        const instanceDetails = document.getElementById('instance-details');
+        const emptyState = document.getElementById('empty-state');
+        const statusBadge = document.getElementById('status-badge');
+        const statusText = document.getElementById('status-text');
 
-    document.getElementById('instance-username').textContent = instance.username;
-    document.getElementById('instance-password').textContent = '••••••••';
-    document.getElementById('instance-ip').textContent = instance.ip;
-    document.getElementById('instance-ssh').textContent = `${instance.username}@${instance.ip}`;
+        if (!instanceDetails || !emptyState || !statusBadge || !statusText) {
+            console.error("Some DOM elements not found");
+            return;
+        }
 
-    statusBadge.className = 'status-badge status-active';
-    statusText.textContent = 'Instance Active';
+        instanceDetails.classList.remove('hidden');
+        emptyState.classList.add('hidden');
 
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-      const key = btn.querySelector('i').classList.contains('fa-copy');
-      if (btn.dataset.copy.includes('@')) {
-        btn.dataset.copy = `ssh ${instance.username}@${instance.ip}`;
-      } else if (btn.dataset.copy === instance.Username) {
-        btn.dataset.copy = instance.username;
-      } else if (btn.dataset.copy === instance.Password) {
-        btn.dataset.copy = instance.password;
-      } else if (btn.dataset.copy === instance.IP) {
-        btn.dataset.copy = instance.ip;
-      }
-    });
+        document.getElementById('instance-username').textContent = instance.Username;
+        document.getElementById('instance-password').textContent = '••••••••';
+        document.getElementById('instance-ip').textContent = instance.IP;
+        document.getElementById('instance-ssh').textContent = `${instance.Username}@${instance.IP}`;
 
-    document.getElementById("credentials-required").value = "exists";
-    updateCodeButtonState();
-  }
+        statusBadge.className = 'status-badge status-active';
+        statusText.textContent = 'Instance Active';
+
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            const key = btn.querySelector('i').classList.contains('fa-copy');
+            if (btn.dataset.copy.includes('@')) {
+                btn.dataset.copy = `ssh ${instance.Username}@${instance.IP}`;
+            } else if (btn.dataset.copy === instance.Username) {
+                btn.dataset.copy = instance.Username;
+            } else if (btn.dataset.copy === instance.Password) {
+                btn.dataset.copy = instance.Password;
+            } else if (btn.dataset.copy === instance.IP) {
+                btn.dataset.copy = instance.IP;
+            }
+        });
+
+        document.getElementById("credentials-required").value = "exists";
+        updateCodeButtonState();
+    }
 
   function updateCodeButtonState() {
     const status = statusBadge.className;
