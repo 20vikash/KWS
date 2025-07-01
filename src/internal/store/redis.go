@@ -108,6 +108,10 @@ func (r *RedisStore) GetDeployResult(ctx context.Context, jobID string) (bool, *
 		return false, nil, err
 	}
 
+	if err := r.Ds.Del(ctx, "deploy:result:"+jobID).Err(); err != nil {
+		return false, nil, err
+	}
+
 	return true, &instance, nil
 }
 
@@ -124,6 +128,10 @@ func (r *RedisStore) GetStopResult(ctx context.Context, jobID string) (bool, boo
 		return false, false, err
 	}
 
+	if err := r.Ds.Del(ctx, "stop:result:"+jobID).Err(); err != nil {
+		return false, false, err
+	}
+
 	return true, val == "true", nil
 }
 
@@ -137,6 +145,10 @@ func (r *RedisStore) GetKillResult(ctx context.Context, jobID string) (bool, boo
 		if err == redis.Nil {
 			return false, false, nil
 		}
+		return false, false, err
+	}
+
+	if err := r.Ds.Del(ctx, "kill:result:"+jobID).Err(); err != nil {
 		return false, false, err
 	}
 
