@@ -177,7 +177,7 @@ func (i *InstanceStore) GetData(ctx context.Context, uid int) (*web.InsData, err
 		insData.Active = "exists"
 	} else {
 		insData.InstanceStatus = "stopped"
-		insData.Active = "no"
+		insData.Active = "exists"
 	}
 
 	return insData, nil
