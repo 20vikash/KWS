@@ -22,10 +22,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const closeModal = document.getElementById('close-modal');
   const cancelDeploy = document.getElementById('cancel-deploy');
   const confirmDeploy = document.getElementById('confirm-deploy');
-  const instanceDetails = document.getElementById('instance-details');
-  const emptyState = document.getElementById('empty-state');
-  const statusBadge = document.getElementById('status-badge');
-  const statusText = document.getElementById('status-text');
   const credentialsRequired = document.getElementById('credentials-required');
 
   updateCodeButtonState();
@@ -38,17 +34,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  closeModal.addEventListener('click', function () {
-    deployModal.classList.add('hidden');
-  });
-
-  cancelDeploy.addEventListener('click', function () {
-    deployModal.classList.add('hidden');
-  });
+  closeModal.addEventListener('click', () => deployModal.classList.add('hidden'));
+  cancelDeploy.addEventListener('click', () => deployModal.classList.add('hidden'));
 
   confirmDeploy.addEventListener('click', function () {
     deployModal.classList.add('hidden');
-
     const username = document.getElementById('deploy-username').value.trim();
     const password = document.getElementById('deploy-password').value.trim();
     const confirm = document.getElementById('deploy-confirm').value.trim();
@@ -117,6 +107,26 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   }
 
+  function startAction(type) {
+    lockActionButtons();
+
+    fetch(`/${type}`, {
+      method: "GET"
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`${type} failed`);
+        return res.json();
+      })
+      .then(data => {
+        if (!data.jobID) throw new Error("No jobID received");
+        pollSKResult(type, data.jobID);
+      })
+      .catch(err => {
+        alert(err.message);
+        unlockActionButtons();
+      });
+  }
+
   function pollDeployResult(jobID, attempts = 0) {
     if (attempts > 20) {
       alert("Deployment timed out.");
@@ -143,47 +153,104 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   }
 
-    function updateInstanceDetails(instance) {
-        const instanceDetails = document.getElementById('instance-details');
-        const emptyState = document.getElementById('empty-state');
-        const statusBadge = document.getElementById('status-badge');
-        const statusText = document.getElementById('status-text');
-
-        if (!instanceDetails || !emptyState || !statusBadge || !statusText) {
-            console.error("Some DOM elements not found");
-            return;
-        }
-
-        instanceDetails.classList.remove('hidden');
-        emptyState.classList.add('hidden');
-
-        document.getElementById('instance-username').textContent = instance.Username;
-        document.getElementById('instance-password').textContent = '••••••••';
-        document.getElementById('instance-ip').textContent = instance.IP;
-        document.getElementById('instance-ssh').textContent = `${instance.Username}@${instance.IP}`;
-
-        statusBadge.className = 'status-badge status-active';
-        statusText.textContent = 'Instance Active';
-
-        document.querySelectorAll('.copy-btn').forEach(btn => {
-            const key = btn.querySelector('i').classList.contains('fa-copy');
-            if (btn.dataset.copy.includes('@')) {
-                btn.dataset.copy = `ssh ${instance.Username}@${instance.IP}`;
-            } else if (btn.dataset.copy === instance.Username) {
-                btn.dataset.copy = instance.Username;
-            } else if (btn.dataset.copy === instance.Password) {
-                btn.dataset.copy = instance.Password;
-            } else if (btn.dataset.copy === instance.IP) {
-                btn.dataset.copy = instance.IP;
-            }
-        });
-
-        document.getElementById("credentials-required").value = "exists";
-        updateCodeButtonState();
+  function pollSKResult(type, jobID, attempts = 0) {
+    if (attempts > 20) {
+      alert(`${type} action timed out.`);
+      unlockActionButtons();
+      return;
     }
 
+    const endpoint = type === 'kill' ? '/killresut' : '/stopresult';
+
+    fetch(`${endpoint}?jobID=${encodeURIComponent(jobID)}`, {
+      method: "POST"
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.Done) {
+          setTimeout(() => pollSKResult(type, jobID, attempts + 1), 2000);
+          return;
+        }
+
+        if (!data.Success) {
+          alert(`${type.charAt(0).toUpperCase() + type.slice(1)} failed.`);
+          unlockActionButtons();
+          return;
+        }
+
+        if (type === 'stop') {
+          document.getElementById('status-badge').className = 'status-badge status-stopped';
+          document.getElementById('status-text').textContent = 'Instance Stopped';
+          document.getElementById("credentials-required").value = "exists";
+
+          deployBtn.disabled = false;
+          killBtn.disabled = false;
+          stopBtn.disabled = true;
+        }
+
+        if (type === 'kill') {
+          document.getElementById('instance-details').classList.add('hidden');
+          document.getElementById('empty-state').classList.remove('hidden');
+
+          document.getElementById('status-badge').className = 'status-badge status-inactive';
+          document.getElementById('status-text').textContent = 'Instance not deployed';
+          document.getElementById("credentials-required").value = "no";
+
+          deployBtn.disabled = false;
+          killBtn.disabled = true;
+          stopBtn.disabled = true;
+        }
+
+        updateCodeButtonState();
+        removeBlinking();
+      })
+      .catch(err => {
+        console.error(`${type} polling failed:`, err);
+        unlockActionButtons();
+      });
+  }
+
+  function updateInstanceDetails(instance) {
+    const instanceDetails = document.getElementById('instance-details');
+    const emptyState = document.getElementById('empty-state');
+    const statusBadge = document.getElementById('status-badge');
+    const statusText = document.getElementById('status-text');
+
+    instanceDetails.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+
+    document.getElementById('instance-username').textContent = instance.Username;
+    document.getElementById('instance-password').textContent = '••••••••';
+    document.getElementById('instance-ip').textContent = instance.IP;
+    document.getElementById('instance-ssh').textContent = `${instance.Username}@${instance.IP}`;
+
+    statusBadge.className = 'status-badge status-active';
+    statusText.textContent = 'Instance Active';
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      const copyType = btn.previousElementSibling.id;
+      switch (copyType) {
+        case "instance-username":
+          btn.dataset.copy = instance.Username;
+          break;
+        case "instance-password":
+          btn.dataset.copy = instance.Password;
+          break;
+        case "instance-ip":
+          btn.dataset.copy = instance.IP;
+          break;
+        case "instance-ssh":
+          btn.dataset.copy = `ssh ${instance.Username}@${instance.IP}`;
+          break;
+      }
+    });
+
+    document.getElementById("credentials-required").value = "exists";
+    updateCodeButtonState();
+  }
+
   function updateCodeButtonState() {
-    const status = statusBadge.className;
+    const status = document.getElementById('status-badge').className;
     codeBtn.disabled = !status.includes('status-active');
   }
 
@@ -191,21 +258,25 @@ document.addEventListener('DOMContentLoaded', function () {
     deployBtn.disabled = true;
     killBtn.disabled = true;
     stopBtn.disabled = true;
+
     deployBtn.classList.add("action-blinking");
     killBtn.classList.add("action-blinking");
     stopBtn.classList.add("action-blinking");
   }
 
   function unlockActionButtons() {
-    deployBtn.disabled = true;
+    deployBtn.disabled = false;
     killBtn.disabled = false;
     stopBtn.disabled = false;
+    removeBlinking();
+  }
+
+  function removeBlinking() {
     deployBtn.classList.remove("action-blinking");
     killBtn.classList.remove("action-blinking");
     stopBtn.classList.remove("action-blinking");
   }
 
-  // Copy functionality
   document.querySelectorAll('.copy-btn').forEach(button => {
     button.addEventListener('click', function () {
       const text = this.getAttribute('data-copy');
