@@ -512,7 +512,7 @@ cert: false
 	}
 
 	// Start code-server as the non-root user (no chown needed)
-	startCmd := fmt.Sprintf("su - %s -c 'code-server'", username)
+	startCmd := fmt.Sprintf("su - %s -c 'nohup code-server > /dev/null 2>&1 &' ", username)
 	if err := d.ExecAndPrint(ctx, containerID, []string{"bash", "-c", startCmd}); err != nil {
 		return fmt.Errorf("failed to start code-server as user: %w", err)
 	}
