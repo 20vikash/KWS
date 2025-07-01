@@ -193,3 +193,23 @@ func (app *Application) RenderPgDatabasesPage(w http.ResponseWriter, r *http.Req
 		http.Error(w, "Template rendering error", http.StatusInternalServerError)
 	}
 }
+
+func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Username       string
+		InstanceStatus string
+		Instance       struct {
+			Username string
+			Password string
+			IP       string
+		}
+	}{
+		Username:       "admin_user",
+		InstanceStatus: "inactive",
+	}
+
+	err := templates.ExecuteTemplate(w, "instance_management", data)
+	if err != nil {
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+	}
+}
