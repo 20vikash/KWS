@@ -269,6 +269,13 @@ body::before {
     transform: translateY(-3px);
 }
 
+.code-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+}
+
+
 .action-blinking {
     animation: blinking 1s infinite;
 }
