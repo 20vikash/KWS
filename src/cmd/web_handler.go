@@ -208,11 +208,10 @@ func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Reques
 
 	ip, err := app.Docker.FindContainerIP(r.Context(), data.ContainerName)
 	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
+		data.Instance.IP = ""
+	} else {
+		data.Instance.IP = ip
 	}
-
-	data.Instance.IP = ip
 
 	err = templates.ExecuteTemplate(w, "instance_management", data)
 	if err != nil {
