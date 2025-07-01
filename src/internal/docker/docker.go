@@ -11,6 +11,7 @@ import (
 	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/internal/docker/dockerfiles/core"
+	"kws/kws/internal/wg"
 	"log"
 	"os"
 	"path/filepath"
@@ -27,7 +28,8 @@ import (
 )
 
 type Docker struct {
-	Con *client.Client
+	Con     *client.Client
+	IpAlloc *wg.IPAllocator
 }
 
 func createTarDir(src string) (*bytes.Buffer, error) {
@@ -162,7 +164,7 @@ func (d *Docker) CreateImageCore(ctx context.Context) error {
 }
 
 // Creating the container using the core ubuntu image created earlier. (Has persistent named volume, network)
-func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeName, networkName string) (string, error) {
+func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeName, networkName string, uid int) (string, error) {
 	// Check if the container already exists
 	containers, err := d.Con.ContainerList(ctx, container.ListOptions{All: true}) // All to true will include non running containers
 	if err != nil {
@@ -196,10 +198,21 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 		},
 	}
 
+	// Find a free IP to allocate.
+	freeIP, err := d.IpAlloc.AllocateFreeDockerIp(ctx, uid)
+	if err != nil {
+		log.Println("Docker cannot allocate free IP")
+		return "", err
+	}
+
 	// Network config.
 	networkConfig := &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
-			networkName:                  {},
+			networkName: {
+				IPAMConfig: &network.EndpointIPAMConfig{
+					IPv4Address: freeIP,
+				},
+			},
 			config.SERVICES_NETWORK_NAME: {},
 		},
 	}
@@ -293,7 +306,7 @@ func (d *Docker) StopContainer(ctx context.Context, containerName string) error 
 }
 
 // Delete the running container using the container name being passed.
-func (d *Docker) DeleteContainer(ctx context.Context, containerName string) error {
+func (d *Docker) DeleteContainer(ctx context.Context, containerName string, uid int) error {
 	var containerID string
 	containerFound := false
 
@@ -325,6 +338,13 @@ func (d *Docker) DeleteContainer(ctx context.Context, containerName string) erro
 
 	if err := d.Con.ContainerRemove(ctx, containerID, removeOptions); err != nil {
 		log.Println("Failed to delete the container:", err)
+		return err
+	}
+
+	// De-allocate the IP
+	err = d.IpAlloc.DeAllocateDockerIP(ctx, uid)
+	if err != nil {
+		log.Println("Cannot de-allocate IP after deleting container")
 		return err
 	}
 

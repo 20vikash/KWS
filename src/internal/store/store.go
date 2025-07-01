@@ -71,7 +71,7 @@ func NewStore(pg *pgxpool.Pool, redis *redis.Client, mq *MQ) *Storage {
 			Ds: redis,
 		},
 		Instance: &InstanceStore{
-			db: pg,
+			Db: pg,
 		},
 		MessageQueue: &MQ{
 			Ch:    mq.Ch,

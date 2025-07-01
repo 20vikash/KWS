@@ -38,6 +38,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 		instanceType.ContainerName,
 		instanceType.VolumeName,
 		config.CORE_NETWORK_NAME,
+		uid,
 	)
 	if err != nil {
 		if err.Error() == status.CONTAINER_ALREADY_EXISTS {
@@ -157,7 +158,7 @@ func (app *Application) stop(ctx context.Context, uid int, userName string, d *a
 func (app *Application) kill(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string) {
 	// kill the container
 	instanceType := models.CreateInstanceType(uid, userName)
-	err := app.Docker.DeleteContainer(ctx, instanceType.ContainerName)
+	err := app.Docker.DeleteContainer(ctx, instanceType.ContainerName, uid)
 	if err != nil {
 		if err.Error() != status.CONTAINER_NOT_FOUND_TO_DELETE {
 			log.Println("Something went wrong in stopping the container")

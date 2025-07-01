@@ -14,7 +14,7 @@ import (
 )
 
 type InstanceStore struct {
-	db *pgxpool.Pool
+	Db *pgxpool.Pool
 }
 
 // Database level function: Insert an instance record related to the user
@@ -25,7 +25,7 @@ func (i *InstanceStore) CreateInstance(ctx context.Context, uid int, userName, i
 		INSERT INTO instance (user_id, volume_name, container_name, instance_type, is_running, ins_user, ins_password) VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
-	_, err := i.db.Exec(ctx, sql,
+	_, err := i.Db.Exec(ctx, sql,
 		instance.Uid,
 		instance.VolumeName,
 		instance.ContainerName,
@@ -50,7 +50,7 @@ func (i *InstanceStore) StartInstance(ctx context.Context, uid int) error {
 		SELECT is_running FROM instance WHERE user_id=$1
 	`
 
-	err := i.db.QueryRow(ctx, sql, uid).Scan(&isRunning)
+	err := i.Db.QueryRow(ctx, sql, uid).Scan(&isRunning)
 	if err != nil {
 		log.Println("Cannot query the instance table(db)")
 		return err
@@ -64,7 +64,7 @@ func (i *InstanceStore) StartInstance(ctx context.Context, uid int) error {
 		UPDATE instance SET is_running=TRUE WHERE user_id=$1
 	`
 
-	res, err := i.db.Exec(ctx, sql, uid)
+	res, err := i.Db.Exec(ctx, sql, uid)
 	if err != nil {
 		log.Println("Cannot start the instance(db)")
 		return err
@@ -86,7 +86,7 @@ func (i *InstanceStore) RemoveInstance(ctx context.Context, uid int) error {
 		DELETE FROM instance WHERE user_id = $1
 	`
 
-	res, err := i.db.Exec(ctx, sql, uid)
+	res, err := i.Db.Exec(ctx, sql, uid)
 	if err != nil {
 		log.Println("Cannot remove the instance(db)")
 		return err
@@ -108,7 +108,7 @@ func (i *InstanceStore) StopInstance(ctx context.Context, uid int) error {
 		UPDATE instance SET is_running=FALSE WHERE user_id=$1
 	`
 
-	res, err := i.db.Exec(ctx, sql, uid)
+	res, err := i.Db.Exec(ctx, sql, uid)
 	if err != nil {
 		log.Println("Cannot stop the instance(db)")
 		return err
@@ -131,7 +131,7 @@ func (i *InstanceStore) Exists(ctx context.Context, uid int) (bool, error) {
 		SELECT COUNT(id) FROM instance WHERE user_id  = $1
 	`
 
-	err := i.db.QueryRow(ctx, sql, uid).Scan(&c)
+	err := i.Db.QueryRow(ctx, sql, uid).Scan(&c)
 	if err != nil {
 		log.Println("Failed to check instance existance")
 		return false, err
@@ -154,7 +154,7 @@ func (i *InstanceStore) GetData(ctx context.Context, uid int) (*web.InsData, err
 		WHERE user_id = $1
 	`
 
-	err := i.db.QueryRow(ctx, sql, uid).Scan(
+	err := i.Db.QueryRow(ctx, sql, uid).Scan(
 		&insData.Instance.Username,
 		&insData.Instance.Password,
 		&insData.ContainerName,
@@ -188,7 +188,7 @@ func (i *InstanceStore) AddIP(ctx context.Context, uid int, ip int) error {
 		INSERT INTO userip (user_id, ip_address) VALUES ($1, $2)
 	`
 
-	_, err := i.db.Exec(ctx, sql,
+	_, err := i.Db.Exec(ctx, sql,
 		uid,
 		ip,
 	)
@@ -207,7 +207,7 @@ func (i *InstanceStore) RemoveIP(ctx context.Context, uid int) (int, error) {
 		DELETE FROM userip WHERE user_id = $1 RETURNING ip_address
 	`
 
-	err := i.db.QueryRow(ctx, sql,
+	err := i.Db.QueryRow(ctx, sql,
 		uid,
 	).Scan(&ipAddress)
 	if err != nil {
@@ -235,7 +235,7 @@ func (in *InstanceStore) AllocateNextFreeIP(ctx context.Context, maxHostNumber i
 	`
 
 	for i := range maxRetries {
-		tx, err := in.db.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
+		tx, err := in.Db.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
 		if err != nil {
 			log.Println("Cannot start transaction")
 			return -1, err

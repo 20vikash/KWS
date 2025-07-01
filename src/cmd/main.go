@@ -155,10 +155,13 @@ func main() {
 
 	// Create IPAllocator
 	ipAlloc := &wg.IPAllocator{
-		CidrValue:  config.CIDR,
-		RedisStore: &store.RedisStore{Ds: rc},
-		WgStore:    &store.WireguardStore{Con: connPool},
+		CidrValue:     config.CIDR,
+		RedisStore:    &store.RedisStore{Ds: rc},
+		WgStore:       &store.WireguardStore{Con: connPool},
+		InstanceStore: &store.InstanceStore{Db: connPool},
 	}
+
+	docker.IpAlloc = ipAlloc
 
 	// Initialize pg service
 	pgService := serviceConn.Pg{
