@@ -198,6 +198,7 @@ func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Reques
 	data := struct {
 		Username       string
 		InstanceStatus string
+		Active         string
 		Instance       struct {
 			Username string
 			Password string
@@ -205,6 +206,7 @@ func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Reques
 		}
 	}{
 		Username:       "admin_user",
+		Active:         "no",
 		InstanceStatus: "inactive",
 	}
 
