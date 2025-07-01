@@ -104,6 +104,10 @@ func (app *Application) handleDeployResult(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	if instance == nil {
+		instance = &web.Instance{}
+	}
+
 	response := web.JobResponseDeploy{
 		Done:     done,
 		Instance: *instance,
