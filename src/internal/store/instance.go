@@ -149,7 +149,7 @@ func (i *InstanceStore) GetData(ctx context.Context, uid int) (*web.InsData, err
 
 	sql := `
 		SELECT ins_user, ins_password, container_name, is_running
-		FROM instances
+		FROM instance
 		WHERE user_id = $1
 	`
 
