@@ -256,10 +256,25 @@ func (d *Docker) StartContainer(ctx context.Context, containerID, userName, pass
 			return err
 		}
 
-		err = d.InstallAndConfigureCodeServer(containerID, userName, password)
+		err = d.InstallCodeServer(containerID)
 		if err != nil {
 			return err
 		}
+
+		err = d.ConfigureCodeServer(containerID, userName, password)
+		if err != nil {
+			return err
+		}
+
+		err = d.StartCodeServer(containerID, userName)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = d.StartCodeServer(containerID, userName)
+	if err != nil {
+		return err
 	}
 
 	log.Println("Container started successfully")
@@ -507,19 +522,24 @@ func (d *Docker) CreateUserWithSudo(containerID, username, password string) erro
 }
 
 // Install code-server, configure it, and set password for a specific user
-func (d *Docker) InstallAndConfigureCodeServer(containerID, username, vscodePassword string) error {
+func (d *Docker) InstallCodeServer(containerID string) error {
 	ctx := context.Background()
 
-	// Install code-server
 	installCmd := []string{
 		"bash", "-c",
 		"curl -fsSL https://code-server.dev/install.sh | sh",
 	}
+
 	if err := d.ExecAndPrint(ctx, containerID, installCmd); err != nil {
 		return fmt.Errorf("failed to install code-server: %w", err)
 	}
 
-	// Create config directory
+	return nil
+}
+
+func (d *Docker) ConfigureCodeServer(containerID, username, vscodePassword string) error {
+	ctx := context.Background()
+
 	configDir := fmt.Sprintf("/home/%s/.config/code-server", username)
 	if err := d.ExecAndPrint(ctx, containerID, []string{"mkdir", "-p", configDir}); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
@@ -536,8 +556,13 @@ cert: false
 		return fmt.Errorf("failed to write config.yaml: %w", err)
 	}
 
-	// Start code-server as the non-root user (no chown needed)
-	startCmd := fmt.Sprintf("su - %s -c 'nohup code-server > /dev/null 2>&1 &' ", username)
+	return nil
+}
+
+func (d *Docker) StartCodeServer(containerID, username string) error {
+	ctx := context.Background()
+
+	startCmd := fmt.Sprintf("su - %s -c 'nohup code-server > /dev/null 2>&1 &'", username)
 	if err := d.ExecAndPrint(ctx, containerID, []string{"bash", "-c", startCmd}); err != nil {
 		return fmt.Errorf("failed to start code-server as user: %w", err)
 	}
