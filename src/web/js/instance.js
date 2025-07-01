@@ -85,8 +85,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // Set initial state
   updateUIFromState();
 
-  // Disable all buttons except the clicked one
-  function lockButtonsExcept(activeButton) {
+  // Disable all buttons and add blinking to the active button
+  function lockButton(activeButton) {
     // Disable all buttons
     deployBtn.disabled = true;
     killBtn.disabled = true;
@@ -99,8 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
     stopBtn.classList.remove("action-blinking");
     codeBtn.classList.remove("action-blinking");
     
-    // Re-enable and add blinking to active button
-    activeButton.disabled = false;
+    // Add blinking to the active button (and keep it disabled)
     activeButton.classList.add("action-blinking");
   }
   
@@ -118,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Button event handlers
   deployBtn.addEventListener('click', function () {
-    lockButtonsExcept(this);
+    lockButton(this);
     
     if (stateInput.value === 'inactive') {
       deployModal.classList.remove('hidden');
@@ -147,11 +146,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!username || !password) {
       alert('Username and password are required!');
+      unlockAllButtons();
       return;
     }
     
     if (password !== confirm) {
       alert('Passwords do not match!');
+      unlockAllButtons();
       return;
     }
 
@@ -160,12 +161,12 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   killBtn.addEventListener('click', function () {
-    lockButtonsExcept(this);
+    lockButton(this);
     startAction('kill');
   });
 
   stopBtn.addEventListener('click', function () {
-    lockButtonsExcept(this);
+    lockButton(this);
     startAction('stop');
   });
 
