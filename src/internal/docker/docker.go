@@ -354,22 +354,27 @@ func (d *Docker) DeleteContainer(ctx context.Context, containerName string, uid 
 
 // Extracts the IP assigned by the docker daemon while creating the container in the custom network.
 func (d *Docker) FindContainerIP(ctx context.Context, containerName string) (string, error) {
-	// Inspect the container to get network settings
 	containerJSON, err := d.Con.ContainerInspect(ctx, containerName)
 	if err != nil {
-		return "", nil
+		return "", fmt.Errorf("failed to inspect container: %w", err)
 	}
 
-	// Iterate through the network settings
 	for netName, netSettings := range containerJSON.NetworkSettings.Networks {
-		log.Printf("Found container in network: %s, IP: %s", netName, netSettings.IPAddress)
+		// Try runtime IP (available when running)
 		if netSettings.IPAddress != "" {
+			log.Printf("Found container in network %s with runtime IP: %s", netName, netSettings.IPAddress)
 			return netSettings.IPAddress, nil
+		}
+
+		// Try static IP from IPAM (available even if stopped)
+		if netSettings.IPAMConfig != nil && netSettings.IPAMConfig.IPv4Address != "" {
+			log.Printf("Found container in network %s with static IPAM IP: %s", netName, netSettings.IPAMConfig.IPv4Address)
+			return netSettings.IPAMConfig.IPv4Address, nil
 		}
 	}
 
 	log.Println("No IP address found for the container")
-	return "", errors.New("no ip address found")
+	return "", errors.New("no IP address found")
 }
 
 // Named volume for every user creating a container.
