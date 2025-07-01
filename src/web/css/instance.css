@@ -264,20 +264,15 @@ body::before {
     color: white;
 }
 
-.code-btn:hover {
-    background: linear-gradient(to right, #7c3aed, #6d28d9);
-    transform: translateY(-3px);
+.code-btn:hover:not(:disabled) {
+  background: linear-gradient(to right, #7c3aed, #6d28d9);
+  transform: translateY(-3px);
 }
 
 .code-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     filter: grayscale(0.5);
-}
-
-.code-btn:hover:not(:disabled) {
-    background: linear-gradient(to right, #7c3aed, #6d28d9);
-    transform: translateY(-3px);
 }
 
 .action-blinking {
