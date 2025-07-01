@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -180,4 +181,115 @@ func (i *InstanceStore) GetData(ctx context.Context, uid int) (*web.InsData, err
 	}
 
 	return insData, nil
+}
+
+func (i *InstanceStore) AddIP(ctx context.Context, uid int, ip int) error {
+	sql := `
+		INSERT INTO userip (user_id, ip_address) VALUES ($1, $2)
+	`
+
+	_, err := i.db.Exec(ctx, sql,
+		uid,
+		ip,
+	)
+	if err != nil {
+		log.Println("Cannot insert userip record")
+		return err
+	}
+
+	return nil
+}
+
+func (i *InstanceStore) RemoveIP(ctx context.Context, uid int) (int, error) {
+	var ipAddress int
+
+	sql := `
+		DELETE FROM userip WHERE user_id = $1 RETURNING ip_address
+	`
+
+	err := i.db.QueryRow(ctx, sql,
+		uid,
+	).Scan(&ipAddress)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			log.Println("No rows found to delete")
+			return -1, errors.New(status.PEER_DOES_NOT_EXIST)
+		}
+		log.Println("Cannot delete userip record")
+		return -1, err
+	}
+
+	return ipAddress, nil
+}
+
+func (in *InstanceStore) AllocateNextFreeIP(ctx context.Context, maxHostNumber int, uid int) (int, error) {
+	var ip int
+	maxRetries := 5
+
+	// Transaction (serializable)
+	sqlSelect := `
+		SELECT ip_address FROM userip ORDER BY ip_address DESC LIMIT 1
+	`
+	sqlInsert := `
+		INSERT INTO userip (user_id, ip_address) VALUES ($1, $2)
+	`
+
+	for i := range maxRetries {
+		tx, err := in.db.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
+		if err != nil {
+			log.Println("Cannot start transaction")
+			return -1, err
+		}
+
+		err = func() error {
+			defer tx.Rollback(ctx)
+
+			err := tx.QueryRow(ctx, sqlSelect).Scan(&ip)
+			if err != nil {
+				if err == pgx.ErrNoRows {
+					log.Println("Cannot find the max of the ip. This is the start it seems")
+					ip = 2
+				} else {
+					log.Println("Cannot find max of the IP. Something went wrong.")
+					return err
+				}
+			} else {
+				ip += 1
+				if ip > maxHostNumber {
+					return errors.New(status.HOST_EXHAUSTION)
+				}
+			}
+
+			_, err = tx.Exec(ctx, sqlInsert,
+				uid,
+				ip,
+			)
+			if err != nil {
+				log.Println("Cannot insert ip+1 record")
+				return err
+			}
+
+			return tx.Commit(ctx)
+		}()
+
+		if err == nil {
+			log.Println("Transaction successful")
+			break
+		}
+
+		if err.Error() == status.HOST_EXHAUSTION {
+			log.Println("Cannot allocate IP more than the host portion size")
+			return -1, err
+		}
+
+		if pgError, ok := err.(*pgconn.PgError); ok && pgError.Code == "40001" {
+			log.Printf("Serialization conflict, retrying... Attempt: %d\n", i+1)
+			continue
+		}
+
+		log.Println("Transaction failed. Not serializable error")
+		return -1, err
+	}
+
+	return ip, nil
 }
