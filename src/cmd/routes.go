@@ -40,6 +40,7 @@ func NewRouter(app *Application) http.Handler {
 			r.Get("/postgres/users", app.RenderPgUsersPage)
 			r.Get("/postgres/db", app.RenderPgDatabasesPage)
 		})
+		protected.Get("/kws_instances", app.RenderInstancePage)
 		protected.Get("/", app.HomeHandler)
 	})
 

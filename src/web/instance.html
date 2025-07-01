@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/instance.css">
+  <link rel="stylesheet" href="/css/instance.css">
 </head>
 <body class="relative flex flex-col md:flex-row">
   <div id="sparkle-container"></div>
@@ -18,7 +18,7 @@
     <div class="flex flex-col md:block">
       <h1 class="text-2xl font-bold text-blue-400 mb-4 md:mb-8">KWS Cloud</h1>
       <nav class="space-y-0 md:space-y-4 flex md:block gap-4">
-        <a href="/instances" class="block px-3 py-2 rounded-md bg-gray-800 text-white">
+        <a href="/kws_instances" class="block px-3 py-2 rounded-md bg-gray-800 text-white">
           <i class="fas fa-server mr-2"></i>Instances
         </a>
         <a href="/kws_devices" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
@@ -176,7 +176,7 @@
   <!-- Credentials Status for JS -->
   <input type="hidden" id="credentials-required" value="{{ if eq .InstanceStatus "active" }}exists{{ else }}no{{ end }}">
 
-  <script src="js/instance.js"></script>
+  <script src="/js/instance.js"></script>
 </body>
 </html>
 {{ end }}
