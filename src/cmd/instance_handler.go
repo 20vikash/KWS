@@ -133,7 +133,7 @@ func (app *Application) handleSKResult(w http.ResponseWriter, r *http.Request, g
 	writeJSON(w, response)
 }
 
-func writeJSON(w http.ResponseWriter, data interface{}) {
+func writeJSON(w http.ResponseWriter, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(data)
 }

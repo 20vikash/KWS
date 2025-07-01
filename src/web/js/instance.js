@@ -129,12 +129,12 @@ document.addEventListener('DOMContentLoaded', function () {
     })
       .then(res => res.json())
       .then(data => {
-        if (!data.done) {
+        if (!data.Done) {
           setTimeout(() => pollDeployResult(jobID, attempts + 1), 2000);
           return;
         }
 
-        updateInstanceDetails(data.instance);
+        updateInstanceDetails(data.Instance);
         unlockActionButtons();
       })
       .catch(err => {
@@ -159,11 +159,11 @@ document.addEventListener('DOMContentLoaded', function () {
       const key = btn.querySelector('i').classList.contains('fa-copy');
       if (btn.dataset.copy.includes('@')) {
         btn.dataset.copy = `ssh ${instance.username}@${instance.ip}`;
-      } else if (btn.dataset.copy === instance.username) {
+      } else if (btn.dataset.copy === instance.Username) {
         btn.dataset.copy = instance.username;
-      } else if (btn.dataset.copy === instance.password) {
+      } else if (btn.dataset.copy === instance.Password) {
         btn.dataset.copy = instance.password;
-      } else if (btn.dataset.copy === instance.ip) {
+      } else if (btn.dataset.copy === instance.IP) {
         btn.dataset.copy = instance.ip;
       }
     });
