@@ -57,7 +57,7 @@
             </h1>
             <p class="text-gray-400 mt-2">Deploy, manage, and access your cloud instances</p>
           </div>
-          <div id="status-badge" class="status-badge {{ if eq .InstanceStatus "active" }}status-active{{ else if eq .InstanceStatus "stopped" }}status-stopped{{ else }}status-inactive{{ end }}">
+          <div id="status-badge" class="status-badge">
             <span class="status-indicator"></span>
             <span id="status-text">
               {{ if eq .InstanceStatus "active" }}Instance Active
@@ -66,20 +66,22 @@
             </span>
           </div>
         </div>
-        <input type="text" value={{ .Active }} id="credentials-required" hidden>
-        <input type="text" value={{ .ContainerName }} id="container-name" hidden>
+        <input type="text" id="instance-state" value="{{ .InstanceStatus }}" hidden>
+        <input type="text" id="hidden-username" value="{{ .Instance.Username }}" hidden>
+        <input type="text" id="hidden-password" value="{{ .Instance.Password }}" hidden>
+        <input type="text" value="{{ .ContainerName }}" id="container-name" hidden>
       </div>
 
       <!-- Action Buttons -->
       <div class="card p-6 mb-8">
         <div class="flex flex-col md:flex-row justify-center items-center gap-4">
-          <button id="deploy-btn" class="action-btn deploy-btn" {{ if eq .InstanceStatus "active" }}disabled{{ end }}>
+          <button id="deploy-btn" class="action-btn deploy-btn">
             <i class="fas fa-cloud-upload-alt mr-2"></i> Deploy
           </button>
-          <button id="kill-btn" class="action-btn kill-btn" {{ if ne .InstanceStatus "active" }}disabled{{ end }}>
+          <button id="kill-btn" class="action-btn kill-btn">
             <i class="fas fa-skull mr-2"></i> Kill
           </button>
-          <button id="stop-btn" class="action-btn stop-btn" {{ if or (eq .InstanceStatus "stopped") (eq .InstanceStatus "inactive") }}disabled{{ end }}>
+          <button id="stop-btn" class="action-btn stop-btn">
             <i class="fas fa-stop mr-2"></i> Stop
           </button>
           <button id="code-btn" class="action-btn code-btn">
@@ -89,7 +91,7 @@
       </div>
 
       <!-- Instance Details -->
-      <div id="instance-details" class="{{ if ne .InstanceStatus "active" }}hidden{{ end }}">
+      <div id="instance-details" class="{{ if eq .InstanceStatus "inactive" }}hidden{{ end }}">
         <div class="flex items-center mb-6">
           <div class="terminal-icon">
             <i class="fas fa-terminal text-blue-400"></i>
@@ -127,7 +129,7 @@
           </div>
         </div>
       </div>
-      <div id="empty-state" class="{{ if eq .InstanceStatus "active" }}hidden{{ end }} text-center py-16">
+      <div id="empty-state" class="{{ if ne .InstanceStatus "inactive" }}hidden{{ end }} text-center py-16">
         <i class="fas fa-cloud text-gray-600 text-6xl mb-6"></i>
         <h3 class="text-2xl font-bold text-gray-400 mb-2">No Instance Deployed</h3>
         <p class="text-gray-500 max-w-md mx-auto">
@@ -170,9 +172,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Credentials Status for JS -->
-  <input type="hidden" id="credentials-required" value="{{ if eq .InstanceStatus "active" }}exists{{ else }}no{{ end }}">
 
   <script src="/js/instance.js"></script>
 </body>

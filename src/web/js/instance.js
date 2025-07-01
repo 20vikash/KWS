@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
+  // Sparkle effect
   const sparkleContainer = document.getElementById('sparkle-container');
   const sparkleCount = 60;
-
+  
   for (let i = 0; i < sparkleCount; i++) {
     const sparkle = document.createElement('div');
     sparkle.classList.add('sparkle');
@@ -14,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function () {
     sparkleContainer.appendChild(sparkle);
   }
 
+  // State management
+  const stateInput = document.getElementById('instance-state');
   const deployBtn = document.getElementById('deploy-btn');
   const killBtn = document.getElementById('kill-btn');
   const stopBtn = document.getElementById('stop-btn');
@@ -22,15 +25,75 @@ document.addEventListener('DOMContentLoaded', function () {
   const closeModal = document.getElementById('close-modal');
   const cancelDeploy = document.getElementById('cancel-deploy');
   const confirmDeploy = document.getElementById('confirm-deploy');
-  const credentialsRequired = document.getElementById('credentials-required');
+  const statusBadge = document.getElementById('status-badge');
+  const statusText = document.getElementById('status-text');
+  const instanceDetails = document.getElementById('instance-details');
+  const emptyState = document.getElementById('empty-state');
+  const hiddenUsername = document.getElementById('hidden-username');
+  const hiddenPassword = document.getElementById('hidden-password');
 
-  updateCodeButtonState();
+  // Initialize button states
+  function updateButtonStates() {
+    const state = stateInput.value;
+    
+    deployBtn.disabled = (state === 'active');
+    killBtn.disabled = (state !== 'active' && state !== 'stopped');
+    stopBtn.disabled = (state !== 'active');
+    codeBtn.disabled = (state !== 'active');
+  }
 
-  deployBtn.addEventListener('click', function () {
-    if (credentialsRequired.value === 'no') {
-      deployModal.classList.remove('hidden');
+  // Update UI based on state
+  function updateUIFromState() {
+    const state = stateInput.value;
+    
+    // Update status badge
+    statusBadge.className = 'status-badge';
+    if (state === 'active') {
+      statusBadge.classList.add('status-active');
+      statusText.textContent = 'Instance Active';
+      instanceDetails.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+    } else if (state === 'stopped') {
+      statusBadge.classList.add('status-stopped');
+      statusText.textContent = 'Instance Stopped';
+      instanceDetails.classList.remove('hidden');
+      emptyState.classList.add('hidden');
     } else {
-      startDeployDirectly();
+      statusBadge.classList.add('status-inactive');
+      statusText.textContent = 'Instance not deployed';
+      instanceDetails.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+    }
+    
+    updateButtonStates();
+  }
+  
+  // Update visible instance details
+  function updateInstanceDetails(instance) {
+    document.getElementById('instance-username').textContent = instance.Username;
+    document.getElementById('instance-password').textContent = '••••••••';
+    document.getElementById('instance-ip').textContent = instance.IP;
+    document.getElementById('instance-ssh').textContent = `${instance.Username}@${instance.IP}`;
+    
+    // Update copy buttons
+    document.querySelector('[data-copy]').setAttribute('data-copy', instance.Username);
+    document.querySelectorAll('.copy-btn')[1].setAttribute('data-copy', instance.Password);
+    document.querySelectorAll('.copy-btn')[2].setAttribute('data-copy', instance.IP);
+    document.querySelectorAll('.copy-btn')[3].setAttribute('data-copy', `ssh ${instance.Username}@${instance.IP}`);
+  }
+  
+  // Set initial state
+  updateUIFromState();
+
+  // Button event handlers
+  deployBtn.addEventListener('click', function () {
+    if (stateInput.value === 'inactive') {
+      deployModal.classList.remove('hidden');
+    } else if (stateInput.value === 'stopped') {
+      // Reuse existing credentials
+      const username = hiddenUsername.value;
+      const password = hiddenPassword.value;
+      startDeployWithCredentials(username, password);
     }
   });
 
@@ -38,39 +101,22 @@ document.addEventListener('DOMContentLoaded', function () {
   cancelDeploy.addEventListener('click', () => deployModal.classList.add('hidden'));
 
   confirmDeploy.addEventListener('click', function () {
-    deployModal.classList.add('hidden');
     const username = document.getElementById('deploy-username').value.trim();
     const password = document.getElementById('deploy-password').value.trim();
     const confirm = document.getElementById('deploy-confirm').value.trim();
 
+    if (!username || !password) {
+      alert('Username and password are required!');
+      return;
+    }
+    
     if (password !== confirm) {
       alert('Passwords do not match!');
       return;
     }
 
-    lockActionButtons();
-
-    const formData = new URLSearchParams();
-    formData.append("insUser", username);
-    formData.append("insPassword", password);
-
-    fetch("/deploy", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData,
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Deployment failed");
-        return res.json();
-      })
-      .then(data => {
-        if (!data.jobID) throw new Error("No jobID received");
-        pollDeployResult(data.jobID);
-      })
-      .catch(err => {
-        alert(err.message);
-        unlockActionButtons();
-      });
+    deployModal.classList.add('hidden');
+    startDeployWithCredentials(username, password);
   });
 
   killBtn.addEventListener('click', function () {
@@ -85,13 +131,46 @@ document.addEventListener('DOMContentLoaded', function () {
     alert('Opening VS Code in browser...');
   });
 
-  function startDeployDirectly() {
+  // Copy buttons
+  document.querySelectorAll('.copy-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const text = this.getAttribute('data-copy');
+      navigator.clipboard.writeText(text);
+      const icon = this.querySelector('i');
+      icon.className = 'fas fa-check';
+      this.classList.add('copied');
+      setTimeout(() => {
+        icon.className = 'fas fa-copy';
+        this.classList.remove('copied');
+      }, 2000);
+    });
+  });
+
+  // Helper functions
+  function lockActionButtons() {
+    deployBtn.classList.add("action-blinking");
+    killBtn.classList.add("action-blinking");
+    stopBtn.classList.add("action-blinking");
+  }
+
+  function unlockActionButtons() {
+    deployBtn.classList.remove("action-blinking");
+    killBtn.classList.remove("action-blinking");
+    stopBtn.classList.remove("action-blinking");
+    updateButtonStates();
+  }
+
+  function startDeployWithCredentials(username, password) {
     lockActionButtons();
+
+    const formData = new URLSearchParams();
+    formData.append("insUser", username);
+    formData.append("insPassword", password);
 
     fetch("/deploy", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(),
+      body: formData,
     })
       .then(res => {
         if (!res.ok) throw new Error("Deployment failed");
@@ -144,7 +223,15 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
 
+        // Update credentials in DOM
+        document.getElementById('hidden-username').value = data.Instance.Username;
+        document.getElementById('hidden-password').value = data.Instance.Password;
+        
+        // Update visible instance details
         updateInstanceDetails(data.Instance);
+        
+        stateInput.value = 'active';
+        updateUIFromState();
         unlockActionButtons();
       })
       .catch(err => {
@@ -178,116 +265,13 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
 
-        if (type === 'stop') {
-          document.getElementById('status-badge').className = 'status-badge status-stopped';
-          document.getElementById('status-text').textContent = 'Instance Stopped';
-          document.getElementById("credentials-required").value = "exists";
-
-          deployBtn.disabled = false;
-          killBtn.disabled = false;
-          stopBtn.disabled = true;
-        }
-
-        if (type === 'kill') {
-          document.getElementById('instance-details').classList.add('hidden');
-          document.getElementById('empty-state').classList.remove('hidden');
-
-          document.getElementById('status-badge').className = 'status-badge status-inactive';
-          document.getElementById('status-text').textContent = 'Instance not deployed';
-          document.getElementById("credentials-required").value = "no";
-
-          deployBtn.disabled = false;
-          killBtn.disabled = true;
-          stopBtn.disabled = true;
-        }
-
-        updateCodeButtonState();
-        removeBlinking();
+        stateInput.value = type === 'kill' ? 'inactive' : 'stopped';
+        updateUIFromState();
+        unlockActionButtons();
       })
       .catch(err => {
         console.error(`${type} polling failed:`, err);
         unlockActionButtons();
       });
   }
-
-  function updateInstanceDetails(instance) {
-    const instanceDetails = document.getElementById('instance-details');
-    const emptyState = document.getElementById('empty-state');
-    const statusBadge = document.getElementById('status-badge');
-    const statusText = document.getElementById('status-text');
-
-    instanceDetails.classList.remove('hidden');
-    emptyState.classList.add('hidden');
-
-    document.getElementById('instance-username').textContent = instance.Username;
-    document.getElementById('instance-password').textContent = '••••••••';
-    document.getElementById('instance-ip').textContent = instance.IP;
-    document.getElementById('instance-ssh').textContent = `${instance.Username}@${instance.IP}`;
-
-    statusBadge.className = 'status-badge status-active';
-    statusText.textContent = 'Instance Active';
-
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-      const copyType = btn.previousElementSibling.id;
-      switch (copyType) {
-        case "instance-username":
-          btn.dataset.copy = instance.Username;
-          break;
-        case "instance-password":
-          btn.dataset.copy = instance.Password;
-          break;
-        case "instance-ip":
-          btn.dataset.copy = instance.IP;
-          break;
-        case "instance-ssh":
-          btn.dataset.copy = `ssh ${instance.Username}@${instance.IP}`;
-          break;
-      }
-    });
-
-    document.getElementById("credentials-required").value = "exists";
-    updateCodeButtonState();
-  }
-
-  function updateCodeButtonState() {
-    const status = document.getElementById('status-badge').className;
-    codeBtn.disabled = !status.includes('status-active');
-  }
-
-  function lockActionButtons() {
-    deployBtn.disabled = true;
-    killBtn.disabled = true;
-    stopBtn.disabled = true;
-
-    deployBtn.classList.add("action-blinking");
-    killBtn.classList.add("action-blinking");
-    stopBtn.classList.add("action-blinking");
-  }
-
-  function unlockActionButtons() {
-    deployBtn.disabled = false;
-    killBtn.disabled = false;
-    stopBtn.disabled = false;
-    removeBlinking();
-  }
-
-  function removeBlinking() {
-    deployBtn.classList.remove("action-blinking");
-    killBtn.classList.remove("action-blinking");
-    stopBtn.classList.remove("action-blinking");
-  }
-
-  document.querySelectorAll('.copy-btn').forEach(button => {
-    button.addEventListener('click', function () {
-      const text = this.getAttribute('data-copy');
-      navigator.clipboard.writeText(text);
-      const icon = this.querySelector('i');
-      icon.className = 'fas fa-check';
-      this.classList.add('copied');
-      setTimeout(() => {
-        icon.className = 'fas fa-copy';
-        this.classList.remove('copied');
-      }, 2000);
-    });
-  });
 });
