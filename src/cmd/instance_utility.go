@@ -97,6 +97,18 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 
 	// Ack the request once everything went well
 	d.Ack(true)
+
+	ip, err := app.Docker.FindContainerIP(ctx, instanceType.ContainerName)
+	if err != nil {
+		log.Println("Cannot find container IP")
+	}
+
+	// Update redis
+	err = app.Store.InMemory.PutDeployResult(ctx, insUser, jobID, insPass, ip, true)
+	if err != nil {
+		log.Println("Cannot push deploy success to redis")
+	}
+
 	// Delete the retry entry
 	mutex.Lock()
 	delete(retries, jobID)
@@ -127,6 +139,13 @@ func (app *Application) stop(ctx context.Context, uid int, userName string, d *a
 
 	log.Println("Successfully stopped the container and updated the database")
 	d.Ack(true) // Ack the message once its all done
+
+	// Update redis
+	err = app.Store.InMemory.PutStopResult(ctx, true, jobID)
+	if err != nil {
+		log.Println("Cannot push stop success to redis")
+	}
+
 	// Delete the retry entry
 	mutex.Lock()
 	delete(retries, jobID)
@@ -167,6 +186,13 @@ func (app *Application) kill(ctx context.Context, uid int, userName string, d *a
 
 	log.Println("Successfully killed the container and updated the database")
 	d.Ack(true) // Ack the message once its all done
+
+	// Update redis
+	err = app.Store.InMemory.PutKillResult(ctx, true, jobID)
+	if err != nil {
+		log.Println("Cannot push kill success to redis")
+	}
+
 	// Delete the retry entry
 	mutex.Lock()
 	delete(retries, jobID)
@@ -187,6 +213,24 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 			mutex.Lock()
 			if retries[queueMessage.JobID] == 3 {
 				d.Ack(false)
+				// Send it to redis
+				switch queueMessage.Action {
+				case config.DEPLOY:
+					err := app.Store.InMemory.PutDeployResult(context.Background(), "", queueMessage.JobID, "", "", false)
+					if err != nil {
+						log.Println("Failed to put deploy fail result")
+					}
+				case config.STOP:
+					err := app.Store.InMemory.PutStopResult(context.Background(), false, queueMessage.JobID)
+					if err != nil {
+						log.Println("Failed to put stop fail result")
+					}
+				case config.KILL:
+					err := app.Store.InMemory.PutKillResult(context.Background(), false, queueMessage.JobID)
+					if err != nil {
+						log.Println("Failed to put kill fail result")
+					}
+				}
 				delete(retries, queueMessage.JobID)
 				mutex.Unlock()
 				continue

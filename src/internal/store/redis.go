@@ -77,6 +77,8 @@ func (r *RedisStore) PopFreeIp(ctx context.Context) (int, error) {
 	return intVal, nil
 }
 
+// Instance deploy, kill and stop
+
 func (r *RedisStore) PutDeployResult(ctx context.Context, userName, jobID, password, ip string, success bool) error {
 	instance := web.Instance{
 		Success:  success,
