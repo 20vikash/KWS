@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/internal/store"
 	"kws/kws/models"
@@ -56,7 +57,7 @@ func (ip *IPAllocator) GenerateIP(hostNumber int) string {
 
 func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid int, pubKey string) (string, error) {
 	// Check redis stack for any released IP's
-	ipAddr, err := ip.RedisStore.PopFreeIp(ctx)
+	ipAddr, err := ip.RedisStore.PopFreeIp(ctx, config.STACK_KEY)
 
 	if err == nil { // If we successfully popped a free IP from the stack
 		// AddPeer/update the Database
@@ -90,7 +91,7 @@ func (ip *IPAllocator) DeAllocateIP(ctx context.Context, pubKey string, uid int)
 	}
 
 	// Push the IP to the redis stack
-	err = ip.RedisStore.PushFreeIp(ctx, ipAddr)
+	err = ip.RedisStore.PushFreeIp(ctx, ipAddr, config.STACK_KEY)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/models/web"
 	"log"
@@ -47,8 +46,8 @@ func (r *RedisStore) GetEmailFromToken(ctx context.Context, token string) string
 }
 
 // Wireguard
-func (r *RedisStore) PushFreeIp(ctx context.Context, ip int) error {
-	err := r.Ds.LPush(ctx, config.STACK_KEY, ip).Err()
+func (r *RedisStore) PushFreeIp(ctx context.Context, ip int, key string) error {
+	err := r.Ds.LPush(ctx, key, ip).Err()
 	if err != nil {
 		log.Println("Cannot push free IP to the stack")
 		return err
@@ -57,8 +56,8 @@ func (r *RedisStore) PushFreeIp(ctx context.Context, ip int) error {
 	return nil
 }
 
-func (r *RedisStore) PopFreeIp(ctx context.Context) (int, error) {
-	val, err := r.Ds.LPop(ctx, config.STACK_KEY).Result()
+func (r *RedisStore) PopFreeIp(ctx context.Context, key string) (int, error) {
+	val, err := r.Ds.LPop(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
 			log.Println("Nothing to pop")
