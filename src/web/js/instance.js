@@ -29,13 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const statusBadge = document.getElementById('status-badge');
     const statusText = document.getElementById('status-text');
     
-    // Hidden field to track credential requirement
-    const credentialsRequired = document.createElement('input');
-    credentialsRequired.type = 'hidden';
-    credentialsRequired.id = 'credentials-required';
-    credentialsRequired.value = 'no';
-    document.body.appendChild(credentialsRequired);
-    
     // Open deploy modal
     deployBtn.addEventListener('click', function() {
     if (credentialsRequired.value === 'no') {
