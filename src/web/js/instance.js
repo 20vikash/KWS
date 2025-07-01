@@ -74,8 +74,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return res.json();
       })
       .then(data => {
-        if (!data.JobID) throw new Error("No jobID received");
-        pollDeployResult(data.JobID);
+        if (!data.jobID) throw new Error("No jobID received");
+        pollDeployResult(data.jobID);
       })
       .catch(err => {
         alert(err.message);
@@ -108,8 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return res.json();
       })
       .then(data => {
-        if (!data.JobID) throw new Error("No jobID received");
-        pollDeployResult(data.JobID);
+        if (!data.jobID) throw new Error("No jobID received");
+        pollDeployResult(data.jobID);
       })
       .catch(err => {
         alert(err.message);

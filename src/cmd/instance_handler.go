@@ -11,8 +11,8 @@ import (
 )
 
 type InstanceResponse struct {
-	JobID  string
-	Action string
+	JobID  string `json:"jobID"`
+	Action string `json:"action"`
 }
 
 func (app *Application) handleInstanceAction(w http.ResponseWriter, r *http.Request, action string) {
