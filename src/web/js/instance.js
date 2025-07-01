@@ -137,6 +137,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 2000); // Simulate 2 second delay for action
     }
+
+    updateCodeButtonState();
+
+
+    function updateCodeButtonState() {
+        const status = statusBadge.className;
+
+        if (status.includes('status-active')) {
+            codeBtn.disabled = false;
+        } else {
+            codeBtn.disabled = true;
+        }
+    }
     
     // Copy functionality
     document.querySelectorAll('.copy-btn').forEach(button => {
