@@ -34,6 +34,16 @@ type PgDatabase struct {
 	Databases      []Database
 }
 
+type JobResponseDeploy struct {
+	Done     bool
+	Instance Instance
+}
+
+type JobResponseSK struct {
+	Done    bool
+	Success bool
+}
+
 type Instance struct {
 	Success  bool
 	Username string

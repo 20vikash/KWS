@@ -95,51 +95,51 @@ func (r *RedisStore) PutDeployResult(ctx context.Context, userName, jobID, passw
 	return r.Ds.Set(ctx, "deploy:result:"+jobID, data, 0).Err()
 }
 
-func (r *RedisStore) GetDeployResult(ctx context.Context, jobID string) (*web.Instance, error) {
+func (r *RedisStore) GetDeployResult(ctx context.Context, jobID string) (bool, *web.Instance, error) {
 	val, err := r.Ds.Get(ctx, "deploy:result:"+jobID).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return nil, nil
+			return false, nil, nil
 		}
-		return nil, err
+		return false, nil, err
 	}
 
 	var instance web.Instance
 	if err := json.Unmarshal([]byte(val), &instance); err != nil {
-		return nil, err
+		return false, nil, err
 	}
 
-	return &instance, nil
+	return true, &instance, nil
 }
 
 func (r *RedisStore) PutStopResult(ctx context.Context, result bool, jobID string) error {
 	return r.Ds.Set(ctx, "stop:result:"+jobID, fmt.Sprintf("%v", result), 0).Err()
 }
 
-func (r *RedisStore) GetStopResult(ctx context.Context, jobID string) (bool, error) {
+func (r *RedisStore) GetStopResult(ctx context.Context, jobID string) (bool, bool, error) {
 	val, err := r.Ds.Get(ctx, "stop:result:"+jobID).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return false, nil
+			return false, false, nil
 		}
-		return false, err
+		return false, false, err
 	}
 
-	return val == "true", nil
+	return true, val == "true", nil
 }
 
 func (r *RedisStore) PutKillResult(ctx context.Context, result bool, jobID string) error {
 	return r.Ds.Set(ctx, "kill:result:"+jobID, fmt.Sprintf("%v", result), 0).Err()
 }
 
-func (r *RedisStore) GetKillResult(ctx context.Context, jobID string) (bool, error) {
+func (r *RedisStore) GetKillResult(ctx context.Context, jobID string) (bool, bool, error) {
 	val, err := r.Ds.Get(ctx, "kill:result:"+jobID).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return false, nil
+			return false, false, nil
 		}
-		return false, err
+		return false, false, err
 	}
 
-	return val == "true", nil
+	return true, val == "true", nil
 }

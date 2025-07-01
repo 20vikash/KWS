@@ -24,11 +24,11 @@ type Storage struct {
 		PushFreeIp(ctx context.Context, ip int) error
 		PopFreeIp(ctx context.Context) (int, error)
 		PutDeployResult(ctx context.Context, userName, jobID, password, ip string, success bool) error
-		GetDeployResult(ctx context.Context, jobID string) (*web.Instance, error)
+		GetDeployResult(ctx context.Context, jobID string) (bool, *web.Instance, error)
 		PutStopResult(ctx context.Context, result bool, jobID string) error
-		GetStopResult(ctx context.Context, jobID string) (bool, error)
+		GetStopResult(ctx context.Context, jobID string) (bool, bool, error)
 		PutKillResult(ctx context.Context, result bool, jobID string) error
-		GetKillResult(ctx context.Context, jobID string) (bool, error)
+		GetKillResult(ctx context.Context, jobID string) (bool, bool, error)
 	}
 
 	Instance interface {
