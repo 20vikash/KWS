@@ -35,6 +35,7 @@ type PgDatabase struct {
 }
 
 type Instance struct {
+	Success  bool
 	Username string
 	Password string
 	IP       string
