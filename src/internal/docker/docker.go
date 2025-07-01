@@ -337,7 +337,7 @@ func (d *Docker) FindContainerIP(ctx context.Context, containerName string) (str
 	// Inspect the container to get network settings
 	containerJSON, err := d.Con.ContainerInspect(ctx, containerName)
 	if err != nil {
-		return "", err
+		return "", nil
 	}
 
 	// Iterate through the network settings
