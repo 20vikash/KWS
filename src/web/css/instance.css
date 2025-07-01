@@ -275,6 +275,10 @@ body::before {
     filter: grayscale(0.5);
 }
 
+.code-btn:hover:not(:disabled) {
+    background: linear-gradient(to right, #7c3aed, #6d28d9);
+    transform: translateY(-3px);
+}
 
 .action-blinking {
     animation: blinking 1s infinite;
