@@ -250,7 +250,7 @@ func (app *Application) RenderPublishPage(w http.ResponseWriter, r *http.Request
 		HasDomains:   hasDomains,
 	}
 
-	err = templates.ExecuteTemplate(w, "instance_management", pubinsData)
+	err = templates.ExecuteTemplate(w, "publish_instance", pubinsData)
 	if err != nil {
 		http.Error(w, "something went wrong", http.StatusInternalServerError)
 	}
