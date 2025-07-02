@@ -280,7 +280,7 @@ func (d *Docker) StartContainer(ctx context.Context, containerID, userName, pass
 		}
 
 		nginxTemplate := &nginx.Template{
-			Domain: containerID,
+			Domain: containerID[:8],
 			IP:     containerIP,
 			Port:   "8099",
 		}
@@ -389,7 +389,7 @@ func (d *Docker) DeleteContainer(ctx context.Context, containerName string, uid 
 	}
 
 	nginxTemplate := nginx.Template{
-		Domain: containerID,
+		Domain: containerID[:8],
 	}
 
 	err = nginxTemplate.RemoveConf()
