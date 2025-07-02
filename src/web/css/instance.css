@@ -406,6 +406,24 @@ body::before {
     margin-right: 8px;
 }
 
+.publish-btn {
+    background: linear-gradient(to right, #8b5cf6, #7c3aed);
+    color: white;
+    padding: 12px 28px;
+    font-size: 1.1rem;
+    min-width: 240px;
+}
+
+.publish-btn:hover:not(:disabled) {
+    background: linear-gradient(to right, #7c3aed, #6d28d9);
+    transform: translateY(-3px);
+}
+
+.publish-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .status-active .status-indicator {
     background: #10b981;
     animation: pulse-active 2s infinite;
