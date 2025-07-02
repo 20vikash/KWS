@@ -5,6 +5,7 @@ import (
 	"errors"
 	"kws/kws/consts/status"
 	"kws/kws/models"
+	"kws/kws/models/web"
 	"log"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -49,4 +50,36 @@ func (d *Domain) RemoveDomain(ctx context.Context, domain *models.Domain) error 
 	}
 
 	return nil
+}
+
+func (d *Domain) GetUserDomains(ctx context.Context, domain *models.Domain) (*[]web.Domain, error) {
+	domains := new([]web.Domain)
+
+	var domainName string
+	var port int
+
+	sql := `
+		SELECT domain_name, port WHERE user_id = $1 AND is_code = $2
+	`
+
+	rows, err := d.Con.Query(ctx, sql,
+		domain.Uid,
+		false,
+	)
+	if err != nil {
+		log.Println("Cannot get all the domains of the user")
+		return nil, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&domainName, &port)
+		if err != nil {
+			log.Println("Error scanning domain table")
+			return nil, err
+		}
+
+		*domains = append(*domains, web.Domain{Name: domainName, Port: port, Status: "Active"})
+	}
+
+	return domains, nil
 }

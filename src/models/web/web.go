@@ -59,3 +59,16 @@ type InsData struct {
 	Active         string // "exists", "no"
 	Instance       Instance
 }
+
+type Domain struct {
+	Name   string
+	Port   int
+	Status string
+}
+
+type PublishInstancePageData struct {
+	LoggedInUser string
+	InstanceName string
+	Domains      []Domain
+	HasDomains   bool
+}
