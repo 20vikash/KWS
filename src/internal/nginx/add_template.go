@@ -55,3 +55,21 @@ func (t *Template) AddNewConf() error {
 
 	return nil
 }
+
+func (t *Template) RemoveConf() error {
+	// Path to the config file to be removed
+	filePath := fmt.Sprintf("/app/nginx_conf/%s.conf", t.Domain)
+
+	// Attempt to remove the file
+	if err := os.Remove(filePath); err != nil {
+		if os.IsNotExist(err) {
+			log.Printf("Config file %s does not exist, nothing to remove.", filePath)
+			return nil
+		}
+		log.Printf("Failed to remove config file %s: %v", filePath, err)
+		return err
+	}
+
+	log.Printf("Config file %s successfully removed.", filePath)
+	return nil
+}

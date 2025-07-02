@@ -17,7 +17,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strings"
 
 	"github.com/docker/docker/api/types/build"
 	"github.com/docker/docker/api/types/container"
@@ -281,7 +280,7 @@ func (d *Docker) StartContainer(ctx context.Context, containerID, userName, pass
 		}
 
 		nginxTemplate := &nginx.Template{
-			Domain: ShortenContainerID(containerID),
+			Domain: containerID,
 			IP:     containerIP,
 			Port:   "8099",
 		}
@@ -386,6 +385,22 @@ func (d *Docker) DeleteContainer(ctx context.Context, containerName string, uid 
 	err = d.IpAlloc.DeAllocateDockerIP(ctx, uid)
 	if err != nil {
 		log.Println("Cannot de-allocate IP after deleting container")
+		return err
+	}
+
+	nginxTemplate := nginx.Template{
+		Domain: containerID,
+	}
+
+	err = nginxTemplate.RemoveConf()
+	if err != nil {
+		log.Println("Cannot remove conf file nginx")
+		return err
+	}
+
+	err = d.ReloadNginxConf(config.NGINX_CONTAINER)
+	if err != nil {
+		log.Println("Cannot reload nginx conf while removing conf")
 		return err
 	}
 
@@ -627,17 +642,4 @@ func (d *Docker) ExecAndPrint(ctx context.Context, containerID string, cmd []str
 	// Print output
 	_, err = io.Copy(os.Stdout, attachResp.Reader)
 	return err
-}
-
-func ShortenContainerID(id string) string {
-	// Remove "_instance" suffix if present
-	cleanID := strings.TrimSuffix(id, "_instance")
-
-	// Take first 8 characters
-	prefix := cleanID
-	if len(cleanID) > 8 {
-		prefix = cleanID[:8]
-	}
-
-	return prefix
 }
