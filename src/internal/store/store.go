@@ -60,6 +60,10 @@ type Storage struct {
 		RemoveUser(ctx context.Context, pgUser *models.PGServiceUser) error
 		RemoveDatabase(ctx context.Context, pgUser *models.PGServiceUser, pgDatabase *models.PGServiceDatabase) error
 	}
+
+	Domains interface {
+		AddDomain(ctx context.Context, domain *models.Domain) error
+	}
 }
 
 func NewStore(pg *pgxpool.Pool, redis *redis.Client, mq *MQ) *Storage {
@@ -81,6 +85,9 @@ func NewStore(pg *pgxpool.Pool, redis *redis.Client, mq *MQ) *Storage {
 			Con: pg,
 		},
 		PgService: &PgServiceStore{
+			Con: pg,
+		},
+		Domains: &Domain{
 			Con: pg,
 		},
 	}
