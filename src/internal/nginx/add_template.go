@@ -2,15 +2,10 @@ package nginx
 
 import (
 	"fmt"
-	"kws/kws/internal/docker"
 	"log"
 	"os"
 	"text/template"
 )
-
-type Nginx struct {
-	Docker *docker.Docker
-}
 
 type Template struct {
 	Domain string
@@ -32,7 +27,7 @@ server {
 }
 `
 
-func (t *Template) AddCodeServer() error {
+func (t *Template) AddNewConf() error {
 	tmpl, err := template.New("nginx").Parse(nginxTemplate)
 	if err != nil {
 		panic(err)

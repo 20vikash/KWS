@@ -570,6 +570,15 @@ func (d *Docker) StartCodeServer(containerID, username string) error {
 	return nil
 }
 
+func (d *Docker) ReloadNginxConf(containerID string) error {
+	err := d.ExecAndPrint(context.Background(), containerID, []string{"nginx", "-s", "reload"})
+	if err != nil {
+		log.Fatalf("Failed to reload Nginx: %v", err)
+	}
+
+	return nil
+}
+
 // Docker exec
 func (d *Docker) ExecAndPrint(ctx context.Context, containerID string, cmd []string) error {
 	execConfig := container.ExecOptions{

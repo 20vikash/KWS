@@ -26,4 +26,6 @@ const (
 
 	MAX_SERVICE_DB_USERS = 5
 	MAX_SERVICE_DB_DB    = 10
+
+	NGINX_CONTAINER = "nginx_proxy"
 )
