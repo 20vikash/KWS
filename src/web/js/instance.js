@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function () {
         stateInput.value = 'active';
         updateUIFromState();
         // Show the publish section again
-        const publishSection = document.querySelector('.publish-section');
+        const publishSection = document.getElementById('publish-section');
         if (publishSection) {
           publishSection.classList.remove('hidden');
         }
@@ -306,9 +306,9 @@ document.addEventListener('DOMContentLoaded', function () {
           updateUIFromState();
 
           // Remove/hide the publish section if it exists
-          const publishSection = document.querySelector('.publish-section');
+          const publishSection = document.getElementById('publish-section');
           if (publishSection) {
-            publishSection.remove();
+            publishSection.classList.add('hidden');
           }
 
           unlockAllButtons();

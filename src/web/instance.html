@@ -129,18 +129,7 @@
           </div>
         </div>
       </div>
-      {{ if or (eq .InstanceStatus "active") (eq .InstanceStatus "stopped") }}
-      <div class="publish-section">
-        <button id="publish-btn" class="publish-btn">
-          <i class="fas fa-globe mr-2"></i> Publish
-        </button>
-        <p class="publish-description">
-          Make your instance publicly accessible with a custom domain. 
-          Publishing will generate a unique URL for your instance.
-        </p>
-      </div>
-      {{ end }}
-      <div class="publish-section {{ if eq .InstanceStatus "inactive" }}hidden{{ end }} mt-8 text-center">
+      <div id="publish-section" class="publish-section {{ if or (eq .InstanceStatus "active") (eq .InstanceStatus "stopped") }}{{ else }}hidden{{ end }} mt-8 text-center">
         <button id="publish-btn" class="action-btn publish-btn">
           <i class="fas fa-globe mr-2"></i> Publish
         </button>
