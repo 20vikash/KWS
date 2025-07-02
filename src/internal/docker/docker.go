@@ -11,6 +11,7 @@ import (
 	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/internal/docker/dockerfiles/core"
+	"kws/kws/internal/nginx"
 	"kws/kws/internal/wg"
 	"log"
 	"os"
@@ -269,6 +270,30 @@ func (d *Docker) StartContainer(ctx context.Context, containerID, userName, pass
 		err = d.StartCodeServer(containerID, userName)
 		if err != nil {
 			return err
+		}
+
+		// Expose code server to the internet
+		containerIP, err := d.FindContainerIP(ctx, containerID)
+		if err != nil {
+			log.Println("Cannot find container ip")
+			return err
+		}
+
+		nginxTemplate := &nginx.Template{
+			Domain: containerID,
+			IP:     containerIP,
+			Port:   "8099",
+		}
+
+		err = nginxTemplate.AddNewConf()
+		if err != nil {
+			log.Println("Cannot add new nginx conf file")
+			return err
+		}
+
+		err = d.ReloadNginxConf(config.NGINX_CONTAINER)
+		if err != nil {
+			log.Println("Failed to reload nginx conf for code server")
 		}
 	}
 
