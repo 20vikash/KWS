@@ -257,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update credentials in DOM
         document.getElementById('hidden-username').value = data.Instance.Username;
         document.getElementById('hidden-password').value = data.Instance.Password;
+        document.getElementById("container-name").value = data.Instance.ContainerID;
         
         // Update visible instance details
         updateInstanceDetails(data.Instance);
