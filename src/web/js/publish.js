@@ -26,11 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmRemoveBtn = document.getElementById('confirm-remove');
     const confirmCancelBtn = document.getElementById('confirm-cancel');
 
-    // Domain list
-    let domains = [];
     let domainToRemove = null;
 
-    // Validate domain name
     function isValidDomain(domain) {
         domain = domain.trim().toLowerCase();
         if (domain.length < 3 || domain.length > 63) return false;
@@ -38,52 +35,26 @@ document.addEventListener('DOMContentLoaded', function () {
         return regex.test(domain);
     }
 
-    // Render domains
-    function renderDomains() {
-        domainsContainer.innerHTML = '';
-        domains.forEach(domain => {
-            const domainCard = document.createElement('div');
-            domainCard.className = 'domain-card';
-            domainCard.innerHTML = `
-                <div class="flex justify-between items-start">
-                    <div class="w-full">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-bold text-white">${domain.name}</h3>
-                            <button class="remove-btn" data-domain="${domain.name}">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="domain-url-container">
-                            <div class="domain-url">https://${domain.name}.kwscloud.in</div>
-                            <button class="copy-domain-btn" data-url="https://${domain.name}.kwscloud.in">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
-                        <div class="mt-4 grid grid-cols-2 gap-2">
-                            <div>
-                                <span class="text-gray-500">Port:</span>
-                                <span class="ml-2 text-white">${domain.port}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-500">Status:</span>
-                                <span class="ml-2 text-green-400">Active</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            domainsContainer.appendChild(domainCard);
-        });
+    function updateDomainsDisplay() {
+        const cards = domainsContainer.querySelectorAll('.domain-card');
+        if (cards.length === 0) {
+            domainsContainer.classList.add('hidden');
+            if (emptyDomains) emptyDomains.classList.remove('hidden');
+        } else {
+            domainsContainer.classList.remove('hidden');
+            if (emptyDomains) emptyDomains.classList.add('hidden');
+        }
+    }
 
-        // Add remove and copy listeners
-        document.querySelectorAll('.remove-btn').forEach(btn => {
+    function attachButtonListeners(scope = document) {
+        scope.querySelectorAll('.remove-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 domainToRemove = this.getAttribute('data-domain');
                 confirmationModal.style.display = 'flex';
             });
         });
 
-        document.querySelectorAll('.copy-domain-btn').forEach(btn => {
+        scope.querySelectorAll('.copy-domain-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 const url = this.getAttribute('data-url');
                 navigator.clipboard.writeText(url);
@@ -96,19 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Update domains display
-    function updateDomainsDisplay() {
-        if (domains.length === 0) {
-            domainsContainer.classList.add('hidden');
-            if (emptyDomains) emptyDomains.classList.remove('hidden');
-        } else {
-            domainsContainer.classList.remove('hidden');
-            if (emptyDomains) emptyDomains.classList.add('hidden');
-        }
-        renderDomains();
-    }
-
-    // Add new domain
     addBtn.addEventListener('click', function () {
         const domainName = domainInput.value.trim().toLowerCase();
         const port = parseInt(portInput.value);
@@ -130,17 +88,18 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        if (domains.some(d => d.name === domainName)) {
+        // Check if domain already exists
+        const existing = domainsContainer.querySelector(`[data-domain="${domainName}"]`);
+        if (existing) {
             errorMsg.classList.remove('hidden');
             return;
         }
 
-        if (domains.length >= 3) {
+        if (domainsContainer.querySelectorAll('.domain-card').length >= 3) {
             alert('You have reached the maximum of 3 domains per instance');
             return;
         }
 
-        // Send POST request to backend
         const formData = new URLSearchParams();
         formData.append('domain_name', domainName);
         formData.append('port', port.toString());
@@ -157,11 +116,38 @@ document.addEventListener('DOMContentLoaded', function () {
             return res.json();
         })
         .then(data => {
-            domains.push({
-                name: data.Domain,
-                port: data.Port,
-                status: data.Status,
-            });
+            const domainCard = document.createElement('div');
+            domainCard.className = 'domain-card';
+            domainCard.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div class="w-full">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-white">${data.Domain}</h3>
+                            <button class="remove-btn" data-domain="${data.Domain}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="domain-url-container">
+                            <div class="domain-url">https://${data.Domain}.kwscloud.in</div>
+                            <button class="copy-domain-btn" data-url="https://${data.Domain}.kwscloud.in">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="mt-4 grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-gray-500">Port:</span>
+                                <span class="ml-2 text-white">${data.Port}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Status:</span>
+                                <span class="ml-2 text-green-400">${data.Status}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            domainsContainer.appendChild(domainCard);
+            attachButtonListeners(domainCard);
             updateDomainsDisplay();
             domainInput.value = '';
             portInput.value = '';
@@ -172,7 +158,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Remove domain from backend and update DOM
     function removeDomain(domainName) {
         const formData = new URLSearchParams();
         formData.append('domain_name', domainName);
@@ -186,7 +171,10 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(res => {
             if (!res.ok) throw new Error('Failed to remove domain');
-            domains = domains.filter(d => d.name !== domainName);
+
+            const card = domainsContainer.querySelector(`[data-domain="${domainName}"]`)?.closest('.domain-card');
+            if (card) card.remove();
+
             updateDomainsDisplay();
             confirmationModal.style.display = 'none';
             domainToRemove = null;
@@ -197,7 +185,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Confirm remove
     confirmRemoveBtn.addEventListener('click', function () {
         if (domainToRemove) {
             removeDomain(domainToRemove);
@@ -209,6 +196,6 @@ document.addEventListener('DOMContentLoaded', function () {
         domainToRemove = null;
     });
 
-    // Initial domains display
+    attachButtonListeners();
     updateDomainsDisplay();
 });
