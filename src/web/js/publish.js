@@ -100,10 +100,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateDomainsDisplay() {
         if (domains.length === 0) {
             domainsContainer.classList.add('hidden');
-            emptyDomains.classList.remove('hidden');
+            if (emptyDomains) emptyDomains.classList.remove('hidden');
         } else {
             domainsContainer.classList.remove('hidden');
-            emptyDomains.classList.add('hidden');
+            if (emptyDomains) emptyDomains.classList.add('hidden');
         }
         renderDomains();
     }
