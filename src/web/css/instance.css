@@ -407,16 +407,57 @@ body::before {
 }
 
 .publish-btn {
-    background: linear-gradient(to right, #8b5cf6, #7c3aed);
+    background: linear-gradient(to right, var(--success), #059669);
     color: white;
     padding: 12px 28px;
     font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
     min-width: 240px;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .publish-btn:hover:not(:disabled) {
-    background: linear-gradient(to right, #7c3aed, #6d28d9);
+    background: linear-gradient(to right, #059669, #047857);
     transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.publish-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20px;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(25deg);
+    transition: all 0.5s;
+}
+
+.publish-btn:hover::after {
+    left: 120%;
+}
+
+.publish-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 40px;
+    padding-bottom: 60px;
+    text-align: center;
+}
+
+.publish-description {
+    color: #9ca3af; /* Tailwind's gray-400 */
+    font-size: 0.95rem;
+    max-width: 600px;
+    margin-top: 16px;
+    line-height: 1.5;
 }
 
 .publish-btn:disabled {

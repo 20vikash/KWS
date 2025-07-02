@@ -263,6 +263,11 @@ document.addEventListener('DOMContentLoaded', function () {
         
         stateInput.value = 'active';
         updateUIFromState();
+        // Show the publish section again
+        const publishSection = document.querySelector('.publish-section');
+        if (publishSection) {
+          publishSection.classList.remove('hidden');
+        }
         unlockAllButtons();
       })
       .catch(err => {
@@ -292,6 +297,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!data.Success) {
           alert(`${type.charAt(0).toUpperCase() + type.slice(1)} failed.`);
+          unlockAllButtons();
+          return;
+        }
+
+        if (type === 'kill') {
+          stateInput.value = 'inactive';
+          updateUIFromState();
+
+          // Remove/hide the publish section if it exists
+          const publishSection = document.querySelector('.publish-section');
+          if (publishSection) {
+            publishSection.remove();
+          }
+
           unlockAllButtons();
           return;
         }
