@@ -59,7 +59,7 @@ func (d *Domain) GetUserDomains(ctx context.Context, domain *models.Domain) (*[]
 	var port int
 
 	sql := `
-		SELECT domain_name, port WHERE user_id = $1 AND is_code = $2
+		SELECT domain_name, port FROM domains WHERE user_id = $1 AND is_code = $2
 	`
 
 	rows, err := d.Con.Query(ctx, sql,
