@@ -293,3 +293,19 @@ func (in *InstanceStore) AllocateNextFreeIP(ctx context.Context, maxHostNumber i
 
 	return ip, nil
 }
+
+func (in *InstanceStore) GetIPFromUID(ctx context.Context, uid int) (int, error) {
+	var ip int
+
+	sql := `
+		SELECT ip_address FROM userip WHERE user_id = $1
+	`
+
+	err := in.Db.QueryRow(ctx, sql, uid).Scan(&ip)
+	if err != nil {
+		log.Println("Cannot get ip from uid")
+		return -1, nil
+	}
+
+	return ip, nil
+}

@@ -38,6 +38,7 @@ type Storage struct {
 		StartInstance(ctx context.Context, uid int) error
 		Exists(ctx context.Context, uid int) (bool, error)
 		GetData(ctx context.Context, uid int) (*web.InsData, error)
+		GetIPFromUID(ctx context.Context, uid int) (int, error)
 	}
 
 	MessageQueue interface {
@@ -65,6 +66,8 @@ type Storage struct {
 		AddDomain(ctx context.Context, domain *models.Domain) error
 		RemoveDomain(ctx context.Context, domain *models.Domain) error
 		GetUserDomains(ctx context.Context, domain *models.Domain) (*[]web.Domain, error)
+		RemoveUserDomain(ctx context.Context, domain *models.Domain) error
+		AddUserDomain(ctx context.Context, domain *models.Domain) error
 	}
 }
 
