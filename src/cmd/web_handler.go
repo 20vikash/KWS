@@ -216,10 +216,13 @@ func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Reques
 	containerID, err := app.Docker.GetContainerIDByName(r.Context(), data.ContainerName)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
 	}
 
-	containerID = containerID[:8]
-	data.ContainerName = containerID
+	if containerID != "" {
+		containerID = containerID[:8]
+		data.ContainerName = containerID
+	}
 
 	err = templates.ExecuteTemplate(w, "instance_management", data)
 	if err != nil {

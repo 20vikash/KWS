@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const emptyState = document.getElementById('empty-state');
   const hiddenUsername = document.getElementById('hidden-username');
   const hiddenPassword = document.getElementById('hidden-password');
+  const containerName = document.getElementById('container-name').value;
 
   // Initialize button states
   function updateButtonStates() {
@@ -171,7 +172,12 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   codeBtn.addEventListener('click', function () {
-    alert('Opening VS Code in browser...');
+    // Open VS Code in a new tab
+    if (containerName) {
+      window.open(`http://${containerName}.kwscloud.in`, '_blank');
+    } else {
+      alert('Container name not found!');
+    }
   });
 
   // Copy buttons
