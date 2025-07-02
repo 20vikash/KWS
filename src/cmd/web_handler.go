@@ -220,7 +220,7 @@ func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Reques
 	}
 
 	if containerID != "" {
-		containerID = containerID[:8]
+		containerID = containerID[:15]
 		data.ContainerName = containerID
 	}
 
