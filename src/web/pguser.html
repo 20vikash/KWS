@@ -1,30 +1,29 @@
-{{ define "publish_instance" }}
+{{ define "pgusers" }}
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KWS Cloud | Publish Instance</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KWS Cloud | PostgreSQL Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/publish.css">
+  <link rel="stylesheet" href="/css/pguser.css">
 </head>
 <body class="relative flex flex-col md:flex-row">
   <div id="sparkle-container"></div>
 
-  <!-- Sidebar -->
   <aside class="relative z-10 w-full md:w-64 h-auto md:h-screen bg-[#12141a] border-b md:border-r border-gray-800 flex flex-col md:justify-between p-6">
     <div class="flex flex-col md:block">
       <h1 class="text-2xl font-bold text-blue-400 mb-4 md:mb-8">KWS Cloud</h1>
       <nav class="space-y-0 md:space-y-4 flex md:block gap-4">
-        <a href="/kws_instances" class="block px-3 py-2 rounded-md bg-gray-800 text-white">
+        <a href="/kws_instances" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
           <i class="fas fa-server mr-2"></i>Instances
         </a>
         <a href="/kws_devices" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
           <i class="fas fa-laptop mr-2"></i>Devices
         </a>
-        <a href="/kws_services" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+        <a href="/services" class="block px-3 py-2 rounded-md bg-gray-800 text-white">
           <i class="fas fa-database mr-2"></i>Services
         </a>
         <a href="/" class="block px-3 py-2 rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
@@ -45,144 +44,167 @@
     </div>
   </aside>
 
-  <!-- Main Content -->
   <main class="relative z-10 flex-1 overflow-y-auto p-6 md:p-8 fadeIn">
     <div class="max-w-6xl mx-auto">
-      <div class="flex flex-col mb-8">
+      <!-- Page Header -->
+      <div class="flex flex-col mb-10">
         <div class="flex items-center justify-between mb-6">
           <div>
             <h1 class="text-3xl md:text-4xl font-bold text-white flex items-center">
-              <i class="fas fa-globe text-purple-400 mr-3"></i>
-              Publish Instance
+              <img src="https://www.postgresql.org/media/img/about/press/elephant.png" 
+                   alt="PostgreSQL Logo"
+                   class="postgres-logo mr-3 floating">
+              PostgreSQL Management
             </h1>
-            <p class="text-gray-400 mt-2">Make your instance publicly accessible with custom domains</p>
+            <p class="text-gray-400 mt-2">
+              Manage users and access for your PostgreSQL database
+            </p>
           </div>
-          <div class="status-badge status-active">
-            <span class="status-indicator"></span>
-            <span id="status-text">Instance Active</span>
+          <div class="hidden md:block">
+            <span class="status-badge status-active">
+              <i class="fas fa-circle mr-2" style="font-size: 8px;"></i>
+              Active: {{ .HostName }}
+            </span>
           </div>
         </div>
-        <input type="text" id="container-name" value="{{ .InstanceName }}" hidden>
       </div>
 
-      <!-- Publish Form -->
+      <!-- Service Connection Info -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="info-card">
+          <p class="text-xs text-gray-400 mb-1">Host Name</p>
+          <p class="text-white font-mono text-sm truncate">{{ .HostName }}</p>
+          <div class="copy-btn" data-copy="{{ .HostName }}">
+            <i class="fas fa-copy text-sm"></i>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <p class="text-xs text-gray-400 mb-1">Service IP</p>
+          <p class="text-white font-mono text-sm truncate">{{ .ServiceIP }}</p>
+          <div class="copy-btn" data-copy="{{ .ServiceIP }}">
+            <i class="fas fa-copy text-sm"></i>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <p class="text-xs text-gray-400 mb-1">Port</p>
+          <p class="text-white font-mono text-sm truncate">{{ .Port }}</p>
+          <div class="copy-btn" data-copy="{{ .Port }}">
+            <i class="fas fa-copy text-sm"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Management Section -->
       <div class="card p-6 mb-8">
-        <div class="flex flex-col md:flex-row items-start gap-6">
-          <div class="flex-1">
-            <h2 class="text-xl font-bold text-white mb-6">Add New Domain</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="form-group">
-                <label class="form-label">Domain Name</label>
-                <input type="text" class="form-input" placeholder="e.g. my-app" id="domain-name">
-                <p class="text-gray-500 text-sm mt-2">Only letters, numbers and hyphens allowed</p>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Port to Expose</label>
-                <input type="number" class="form-input" placeholder="e.g. 8080" id="domain-port" min="1" max="65535">
-                <p class="text-gray-500 text-sm mt-2">Port your application is running on</p>
-              </div>
-            </div>
-            <div id="domain-error" class="hidden mt-4 p-3 bg-red-900/30 border border-red-700 rounded-lg text-red-400">
-              <i class="fas fa-exclamation-circle mr-2"></i>
-              <span>This domain name is already in use. Please choose a different one.</span>
-            </div>
-            <button id="add-domain" class="publish-btn mt-6">
-              <i class="fas fa-plus mr-2"></i> Add Domain
-            </button>
-            <div class="limit-badge mt-6">
-              <i class="fas fa-info-circle mr-2"></i>
-              <span>You can publish up to 3 domains per instance</span>
-            </div>
-          </div>
-          <div class="hidden md:block flex-1 border-l border-gray-800 pl-6">
-            <h3 class="text-lg font-bold text-purple-400 mb-4">How Publishing Works</h3>
-            <ul class="space-y-3 text-gray-400">
-              <li class="flex items-start">
-                <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
-                <span>Your instance will be accessible at <code class="bg-gray-800 px-2 py-1 rounded">[domain].kwscloud.in</code></span>
-              </li>
-              <li class="flex items-start">
-                <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
-                <span>Traffic will be routed to the specified port</span>
-              </li>
-              <li class="flex items-start">
-                <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
-                <span>HTTPS is automatically enabled with SSL certificates</span>
-              </li>
-              <li class="flex items-start">
-                <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
-                <span>Changes take effect within 1-2 minutes</span>
-              </li>
-            </ul>
-          </div>
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-white">Database Users</h2>
+        <div class="text-sm">
+            <span class="text-gray-400">Current users:</span>
+            <span class="text-white ml-2">{{ len .Users }}/{{ .UserLimit }}</span>
+        </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Password</th> 
+                <th>Permissions</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+            {{ range .Users }}
+            <tr>
+            <td class="font-mono">{{ .Username }}</td>
+            <td>
+                <div class="password-field-wrapper">
+                <div class="password-display">
+                    <!-- Add a hidden input to store the actual password securely -->
+                    <input type="hidden" id="real-password-{{ .Username }}" value="{{ .Password }}">
+                    <input type="hidden" id="user-id-{{ .Username }}" value="{{ .ID }}">
+                    <span class="password-text" id="password-{{ .Username }}">••••••••</span>
+                    <button class="password-copy" data-username="{{ .Username }}" title="Copy password">
+                    <i class="fas fa-copy text-sm"></i>
+                    </button>
+                    <button class="password-toggle" data-username="{{ .Username }}" title="Show password">
+                    <i class="fas fa-eye-slash text-sm"></i>
+                    </button>
+                </div>
+                </div>
+            </td>
+            <td>
+                <span class="status-badge status-active">{{ .Role }}</span>
+            </td>
+            <td>
+                <button class="action-btn remove-btn">
+                    <i class="fas fa-trash mr-1" data-username="{{ .Username }}" data-password="{{ .Password }}"></i> Remove
+                </button>
+                <button class="action-btn manage-btn" data-username="{{ .Username }}" data-password="{{ .Password }}" data-id="{{ .ID }}">
+                    <i class="fas fa-database mr-1"></i> Manage
+                </button>
+            </td>
+            </tr>
+            {{ end }}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- Published Domains -->
-      <div class="mb-8">
-        <h2 class="text-2xl font-bold text-white mb-6">Published Domains</h2>
-        <div id="domains-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {{ range .Domains }}
-          <div class="domain-card">
-            <div class="flex justify-between items-start">
-              <div class="w-full">
-                <div class="flex justify-between items-center">
-                  <h3 class="text-lg font-bold text-white">{{ .Name }}</h3>
-                  <button class="remove-btn" data-domain="{{ .Name }}">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-                <div class="domain-url-container">
-                  <div class="domain-url">https://{{ .Name }}.kwscloud.in</div>
-                  <button class="copy-domain-btn" data-url="https://{{ .Name }}.kwscloud.in">
-                    <i class="fas fa-copy"></i>
-                  </button>
-                </div>
-                <div class="mt-4 grid grid-cols-2 gap-2">
-                  <div>
-                    <span class="text-gray-500">Port:</span>
-                    <span class="ml-2 text-white">{{ .Port }}</span>
-                  </div>
-                  <div>
-                    <span class="text-gray-500">Status:</span>
-                    <span class="ml-2 text-green-400">{{ .Status }}</span>
-                  </div>
-                </div>
-              </div>
+      <!-- Add New User Section -->
+      <div class="card p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-white">Add New User</h2>
+          <span class="user-limit">Limit: {{ .UserLimit }} users</span>
+        </div>
+        
+        <div class="form-card">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-input" placeholder="Enter username">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <select class="form-input">
+                <option value="limited">Limited</option>
+              </select>
             </div>
           </div>
-          {{ end }}
+          
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="password-field">
+              <input type="password" class="form-input" placeholder="Create a strong password" id="password">
+              <span class="toggle-password" id="togglePassword">
+                <i class="fas fa-eye"></i>
+              </span>
+            </div>
+            <div class="password-strength">
+              <div class="password-strength-fill" id="passwordStrength"></div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" class="form-input" placeholder="Confirm your password">
+          </div>
+          
+          <div class="flex justify-end mt-8">
+            <button class="btn-primary">
+              <i class="fas fa-user-plus mr-2"></i> Create User
+            </button>
+          </div>
         </div>
-
-        {{ if not .HasDomains }}
-        <div id="empty-domains" class="text-center py-16">
-          <i class="fas fa-globe text-gray-600 text-6xl mb-6"></i>
-          <h3 class="text-2xl font-bold text-gray-400 mb-2">No Domains Published</h3>
-          <p class="text-gray-500 max-w-md mx-auto">
-            Add your first domain to make your instance publicly accessible.
-          </p>
-        </div>
-        {{ end }}
       </div>
     </div>
   </main>
 
-  <!-- Confirmation Modal -->
-  <div id="confirmation-modal" class="confirmation-modal">
-    <div class="confirmation-content">
-      <div class="confirmation-text">
-        <i class="fas fa-exclamation-triangle text-yellow-400 text-3xl mb-4"></i>
-        <h3 class="text-xl font-bold text-white mb-2">Confirm Removal</h3>
-        <p class="text-gray-300">Are you sure you want to remove this domain?<br>This action cannot be undone.</p>
-      </div>
-      <div class="confirmation-buttons">
-        <button id="confirm-remove" class="confirm-btn confirm-remove">Remove Domain</button>
-        <button id="confirm-cancel" class="confirm-btn confirm-cancel">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="js/publish.js"></script>
+<script src="/js/pguser.js"></script>
 </body>
 </html>
 {{ end }}
