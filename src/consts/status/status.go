@@ -35,4 +35,5 @@ const (
 	PG_DB_NOT_FOUND        = "pg_db_not_found"
 
 	DOMAIN_ALREADY_EXISTS = "domain_already_exists"
+	DOMAIN_LIMIT_EXCEEDED = "domain_limit_exceeded"
 )

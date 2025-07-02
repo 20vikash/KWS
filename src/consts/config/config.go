@@ -28,4 +28,6 @@ const (
 	MAX_SERVICE_DB_DB    = 10
 
 	NGINX_CONTAINER = "nginx_proxy"
+
+	USER_DOMAIN_LIMIT = 3
 )

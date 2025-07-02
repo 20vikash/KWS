@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/models"
 	"kws/kws/models/web"
@@ -82,4 +83,57 @@ func (d *Domain) GetUserDomains(ctx context.Context, domain *models.Domain) (*[]
 	}
 
 	return domains, nil
+}
+
+func (d *Domain) AddUserDomain(ctx context.Context, domain *models.Domain) error {
+	var count int
+
+	sql := `
+		SELECT COUNT(user_id) FROM domains WHERE user_id = $1
+	`
+
+	err := d.Con.QueryRow(ctx, sql,
+		domain.Uid,
+	).Scan(&count)
+	if err != nil {
+		log.Println("Failed to count number of user domains")
+		return err
+	}
+
+	if count >= config.USER_DOMAIN_LIMIT {
+		return errors.New(status.DOMAIN_LIMIT_EXCEEDED)
+	}
+
+	sql = `
+		INSERT INTO domains (user_id, domain_name, port) VALUES ($1, $2, $3)
+	`
+
+	_, err = d.Con.Exec(ctx, sql,
+		domain.Uid,
+		domain.Domain,
+		domain.Port,
+	)
+	if err != nil {
+		log.Println("Cannot insert user domain data")
+		return err
+	}
+
+	return nil
+}
+
+func (d *Domain) RemoveUserDomain(ctx context.Context, domain *models.Domain) error {
+	sql := `
+		DELETE FROM domains WHERE user_id = $1 AND domain_name = $2
+	`
+
+	_, err := d.Con.Exec(ctx, sql,
+		domain.Uid,
+		domain.Domain,
+	)
+	if err != nil {
+		log.Println("Cannot delete user domain record")
+		return err
+	}
+
+	return nil
 }
