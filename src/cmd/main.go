@@ -162,6 +162,7 @@ func main() {
 	}
 
 	docker.IpAlloc = ipAlloc
+	docker.Domains = &store.Domain{Con: connPool}
 
 	// Initialize pg service
 	pgService := serviceConn.Pg{
