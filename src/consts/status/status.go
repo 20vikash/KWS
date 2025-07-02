@@ -33,4 +33,6 @@ const (
 	PG_DB_ALREDAY_EXISTS   = "pg_db_already_exists"
 	PG_USER_NOT_FOUND      = "pg_user_not_found"
 	PG_DB_NOT_FOUND        = "pg_db_not_found"
+
+	DOMAIN_ALREADY_EXISTS = "domain_already_exists"
 )

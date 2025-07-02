@@ -63,6 +63,7 @@ type Storage struct {
 
 	Domains interface {
 		AddDomain(ctx context.Context, domain *models.Domain) error
+		RemoveDomain(ctx context.Context, domain *models.Domain) error
 	}
 }
 
