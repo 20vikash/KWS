@@ -648,7 +648,7 @@ func (d *Docker) ExecAndPrint(ctx context.Context, containerID string, cmd []str
 func (d *Docker) GetContainerIDByName(ctx context.Context, containerName string) (string, error) {
 	containers, err := d.Con.ContainerList(ctx, container.ListOptions{All: true})
 	if err != nil {
-		return "", err
+		return "", nil
 	}
 
 	for _, container := range containers {
