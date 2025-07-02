@@ -26,29 +26,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmRemoveBtn = document.getElementById('confirm-remove');
     const confirmCancelBtn = document.getElementById('confirm-cancel');
 
-    // Empty domains array (starts clean)
+    // Domain list
     let domains = [];
-
-    // Domain to be removed
     let domainToRemove = null;
 
-    // Update domains display
-    function updateDomainsDisplay() {
-        if (domains.length === 0) {
-            domainsContainer.classList.add('hidden');
-            emptyDomains.classList.remove('hidden');
-            domainsContainer.innerHTML = '';
-        } else {
-            domainsContainer.classList.remove('hidden');
-            emptyDomains.classList.add('hidden');
-            renderDomains();
-        }
+    // Validate domain name
+    function isValidDomain(domain) {
+        domain = domain.trim().toLowerCase();
+        if (domain.length < 3 || domain.length > 63) return false;
+        const regex = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
+        return regex.test(domain);
     }
 
     // Render domains
     function renderDomains() {
         domainsContainer.innerHTML = '';
-
         domains.forEach(domain => {
             const domainCard = document.createElement('div');
             domainCard.className = 'domain-card';
@@ -83,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
             domainsContainer.appendChild(domainCard);
         });
 
-        // Add event listeners to remove buttons
+        // Add remove and copy listeners
         document.querySelectorAll('.remove-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 domainToRemove = this.getAttribute('data-domain');
@@ -91,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Add event listeners to copy buttons
         document.querySelectorAll('.copy-domain-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 const url = this.getAttribute('data-url');
@@ -105,24 +96,21 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Remove domain
-    function removeDomain(domainName) {
-        domains = domains.filter(d => d.name !== domainName);
-        updateDomainsDisplay();
-        confirmationModal.style.display = 'none';
-    }
-
-    // Validate domain name
-    function isValidDomain(domain) {
-        domain = domain.trim().toLowerCase();
-        if (domain.length < 3 || domain.length > 63) return false;
-        const regex = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
-        return regex.test(domain);
+    // Update domains display
+    function updateDomainsDisplay() {
+        if (domains.length === 0) {
+            domainsContainer.classList.add('hidden');
+            emptyDomains.classList.remove('hidden');
+        } else {
+            domainsContainer.classList.remove('hidden');
+            emptyDomains.classList.add('hidden');
+        }
+        renderDomains();
     }
 
     // Add new domain
     addBtn.addEventListener('click', function () {
-        const domainName = domainInput.value.trim();
+        const domainName = domainInput.value.trim().toLowerCase();
         const port = parseInt(portInput.value);
 
         errorMsg.classList.add('hidden');
@@ -142,9 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const normalizedDomain = domainName.toLowerCase();
-
-        if (domains.some(d => d.name === normalizedDomain)) {
+        if (domains.some(d => d.name === domainName)) {
             errorMsg.classList.remove('hidden');
             return;
         }
@@ -154,14 +140,64 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        domains.push({ name: normalizedDomain, port: port });
-        updateDomainsDisplay();
+        // Send POST request to backend
+        const formData = new URLSearchParams();
+        formData.append('domain_name', domainName);
+        formData.append('port', port.toString());
 
-        domainInput.value = '';
-        portInput.value = '';
+        fetch('/adddomain', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Domain creation failed');
+            return res.json();
+        })
+        .then(data => {
+            domains.push({
+                name: data.Domain,
+                port: data.Port,
+                status: data.Status,
+            });
+            updateDomainsDisplay();
+            domainInput.value = '';
+            portInput.value = '';
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Failed to add domain. It might already exist or an error occurred.');
+        });
     });
 
-    // Confirmation modal buttons
+    // Remove domain from backend and update DOM
+    function removeDomain(domainName) {
+        const formData = new URLSearchParams();
+        formData.append('domain_name', domainName);
+
+        fetch('/removedomain', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to remove domain');
+            domains = domains.filter(d => d.name !== domainName);
+            updateDomainsDisplay();
+            confirmationModal.style.display = 'none';
+            domainToRemove = null;
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error removing domain.');
+        });
+    }
+
+    // Confirm remove
     confirmRemoveBtn.addEventListener('click', function () {
         if (domainToRemove) {
             removeDomain(domainToRemove);
@@ -173,6 +209,6 @@ document.addEventListener('DOMContentLoaded', function () {
         domainToRemove = null;
     });
 
-    // Initial render
+    // Initial domains display
     updateDomainsDisplay();
 });
