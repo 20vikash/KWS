@@ -105,13 +105,14 @@ func (d *Domain) AddUserDomain(ctx context.Context, domain *models.Domain) error
 	}
 
 	sql = `
-		INSERT INTO domains (user_id, domain_name, port) VALUES ($1, $2, $3)
+		INSERT INTO domains (user_id, domain_name, port, is_code) VALUES ($1, $2, $3, $4)
 	`
 
 	_, err = d.Con.Exec(ctx, sql,
 		domain.Uid,
 		domain.Domain,
 		domain.Port,
+		false,
 	)
 	if err != nil {
 		log.Println("Cannot insert user domain data")
