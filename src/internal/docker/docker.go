@@ -187,6 +187,8 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 	// Container config that has the image name.
 	containerConfig := &container.Config{
 		Image: config.CORE_IMAGE_NAME,
+		Cmd:   []string{"bash"}, // This makes the container start with a bash shell
+		Tty:   true,
 	}
 
 	// Container config that has the volume name.
@@ -647,6 +649,7 @@ func (d *Docker) ExecAndPrint(ctx context.Context, containerID string, cmd []str
 		Cmd:          cmd,
 		AttachStdout: true,
 		AttachStderr: true,
+		Tty:          true,
 		Privileged:   true,
 	}
 	execResp, err := d.Con.ContainerExecCreate(ctx, containerID, execConfig)
