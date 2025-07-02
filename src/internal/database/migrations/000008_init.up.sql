@@ -1,0 +1,6 @@
+CREATE TABLE domains (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    domain_name VARCHAR(100) NOT NULL UNIQUE,
+    port INTEGER
+)
