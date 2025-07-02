@@ -215,7 +215,7 @@ func (app *Application) kill(ctx context.Context, uid int, userName string, d *a
 		log.Println("Failed to reload the delete user domain changes")
 	}
 
-	err = app.Store.Domains.RemoveUserDomain(ctx, &models.Domain{Uid: uid})
+	err = app.Store.Domains.DeleteUserDomains(ctx, &models.Domain{Uid: uid})
 	if err != nil {
 		log.Println("Failed to delete user domains while killing the instance")
 	}
