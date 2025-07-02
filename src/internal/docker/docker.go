@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/docker/docker/api/types/build"
 	"github.com/docker/docker/api/types/container"
@@ -280,7 +281,7 @@ func (d *Docker) StartContainer(ctx context.Context, containerID, userName, pass
 		}
 
 		nginxTemplate := &nginx.Template{
-			Domain: containerID,
+			Domain: ShortenContainerID(containerID),
 			IP:     containerIP,
 			Port:   "8099",
 		}
@@ -626,4 +627,17 @@ func (d *Docker) ExecAndPrint(ctx context.Context, containerID string, cmd []str
 	// Print output
 	_, err = io.Copy(os.Stdout, attachResp.Reader)
 	return err
+}
+
+func ShortenContainerID(id string) string {
+	// Remove "_instance" suffix if present
+	cleanID := strings.TrimSuffix(id, "_instance")
+
+	// Take first 8 characters
+	prefix := cleanID
+	if len(cleanID) > 8 {
+		prefix = cleanID[:8]
+	}
+
+	return prefix
 }
