@@ -138,3 +138,17 @@ func (d *Domain) RemoveUserDomain(ctx context.Context, domain *models.Domain) er
 
 	return nil
 }
+
+func (d *Domain) DeleteUserDomains(ctx context.Context, domain *models.Domain) error {
+	sql := `
+		DELETE FROM domains WHERE user_id = $1
+	`
+
+	_, err := d.Con.Exec(ctx, sql, domain.Uid)
+	if err != nil {
+		log.Println("Cannot delete user domains")
+		return err
+	}
+
+	return nil
+}

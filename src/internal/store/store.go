@@ -68,6 +68,7 @@ type Storage struct {
 		GetUserDomains(ctx context.Context, domain *models.Domain) (*[]web.Domain, error)
 		RemoveUserDomain(ctx context.Context, domain *models.Domain) error
 		AddUserDomain(ctx context.Context, domain *models.Domain) error
+		DeleteUserDomains(ctx context.Context, domain *models.Domain) error
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"kws/kws/consts/config"
 	"kws/kws/consts/status"
+	"kws/kws/internal/nginx"
 	"kws/kws/internal/store"
 	"kws/kws/models"
 	"log"
@@ -187,6 +188,37 @@ func (app *Application) kill(ctx context.Context, uid int, userName string, d *a
 
 	log.Println("Successfully killed the container and updated the database")
 	d.Ack(true) // Ack the message once its all done
+
+	// Delete all the related user domain names
+	domains, err := app.Store.Domains.GetUserDomains(ctx, &models.Domain{Uid: uid})
+	if err != nil {
+		log.Println("Failed to get all the user domains (kill)")
+	}
+
+	// Remove all the nginx conf files and reload
+	var nginxTemplate *nginx.Template
+
+	for _, domain := range *domains {
+		nginxTemplate = &nginx.Template{
+			Domain: domain.Name,
+		}
+
+		err = nginxTemplate.RemoveConf()
+		if err != nil {
+			log.Println("Failed to remove nginx conf")
+		}
+	}
+
+	// Reload nginx conf
+	err = app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
+	if err != nil {
+		log.Println("Failed to reload the delete user domain changes")
+	}
+
+	err = app.Store.Domains.RemoveUserDomain(ctx, &models.Domain{Uid: uid})
+	if err != nil {
+		log.Println("Failed to delete user domains while killing the instance")
+	}
 
 	// Update redis
 	err = app.Store.InMemory.PutKillResult(ctx, true, jobID)
