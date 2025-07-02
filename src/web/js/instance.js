@@ -181,6 +181,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  const publishBtn = document.getElementById('publish-btn');
+  if (publishBtn) {
+    publishBtn.addEventListener('click', function () {
+      window.location.href = '/kws_publish';
+    });
+  }
+
   // Copy buttons
   document.querySelectorAll('.copy-btn').forEach(button => {
     button.addEventListener('click', function () {
