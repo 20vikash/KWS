@@ -172,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   codeBtn.addEventListener('click', function () {
+    const containerName = document.getElementById('container-name').value;
     // Open VS Code in a new tab
     if (containerName) {
       window.open(`http://${containerName}.kwscloud.in`, '_blank');
