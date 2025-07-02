@@ -71,6 +71,20 @@ services:
     networks:
       - kws_main
 
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:rw
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - kws_gateway
+    networks:
+      - kws_main
+
   kws_gateway:
     image: golang:latest
     container_name: kws_gateway
@@ -80,6 +94,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/wireguard:/etc/wireguard:ro
     network_mode: "host"
+    ports:
+      - "8080:8080"
     depends_on:
       - postgres
       - redis
