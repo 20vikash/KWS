@@ -57,7 +57,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	}
 
 	// Start the container
-	err = app.Docker.StartContainer(ctx, id, insUser, insPass, exists)
+	err = app.Docker.StartContainer(ctx, id, insUser, insPass, exists, uid)
 	if err != nil {
 		if err.Error() != status.CONTAINER_ALREADY_RUNNING {
 			d.Nack(false, false) // Send to retry queue

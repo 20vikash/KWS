@@ -12,7 +12,9 @@ import (
 	"kws/kws/consts/status"
 	"kws/kws/internal/docker/dockerfiles/core"
 	"kws/kws/internal/nginx"
+	"kws/kws/internal/store"
 	"kws/kws/internal/wg"
+	"kws/kws/models"
 	"log"
 	"os"
 	"path/filepath"
@@ -32,6 +34,7 @@ import (
 type Docker struct {
 	Con     *client.Client
 	IpAlloc *wg.IPAllocator
+	Domains *store.Domain
 }
 
 func createTarDir(src string) (*bytes.Buffer, error) {
@@ -230,7 +233,7 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 	return resp.ID, nil
 }
 
-func (d *Docker) StartContainer(ctx context.Context, containerID, userName, password string, exists bool) error {
+func (d *Docker) StartContainer(ctx context.Context, containerID, userName, password string, exists bool, uid int) error {
 	// Check if the container is already running.
 	containers, err := d.Con.ContainerList(ctx, container.ListOptions{All: false})
 	if err != nil {
@@ -281,9 +284,15 @@ func (d *Docker) StartContainer(ctx context.Context, containerID, userName, pass
 		}
 
 		nginxTemplate := &nginx.Template{
-			Domain: containerID[:8],
+			Domain: containerID[:15],
 			IP:     containerIP,
 			Port:   "8099",
+		}
+
+		// Update the DB
+		err = d.Domains.AddDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: 8099})
+		if err != nil {
+			return err
 		}
 
 		err = nginxTemplate.AddNewConf()
@@ -295,6 +304,11 @@ func (d *Docker) StartContainer(ctx context.Context, containerID, userName, pass
 		err = d.ReloadNginxConf(config.NGINX_CONTAINER)
 		if err != nil {
 			log.Println("Failed to reload nginx conf for code server")
+			// Revert the db state
+			err = d.Domains.RemoveDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: 8099})
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -390,7 +404,13 @@ func (d *Docker) DeleteContainer(ctx context.Context, containerName string, uid 
 	}
 
 	nginxTemplate := nginx.Template{
-		Domain: containerID[:8],
+		Domain: containerID[:15],
+	}
+
+	// Update the DB
+	err = d.Domains.RemoveDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: 8099})
+	if err != nil {
+		return err
 	}
 
 	err = nginxTemplate.RemoveConf()
