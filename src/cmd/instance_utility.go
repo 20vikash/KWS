@@ -105,7 +105,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	}
 
 	// Update redis
-	err = app.Store.InMemory.PutDeployResult(ctx, insUser, jobID, insPass, ip, true)
+	err = app.Store.InMemory.PutDeployResult(ctx, insUser, jobID, insPass, ip, true, id[:15])
 	if err != nil {
 		log.Println("Cannot push deploy success to redis")
 	}
@@ -217,7 +217,7 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 				// Send it to redis
 				switch queueMessage.Action {
 				case config.DEPLOY:
-					err := app.Store.InMemory.PutDeployResult(context.Background(), "", queueMessage.JobID, "", "", false)
+					err := app.Store.InMemory.PutDeployResult(context.Background(), "", queueMessage.JobID, "", "", false, "")
 					if err != nil {
 						log.Println("Failed to put deploy fail result")
 					}

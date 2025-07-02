@@ -45,10 +45,11 @@ type JobResponseSK struct {
 }
 
 type Instance struct {
-	Success  bool
-	Username string
-	Password string
-	IP       string
+	ContainerID string
+	Success     bool
+	Username    string
+	Password    string
+	IP          string
 }
 
 type InsData struct {

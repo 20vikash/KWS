@@ -78,12 +78,13 @@ func (r *RedisStore) PopFreeIp(ctx context.Context, key string) (int, error) {
 
 // Instance deploy, kill and stop
 
-func (r *RedisStore) PutDeployResult(ctx context.Context, userName, jobID, password, ip string, success bool) error {
+func (r *RedisStore) PutDeployResult(ctx context.Context, userName, jobID, password, ip string, success bool, containerID string) error {
 	instance := web.Instance{
-		Success:  success,
-		Username: userName,
-		Password: password,
-		IP:       ip,
+		ContainerID: containerID,
+		Success:     success,
+		Username:    userName,
+		Password:    password,
+		IP:          ip,
 	}
 
 	data, err := json.Marshal(instance)

@@ -23,7 +23,7 @@ type Storage struct {
 		DeleteEmailToken(ctx context.Context, token string) error
 		PushFreeIp(ctx context.Context, ip int, key string) error
 		PopFreeIp(ctx context.Context, key string) (int, error)
-		PutDeployResult(ctx context.Context, userName, jobID, password, ip string, success bool) error
+		PutDeployResult(ctx context.Context, userName, jobID, password, ip string, success bool, containerIP string) error
 		GetDeployResult(ctx context.Context, jobID string) (bool, *web.Instance, error)
 		PutStopResult(ctx context.Context, result bool, jobID string) error
 		GetStopResult(ctx context.Context, jobID string) (bool, bool, error)
