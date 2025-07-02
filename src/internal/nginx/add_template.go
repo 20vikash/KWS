@@ -34,7 +34,7 @@ func (t *Template) AddNewConf() error {
 	}
 
 	// Path to write the new Nginx config file
-	filePath := fmt.Sprintf("/etc/nginx/conf.d/%s.conf", t.Domain)
+	filePath := fmt.Sprintf("/app/nginx_conf/%s.conf", t.Domain)
 
 	// Create and write to the file
 	f, err := os.Create(filePath)
