@@ -89,6 +89,7 @@ services:
     container_name: kws_gateway
     privileged: true
     volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:rw
       - ./src/:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/wireguard:/etc/wireguard:ro
