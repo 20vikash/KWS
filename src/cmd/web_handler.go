@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"kws/kws/consts/config"
 	"kws/kws/consts/services"
+	"kws/kws/models"
 	"kws/kws/models/web"
 	"log"
 	"net/http"
@@ -225,6 +226,31 @@ func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Reques
 	}
 
 	err = templates.ExecuteTemplate(w, "instance_management", data)
+	if err != nil {
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+	}
+}
+
+func (app *Application) RenderPublishPage(w http.ResponseWriter, r *http.Request) {
+	uid := app.SessionManager.GetInt(r.Context(), "id")
+	userName := app.SessionManager.GetString(r.Context(), "user_name")
+
+	// Get domains data
+	domains, err := app.Store.Domains.GetUserDomains(r.Context(), &models.Domain{Uid: uid})
+	if err != nil {
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	hasDomains := len(*domains) > 0
+
+	pubinsData := web.PublishInstancePageData{
+		LoggedInUser: userName,
+		Domains:      *domains,
+		HasDomains:   hasDomains,
+	}
+
+	err = templates.ExecuteTemplate(w, "instance_management", pubinsData)
 	if err != nil {
 		http.Error(w, "something went wrong", http.StatusInternalServerError)
 	}

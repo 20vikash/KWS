@@ -68,7 +68,6 @@ type Domain struct {
 
 type PublishInstancePageData struct {
 	LoggedInUser string
-	InstanceName string
 	Domains      []Domain
 	HasDomains   bool
 }
