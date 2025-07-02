@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/docker/docker/api/types/build"
 	"github.com/docker/docker/api/types/container"
@@ -642,4 +643,21 @@ func (d *Docker) ExecAndPrint(ctx context.Context, containerID string, cmd []str
 	// Print output
 	_, err = io.Copy(os.Stdout, attachResp.Reader)
 	return err
+}
+
+func (d *Docker) GetContainerIDByName(ctx context.Context, containerName string) (string, error) {
+	containers, err := d.Con.ContainerList(ctx, container.ListOptions{All: true})
+	if err != nil {
+		return "", err
+	}
+
+	for _, container := range containers {
+		for _, name := range container.Names {
+			if strings.TrimPrefix(name, "/") == containerName {
+				return container.ID, nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("container with name %s not found", containerName)
 }
