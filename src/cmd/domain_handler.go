@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"kws/kws/consts/config"
 	"kws/kws/internal/nginx"
 	"kws/kws/models"
 	"log"
@@ -57,6 +58,12 @@ func (app *Application) AddUserDomain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
 	domainResponse := DomainResponse{
 		Domain: domain,
 		Port:   portStr,
@@ -89,6 +96,12 @@ func (app *Application) RemoveUserDomain(w http.ResponseWriter, r *http.Request)
 	}
 
 	err = nginxTemplate.RemoveConf()
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	err = app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
