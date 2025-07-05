@@ -78,6 +78,8 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:rw
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/log/nginx:/var/log/nginx
     ports:
       - "80:80"
       - "443:443"
