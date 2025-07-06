@@ -122,7 +122,7 @@
           </div>
           <div class="instance-detail-card">
             <h3>SSH Command</h3>
-            <p id="instance-ssh">{{ .Instance.Username }}@{{ .Instance.IP }}</p>
+            <p id="instance-ssh">ssh {{ .Instance.Username }}@{{ .Instance.IP }}</p>
             <div class="copy-btn" data-copy="ssh {{ .Instance.Username }}@{{ .Instance.IP }}">
               <i class="fas fa-copy text-sm"></i>
             </div>

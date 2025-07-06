@@ -10,6 +10,16 @@ type WebService struct {
 	Port        string
 }
 
+var Adminer = WebService{
+	ServiceName: "adminer",
+	Name:        "Adminer",
+	Description: "Web Based SQL client",
+	IconURL:     "https://www.adminer.org/static/images/logo.png",
+	IP:          "172.25.0.4",
+	Hostname:    "adminer.kws.services",
+	Port:        "8080",
+}
+
 var Services = []WebService{
 	{
 		ServiceName: "postgres",
@@ -24,6 +34,10 @@ var Services = []WebService{
 
 func GetServiceList() []WebService {
 	return Services
+}
+
+func GetAdminerData() WebService {
+	return Adminer
 }
 
 func GetPgServiceData() WebService {

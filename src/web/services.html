@@ -65,10 +65,58 @@
           </div>
         </div>
         
-        <div class="grid service-grid mt-8">
-          <!-- PostgreSQL Service Card -->
-        {{ range .Services }}
-            <div class="card p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          <!-- Adminer Service Card -->
+          <div class="card p-6">
+            <div class="flex items-start justify-between">
+                <div>
+                <div class="service-icon">
+                    <img src="{{ .Adminer.IconURL }}" alt="{{ .Adminer.Name }} Logo" class="postgres-logo">
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-1">{{ .Adminer.Name }}</h3>
+                <p class="text-gray-400 text-sm mb-4">{{ .Adminer.Description }}</p>
+                </div>
+                <div class="flex items-center">
+                <span class="status-badge status-active">
+                    <i class="fas fa-circle mr-1" style="font-size: 8px;"></i>
+                    Active
+                </span>
+                </div>
+            </div>
+            
+            <div class="space-y-4 mt-6">
+                <!-- Service IP -->
+                <div class="info-card">
+                <p class="text-xs text-gray-400 mb-1">Service IP</p>
+                <p class="text-white font-mono text-sm truncate">{{ .Adminer.IP }}</p>
+                <div class="copy-btn" data-copy="{{ .Adminer.IP }}">
+                    <i class="fas fa-copy text-sm"></i>
+                </div>
+                </div>
+
+                <!-- Host Name -->
+                <div class="info-card">
+                <p class="text-xs text-gray-400 mb-1">Host Name</p>
+                <p class="text-white font-mono text-sm truncate">{{ .Adminer.Hostname }}</p>
+                <div class="copy-btn" data-copy="{{ .Adminer.Hostname }}">
+                    <i class="fas fa-copy text-sm"></i>
+                </div>
+                </div>
+
+                <!-- VS Code Port Forwarding -->
+                <div class="info-card">
+                <p class="text-xs text-gray-400 mb-1">VS Code Port Forwarding</p>
+                <p class="text-white font-mono text-sm truncate">{{ .Adminer.Hostname }}:{{ .Adminer.Port }}</p>
+                <div class="copy-btn" data-copy="{{ .Adminer.Hostname }}:{{ .Adminer.Port }}">
+                    <i class="fas fa-copy text-sm"></i>
+                </div>
+                </div>
+            </div>
+          </div>
+          
+          <!-- Loop through all services -->
+          {{ range .Services }}
+          <div class="card p-6">
             <div class="flex items-start justify-between">
                 <div>
                 <div class="service-icon">
@@ -107,8 +155,8 @@
                 <!-- VS Code Port Forwarding -->
                 <div class="info-card">
                 <p class="text-xs text-gray-400 mb-1">VS Code Port Forwarding</p>
-                <p class="text-white font-mono text-sm truncate">{{ .IP }}:{{ .Port }}</p>
-                <div class="copy-btn" data-copy="{{ .IP }}:{{ .Port }}">
+                <p class="text-white font-mono text-sm truncate">{{ .Hostname }}:{{ .Port }}</p>
+                <div class="copy-btn" data-copy="{{ .Hostname }}:{{ .Port }}">
                     <i class="fas fa-copy text-sm"></i>
                 </div>
                 </div>
@@ -122,8 +170,9 @@
                 <i class="fas fa-chart-bar"></i>
                 </button>
             </div>
-            </div>
-        {{ end }}
+          </div>
+          {{ end }}
+          
           <!-- Placeholder for future services -->
           <div class="card p-6 flex flex-col items-center justify-center border-2 border-dashed border-gray-700 hover:border-blue-400/50">
             <div class="service-icon bg-gray-800/50 mb-4">

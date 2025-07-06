@@ -123,3 +123,11 @@ services:
     networks:
       kws_services:
         ipv4_address: 172.25.0.2
+
+  adminer:
+    image: adminer
+    container_name: adminer.kws.services
+    restart: always
+    networks:
+      kws_services:
+        ipv4_address: 172.25.0.4
