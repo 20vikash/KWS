@@ -62,3 +62,15 @@ Let students learn cloud by using it.
 ## 👨‍🔧 Built by a student, for students.
 
 Because the best way to learn cloud isn’t reading about it — it’s **deploying your first app.**
+
+## Screenshots
+
+<img width="1512" height="857" alt="Screenshot 2025-07-12 at 8 19 04 PM" src="https://github.com/user-attachments/assets/26add905-3671-4339-a6f7-913d23a20e21" />
+
+<img width="1512" height="854" alt="Screenshot 2025-07-12 at 8 19 15 PM" src="https://github.com/user-attachments/assets/34178029-2a8c-42ee-a950-5272b8a50ba5" />
+
+<img width="1512" height="853" alt="Screenshot 2025-07-12 at 8 19 25 PM" src="https://github.com/user-attachments/assets/8abd5524-074e-4aeb-8197-6a7a5677ee3c" />
+<img width="1512" height="856" alt="Screenshot 2025-07-12 at 8 24 34 PM" src="https://github.com/user-attachments/assets/07e524cc-65df-4670-a684-22cd2e3fe19a" />
+
+
+
