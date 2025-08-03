@@ -5,6 +5,7 @@ import (
 	"kws/kws/consts/config"
 	"log"
 	"os"
+	"strings"
 
 	lxd "github.com/canonical/lxd/client"
 	"github.com/canonical/lxd/shared/api"
@@ -266,5 +267,61 @@ func (lxdkws *LXDKWS) ConfigSSH(name string) error {
 	}
 
 	fmt.Println("SSH configured.")
+	return nil
+}
+
+// Install and configure code server
+func (lxdkws *LXDKWS) InstallCodeServer(name string) error {
+	installCmd := []string{
+		"bash", "-c",
+		"curl -fsSL https://code-server.dev/install.sh | sh",
+	}
+
+	err := lxdkws.RunCommand(lxdkws.Conn, name, installCmd)
+	if err != nil {
+		log.Println("Cannot install code server to the lxc container")
+		return err
+	}
+
+	return nil
+}
+
+func (lxdkws *LXDKWS) ConfigureCodeServerLXC(containerName, username, vscodePassword string) error {
+	conn, err := lxd.ConnectLXDUnix("", nil)
+	if err != nil {
+		return fmt.Errorf("failed to connect to LXD: %w", err)
+	}
+
+	configDir := fmt.Sprintf("/home/%s/.config/code-server", username)
+
+	// Step 1: Create config directory
+	mkdirCmd := []string{"mkdir", "-p", configDir}
+	if err := lxdkws.RunCommand(conn, containerName, mkdirCmd); err != nil {
+		return fmt.Errorf("failed to create config directory: %w", err)
+	}
+
+	// Step 2: Write the config.yaml
+	configYaml := fmt.Sprintf(`bind-addr: 0.0.0.0:8099
+auth: password
+password: %s
+cert: false
+`, vscodePassword)
+
+	escaped := strings.ReplaceAll(configYaml, `"`, `\"`)
+	writeCmd := []string{
+		"bash", "-c",
+		fmt.Sprintf(`echo "%s" > %s/config.yaml`, escaped, configDir),
+	}
+	if err := lxdkws.RunCommand(conn, containerName, writeCmd); err != nil {
+		return fmt.Errorf("failed to write config.yaml: %w", err)
+	}
+
+	// Step 3: Fix ownership
+	chownCmd := []string{"chown", "-R", fmt.Sprintf("%s:%s", username, username), configDir}
+	if err := lxdkws.RunCommand(conn, containerName, chownCmd); err != nil {
+		return fmt.Errorf("failed to chown config directory: %w", err)
+	}
+
+	fmt.Println("code-server configured.")
 	return nil
 }
