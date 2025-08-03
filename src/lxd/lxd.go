@@ -12,13 +12,13 @@ type LXDKWS struct {
 }
 
 func (lxdkws *LXDKWS) PullUbuntuImage() error {
-	remote, err := lxd.ConnectSimpleStreams("https://images.linuxcontainers.org", nil)
+	remote, err := lxd.ConnectPublicLXD("https://images.lxd.canonical.com", nil)
 	if err != nil {
 		log.Println("Failed to connect to lxc remote")
 		return err
 	}
 
-	alias, _, err := remote.GetImageAlias("ubuntu/22.04")
+	alias, _, err := remote.GetImageAlias("ubuntu/22.04/cloud")
 	if err != nil {
 		log.Println("Cannot get ubuntu image alias")
 		return err
