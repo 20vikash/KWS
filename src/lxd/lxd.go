@@ -109,3 +109,19 @@ func (lxdkws *LXDKWS) CreateBridgeNetwork() error {
 
 	return nil
 }
+
+// Creates a dir backend storage pool for all the lxc containers
+func (lxdkws *LXDKWS) CreateDirStoragePool(name string) error {
+	pool := api.StoragePoolsPost{
+		Name:   name,
+		Driver: "dir",
+	}
+
+	err := lxdkws.Conn.CreateStoragePool(pool)
+	if err != nil {
+		log.Println("Cannot create the storage pool")
+		return err
+	}
+
+	return nil
+}
