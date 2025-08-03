@@ -1,6 +1,7 @@
 package lxd_kws
 
 import (
+	"kws/kws/consts/config"
 	"log"
 
 	lxd "github.com/canonical/lxd/client"
@@ -23,7 +24,7 @@ func (lxdkws *LXDKWS) AliasExists(name string) (bool, error) {
 }
 
 func (lxdkws *LXDKWS) PullUbuntuImage() error {
-	ex, err := lxdkws.AliasExists("ubuntu-22:04")
+	ex, err := lxdkws.AliasExists(config.LXC_UBUNTU_ALIAS)
 	if err != nil {
 		log.Println("Failed to check alias existance")
 		return err
@@ -54,7 +55,7 @@ func (lxdkws *LXDKWS) PullUbuntuImage() error {
 
 	op, err := lxdkws.Conn.CopyImage(remote, *image, &lxd.ImageCopyArgs{
 		Aliases: []api.ImageAlias{
-			{Name: "ubuntu-22:04", Description: "Stable version of ubuntu cloud"},
+			{Name: config.LXC_UBUNTU_ALIAS, Description: "Stable version of ubuntu cloud"},
 		},
 	})
 	if err != nil {

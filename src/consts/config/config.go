@@ -30,4 +30,6 @@ const (
 	NGINX_CONTAINER = "nginx_proxy"
 
 	USER_DOMAIN_LIMIT = 3
+
+	LXC_UBUNTU_ALIAS = "ubuntu-22:04"
 )
