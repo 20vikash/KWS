@@ -1,8 +1,10 @@
 package lxd_kws
 
 import (
+	"fmt"
 	"kws/kws/consts/config"
 	"log"
+	"os"
 
 	lxd "github.com/canonical/lxd/client"
 	"github.com/canonical/lxd/shared/api"
@@ -173,6 +175,54 @@ func (lxdkws *LXDKWS) CreateInstance(name string, ip string) error {
 	}
 
 	log.Println("Instance created successfully with nesting and static IP!")
+
+	return nil
+}
+
+// Exec command in the container
+func (lxdkws *LXDKWS) RunCommand(conn lxd.InstanceServer, container string, command []string) error {
+	req := api.InstanceExecPost{
+		Command:     command,
+		WaitForWS:   true,
+		Interactive: false,
+	}
+
+	args := lxd.InstanceExecArgs{
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	}
+
+	op, err := conn.ExecInstance(container, req, &args)
+	if err != nil {
+		log.Printf("Failed to exec command: %v", err)
+		return err
+	}
+
+	if err := op.Wait(); err != nil {
+		log.Printf("Command failed: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (lxdkws *LXDKWS) InstallEssentials(name string) error {
+	err := lxdkws.RunCommand(lxdkws.Conn, name, []string{"apt", "update"})
+	if err != nil {
+		log.Println("Failed to apt update")
+		return err
+	}
+
+	fmt.Println("Installing essential packages...")
+	err = lxdkws.RunCommand(lxdkws.Conn, name, []string{
+		"apt", "install", "-y",
+		"sudo", "bash", "vim", "curl", "wget", "openssh-server",
+		"iproute2", "net-tools", "ca-certificates",
+	})
+	if err != nil {
+		log.Println("Cannot install essential tools")
+		return err
+	}
 
 	return nil
 }
