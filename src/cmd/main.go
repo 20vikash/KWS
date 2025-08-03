@@ -192,7 +192,7 @@ func main() {
 
 	// Create LXDKWS struct instance
 	lxdKws := &lxd_kws.LXDKWS{
-		Conn: c,
+		Conn: *c,
 	}
 
 	// Initialize Application
@@ -206,6 +206,12 @@ func main() {
 		IpAlloc:        ipAlloc,
 		Services:       services,
 		LXD:            lxdKws,
+	}
+
+	// Install the lxc ubuntu image
+	err = app.LXD.PullUbuntuImage()
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 
 	// Initialize the server with the docker images
