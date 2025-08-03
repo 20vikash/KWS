@@ -32,4 +32,5 @@ const (
 	USER_DOMAIN_LIMIT = 3
 
 	LXC_UBUNTU_ALIAS = "ubuntu-22:04"
+	LXD_BRIDGE       = "lxdbr0"
 )

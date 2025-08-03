@@ -12,6 +12,7 @@ type LXDKWS struct {
 	Conn lxd.InstanceServer
 }
 
+// Check if the image already exists in local server
 func (lxdkws *LXDKWS) AliasExists(name string) (bool, error) {
 	_, _, err := lxdkws.Conn.GetImageAlias(name)
 	if err != nil {
@@ -23,6 +24,7 @@ func (lxdkws *LXDKWS) AliasExists(name string) (bool, error) {
 	return true, nil
 }
 
+// Pull ubuntu lxc image from official repository
 func (lxdkws *LXDKWS) PullUbuntuImage() error {
 	ex, err := lxdkws.AliasExists(config.LXC_UBUNTU_ALIAS)
 	if err != nil {
@@ -70,6 +72,40 @@ func (lxdkws *LXDKWS) PullUbuntuImage() error {
 	}
 
 	log.Println("Successfully created ubuntu alias")
+
+	return nil
+}
+
+// Creates a bridged network for lxc containers to live
+func (lxdkws *LXDKWS) CreateBridgeNetwork() error {
+	_, _, err := lxdkws.Conn.GetNetwork(config.LXD_BRIDGE)
+	if err == nil {
+		log.Println("Bridge network already exists")
+		return nil
+	}
+
+	// Network configurations
+	network := api.NetworksPost{
+		Name: config.LXD_BRIDGE,
+		NetworkPut: api.NetworkPut{
+			Config: map[string]string{
+				"ipv4.address": "172.30.0.0/24",
+				"ipv4.nat":     "true",
+				"ipv6.address": "none",
+			},
+			Description: "KWS bridge network for LXC containers",
+		},
+		Type: "bridge",
+	}
+
+	// Create the bridge network
+	err = lxdkws.Conn.CreateNetwork(network)
+	if err != nil {
+		log.Printf("Failed to create bridge network: %v", err)
+		return err
+	}
+
+	log.Println("Bridge network 'lxdbr0' created successfully.")
 
 	return nil
 }
