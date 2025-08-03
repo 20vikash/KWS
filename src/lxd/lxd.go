@@ -206,6 +206,7 @@ func (lxdkws *LXDKWS) RunCommand(conn lxd.InstanceServer, container string, comm
 	return nil
 }
 
+// Install essential packages
 func (lxdkws *LXDKWS) InstallEssentials(name string) error {
 	err := lxdkws.RunCommand(lxdkws.Conn, name, []string{"apt", "update"})
 	if err != nil {
@@ -224,5 +225,46 @@ func (lxdkws *LXDKWS) InstallEssentials(name string) error {
 		return err
 	}
 
+	return nil
+}
+
+// Create custom user and add it to sudo group
+func (lxdkws *LXDKWS) CreateUser(containerName, userName, password string) error {
+	err := lxdkws.RunCommand(lxdkws.Conn, containerName, []string{
+		"useradd", "-m", "-s", "/bin/bash", userName,
+	})
+
+	err = lxdkws.RunCommand(lxdkws.Conn, containerName, []string{
+		"bash", "-c", fmt.Sprintf("echo '%s:%s' | chpasswd", userName, password),
+	})
+
+	// Add user to sudo group
+	err = lxdkws.RunCommand(lxdkws.Conn, containerName, []string{
+		"usermod", "-aG", "sudo", userName,
+	})
+
+	if err != nil {
+		log.Println("Error while creating a user")
+		return err
+	}
+
+	return nil
+}
+
+// SSH config
+func (lxdkws *LXDKWS) ConfigSSH(name string) error {
+	log.Println("Updating SSH config...")
+	err := lxdkws.RunCommand(lxdkws.Conn, name, []string{"sed", "-i", "s/^#*PermitRootLogin.*/PermitRootLogin no/", "/etc/ssh/sshd_config"})
+	err = lxdkws.RunCommand(lxdkws.Conn, name, []string{"sed", "-i", "s/^#*PasswordAuthentication.*/PasswordAuthentication yes/", "/etc/ssh/sshd_config"})
+
+	fmt.Println("Restarting SSH service...")
+	err = lxdkws.RunCommand(lxdkws.Conn, name, []string{"systemctl", "enable", "--now", "ssh"})
+
+	if err != nil {
+		log.Println("Failed to config SSH")
+		return err
+	}
+
+	fmt.Println("SSH configured.")
 	return nil
 }
