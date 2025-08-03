@@ -13,5 +13,7 @@ func ConnectToLXD() (*lxd.InstanceServer, error) {
 		return nil, err
 	}
 
+	log.Println("Successfully connected to the LXD Socket")
+
 	return &client, nil
 }
