@@ -15,7 +15,7 @@ func SendMail(to string, token string) error {
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", "Hello")
 
-	url := fmt.Sprintf("http://localhost:8080/verify?token=%s", token)
+	url := fmt.Sprintf("https://kwscloud.in/verify?token=%s", token)
 
 	m.SetBody("text/html", fmt.Sprintf("<html>Click <a href='%s'>here</a> to activate your account. This link will expire in 1 day.</html>", url))
 
