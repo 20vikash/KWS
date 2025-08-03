@@ -22,6 +22,7 @@ import (
 	"kws/kws/internal/mq"
 	"kws/kws/internal/store"
 	"kws/kws/internal/wg"
+	lxd_kws "kws/kws/lxd"
 	"log"
 	"net/http"
 	"time"
@@ -42,6 +43,7 @@ type Application struct {
 	Wg             *wg.WgOperations
 	IpAlloc        *wg.IPAllocator
 	Services       *services.Services
+	LXD            *lxd_kws.LXDKWS
 }
 
 func main() {
@@ -182,6 +184,17 @@ func main() {
 	// Create services instance
 	services := services.CreateServices(pgSConn, &store.PgServiceStore{Con: connPool})
 
+	// Connect to LXD
+	c, err := lxd_kws.ConnectToLXD()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create LXDKWS struct instance
+	lxdKws := &lxd_kws.LXDKWS{
+		Conn: c,
+	}
+
 	// Initialize Application
 	app := Application{
 		Port:           ":8080",
@@ -192,6 +205,7 @@ func main() {
 		Wg:             wgOp,
 		IpAlloc:        ipAlloc,
 		Services:       services,
+		LXD:            lxdKws,
 	}
 
 	// Initialize the server with the docker images

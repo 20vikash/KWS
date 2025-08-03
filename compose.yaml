@@ -94,7 +94,7 @@ services:
       - ./nginx/conf.d:/app/nginx_conf:rw
       - ./src/:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
-      - /var/snap/lxd/common/lxd/unix.socket
+      - /var/snap/lxd/common/lxd/unix.socket:/var/snap/lxd/common/lxd/unix.socket
       - /etc/wireguard:/etc/wireguard:ro
     network_mode: "host"
     ports:
