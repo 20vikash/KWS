@@ -78,6 +78,7 @@ func (lxdkws *LXDKWS) PullUbuntuImage() error {
 
 // Creates a bridged network for lxc containers to live
 func (lxdkws *LXDKWS) CreateBridgeNetwork() error {
+	// Check if it already exists
 	_, _, err := lxdkws.Conn.GetNetwork(config.LXD_BRIDGE)
 	if err == nil {
 		log.Println("Bridge network already exists")
@@ -112,16 +113,66 @@ func (lxdkws *LXDKWS) CreateBridgeNetwork() error {
 
 // Creates a dir backend storage pool for all the lxc containers
 func (lxdkws *LXDKWS) CreateDirStoragePool(name string) error {
+	_, _, err := lxdkws.Conn.GetStoragePool(name)
+	if err == nil {
+		log.Println("Storage pool already exists")
+		return nil
+	}
+
 	pool := api.StoragePoolsPost{
 		Name:   name,
 		Driver: "dir",
 	}
 
-	err := lxdkws.Conn.CreateStoragePool(pool)
+	err = lxdkws.Conn.CreateStoragePool(pool)
 	if err != nil {
 		log.Println("Cannot create the storage pool")
 		return err
 	}
+
+	return nil
+}
+
+// Create an Instance with lxdbr0, nesting enabled, and static IP
+func (lxdkws *LXDKWS) CreateInstance(name string, ip string) error {
+	req := api.InstancesPost{
+		Name: name,
+		InstancePut: api.InstancePut{
+			// Enable nesting
+			Config: map[string]string{
+				"security.nesting": "true",
+			},
+			Devices: map[string]map[string]string{
+				"eth0": {
+					"type":         "nic",
+					"nictype":      "bridged",
+					"parent":       config.LXD_BRIDGE,
+					"name":         "eth0",
+					"ipv4.address": ip,
+				},
+			},
+		},
+		Source: api.InstanceSource{
+			Type:  "image",
+			Alias: config.LXC_UBUNTU_ALIAS,
+		},
+	}
+
+	// Create the Instance
+	op, err := lxdkws.Conn.CreateInstance(req)
+	if err != nil {
+		log.Printf("Failed to create Instance: %v", err)
+		return err
+	}
+
+	// Wait for the operation to complete
+	err = op.Wait()
+	if err != nil {
+		log.Printf("Operation failed: %v", err)
+		return err
+	}
+
+	log.Println("Instance created successfully with nesting and static IP!")
 
 	return nil
 }
