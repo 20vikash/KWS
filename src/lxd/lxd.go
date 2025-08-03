@@ -11,7 +11,29 @@ type LXDKWS struct {
 	Conn lxd.InstanceServer
 }
 
+func (lxdkws *LXDKWS) AliasExists(name string) (bool, error) {
+	_, _, err := lxdkws.Conn.GetImageAlias(name)
+	if err != nil {
+		if api.StatusErrorCheck(err, 404) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
 func (lxdkws *LXDKWS) PullUbuntuImage() error {
+	ex, err := lxdkws.AliasExists("ubuntu-22:04")
+	if err != nil {
+		log.Println("Failed to check alias existance")
+		return err
+	}
+
+	if ex {
+		log.Println("Alias already exists")
+		return nil
+	}
+
 	remote, err := lxd.ConnectSimpleStreams("https://cloud-images.ubuntu.com/releases/", nil)
 	if err != nil {
 		log.Println("Failed to connect to lxc remote")
@@ -45,6 +67,8 @@ func (lxdkws *LXDKWS) PullUbuntuImage() error {
 		log.Println("Something failed when downloading ubuntu image")
 		return err
 	}
+
+	log.Println("Successfully created ubuntu alias")
 
 	return nil
 }
