@@ -180,6 +180,28 @@ func (lxdkws *LXDKWS) CreateInstance(name string, ip string) error {
 	return nil
 }
 
+// Update the instance state(start or stop)
+func (lxdkws *LXDKWS) UpdateInstanceState(state, instanceName string) error {
+	req := api.InstanceStatePut{
+		Action:  state,
+		Timeout: -1,
+	}
+
+	op, err := lxdkws.Conn.UpdateInstanceState(instanceName, req, "")
+	if err != nil {
+		log.Printf("Failed to update the instance %s for the state %s", instanceName, state)
+		return err
+	}
+
+	err = op.Wait()
+	if err != nil {
+		log.Printf("Failed to update the instance %s for the state %s", instanceName, state)
+		return err
+	}
+
+	return nil
+}
+
 // Exec command in the container
 func (lxdkws *LXDKWS) RunCommand(conn lxd.InstanceServer, container string, command []string) error {
 	req := api.InstanceExecPost{
