@@ -48,7 +48,7 @@ func (app *Application) AddUserDomain(w http.ResponseWriter, r *http.Request) {
 
 	nginxTemplate := nginx.Template{
 		Domain: domain,
-		IP:     app.IpAlloc.GenerateIPDocker(ipInt),
+		IP:     app.IpAlloc.GenerateIPLXC(ipInt),
 		Port:   portStr,
 	}
 

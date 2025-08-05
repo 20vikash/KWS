@@ -193,6 +193,7 @@ func main() {
 	// Create LXDKWS struct instance
 	lxdKws := &lxd_kws.LXDKWS{
 		Conn: *c,
+		Ip:   ipAlloc,
 	}
 
 	// Initialize Application

@@ -19,8 +19,8 @@ const (
 	INTERFACE_ADDRESS = "10.0.0.1/24"
 	CIDR              = 24
 
-	STACK_KEY  = "ip_stack"
-	DOCKER_KEY = "docker_ip"
+	STACK_KEY = "ip_stack"
+	LXC_IP    = "lxc_ip"
 
 	MAX_WG_DEVICES_PER_USER = 3
 

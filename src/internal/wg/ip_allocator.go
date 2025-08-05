@@ -60,7 +60,7 @@ func (ip *IPAllocator) GenerateIP(hostNumber int) string {
 	return fmt.Sprintf("10.%d.%d.%d", firstOctet, secondOctet, thirdOctet)
 }
 
-func (ip *IPAllocator) GenerateIPDocker(hostNumber int) string {
+func (ip *IPAllocator) GenerateIPLXC(hostNumber int) string {
 	secondOctet, thirdOctet := 0, 0
 
 	c := hostNumber / 256
@@ -68,13 +68,13 @@ func (ip *IPAllocator) GenerateIPDocker(hostNumber int) string {
 	if c < 256 {
 		thirdOctet = hostNumber % 256
 		secondOctet = c
-		return fmt.Sprintf("172.35.%d.%d", secondOctet, thirdOctet)
+		return fmt.Sprintf("172.30.%d.%d", secondOctet, thirdOctet)
 	}
 
 	secondOctet = c % 256
 	thirdOctet = hostNumber % 256
 
-	return fmt.Sprintf("172.35.%d.%d", secondOctet, thirdOctet)
+	return fmt.Sprintf("172.30.%d.%d", secondOctet, thirdOctet)
 }
 
 func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid int, pubKey string) (string, error) {
@@ -105,9 +105,9 @@ func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid int, pubKey strin
 	return ipString, nil
 }
 
-func (ip *IPAllocator) AllocateFreeDockerIp(ctx context.Context, uid int) (string, error) {
+func (ip *IPAllocator) AllocateFreeLXCIp(ctx context.Context, uid int) (string, error) {
 	// Check redis stack for any released IP's
-	ipAddr, err := ip.RedisStore.PopFreeIp(ctx, config.DOCKER_KEY)
+	ipAddr, err := ip.RedisStore.PopFreeIp(ctx, config.LXC_IP)
 
 	if err == nil { // If we successfully popped a free IP from the stack
 		// AddPeer/update the Database
@@ -128,7 +128,7 @@ func (ip *IPAllocator) AllocateFreeDockerIp(ctx context.Context, uid int) (strin
 	}
 
 	// Generate IP address string from the host Number
-	ipString := ip.GenerateIPDocker(ipAddr)
+	ipString := ip.GenerateIPLXC(ipAddr)
 
 	return ipString, nil
 }
@@ -149,7 +149,7 @@ func (ip *IPAllocator) DeAllocateIP(ctx context.Context, pubKey string, uid int)
 	return nil
 }
 
-func (ip *IPAllocator) DeAllocateDockerIP(ctx context.Context, uid int) error {
+func (ip *IPAllocator) DeAllocateLXCIP(ctx context.Context, uid int) error {
 	// Delete the IP from the database
 	ipAddr, err := ip.InstanceStore.RemoveIP(ctx, uid)
 	if err != nil {
@@ -157,7 +157,7 @@ func (ip *IPAllocator) DeAllocateDockerIP(ctx context.Context, uid int) error {
 	}
 
 	// Push the IP to the redis stack
-	err = ip.RedisStore.PushFreeIp(ctx, ipAddr, config.DOCKER_KEY)
+	err = ip.RedisStore.PushFreeIp(ctx, ipAddr, config.LXC_IP)
 	if err != nil {
 		return err
 	}

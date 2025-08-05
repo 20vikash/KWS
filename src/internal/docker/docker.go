@@ -206,7 +206,7 @@ func (d *Docker) CreateContainerCore(ctx context.Context, containerName, volumeN
 	}
 
 	// Find a free IP to allocate.
-	freeIP, err := d.IpAlloc.AllocateFreeDockerIp(ctx, uid)
+	freeIP, err := d.IpAlloc.AllocateFreeLXCIp(ctx, uid)
 	if err != nil {
 		log.Println("Docker cannot allocate free IP")
 		return "", err
@@ -399,7 +399,7 @@ func (d *Docker) DeleteContainer(ctx context.Context, containerName string, uid 
 	}
 
 	// De-allocate the IP
-	err = d.IpAlloc.DeAllocateDockerIP(ctx, uid)
+	err = d.IpAlloc.DeAllocateLXCIP(ctx, uid)
 	if err != nil {
 		log.Println("Cannot de-allocate IP after deleting container")
 		return err

@@ -1,8 +1,10 @@
 package lxd_kws
 
 import (
+	"context"
 	"fmt"
 	"kws/kws/consts/config"
+	"kws/kws/internal/wg"
 	"log"
 	"os"
 	"strings"
@@ -13,6 +15,7 @@ import (
 
 type LXDKWS struct {
 	Conn lxd.InstanceServer
+	Ip   *wg.IPAllocator
 }
 
 // Check if the image already exists in local server
@@ -137,7 +140,13 @@ func (lxdkws *LXDKWS) CreateDirStoragePool(name string) error {
 }
 
 // Create an Instance with lxdbr0, nesting enabled, and static IP
-func (lxdkws *LXDKWS) CreateInstance(name string, ip string) error {
+func (lxdkws *LXDKWS) CreateInstance(ctx context.Context, name string, uid int) error {
+	ip, err := lxdkws.Ip.AllocateFreeLXCIp(ctx, uid)
+	if err != nil {
+		log.Println("Cannot allocate IP for the instance")
+		return err
+	}
+
 	req := api.InstancesPost{
 		Name: name,
 		InstancePut: api.InstancePut{
@@ -203,7 +212,13 @@ func (lxdkws *LXDKWS) UpdateInstanceState(state, instanceName string) error {
 }
 
 // Delete instance
-func (lxdkws *LXDKWS) DeleteInstance(instanceName string) error {
+func (lxdkws *LXDKWS) DeleteInstance(ctx context.Context, uid int, instanceName string) error {
+	err := lxdkws.Ip.DeAllocateLXCIP(ctx, uid)
+	if err != nil {
+		log.Println("Failed to deallocate IP for the instance")
+		return err
+	}
+
 	op, err := lxdkws.Conn.DeleteContainer(instanceName)
 	if err != nil {
 		log.Println("Failed to delete instance")
