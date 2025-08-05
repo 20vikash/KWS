@@ -202,6 +202,23 @@ func (lxdkws *LXDKWS) UpdateInstanceState(state, instanceName string) error {
 	return nil
 }
 
+// Delete instance
+func (lxdkws *LXDKWS) DeleteInstance(instanceName string) error {
+	op, err := lxdkws.Conn.DeleteContainer(instanceName)
+	if err != nil {
+		log.Println("Failed to delete instance")
+		return err
+	}
+
+	err = op.Wait()
+	if err != nil {
+		log.Println("Failed to perform instance deletion operation")
+		return err
+	}
+
+	return nil
+}
+
 // Exec command in the container
 func (lxdkws *LXDKWS) RunCommand(conn lxd.InstanceServer, container string, command []string) error {
 	req := api.InstanceExecPost{
