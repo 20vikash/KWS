@@ -33,4 +33,6 @@ const (
 
 	LXC_UBUNTU_ALIAS = "ubuntu-22:04"
 	LXD_BRIDGE       = "lxdbr0"
+	INSTANCE_START   = "start"
+	INSTANCE_STOP    = "stop"
 )
