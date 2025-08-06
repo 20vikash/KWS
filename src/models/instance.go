@@ -17,14 +17,14 @@ type Instance struct {
 func sanitize(s string) string {
 	// Replace non-alphanumeric characters with underscores
 	reg := regexp.MustCompile(`[^a-zA-Z0-9]`)
-	return reg.ReplaceAllString(s, "_")
+	return reg.ReplaceAllString(s, "-")
 }
 
 func CreateInstanceType(uid int, userName string) *Instance {
 	safeUserName := sanitize(userName)
-	base := fmt.Sprintf("%d_%s", uid, safeUserName)
+	base := fmt.Sprintf("%d-%s", uid, safeUserName)
 
-	const suffixInstance = "_instance"
+	const suffixInstance = "-instance"
 	const suffixVolume = "_volume"
 	const maxLen = 63
 
