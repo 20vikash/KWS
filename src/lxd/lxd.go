@@ -155,13 +155,13 @@ func (lxdkws *LXDKWS) CreateInstance(ctx context.Context, name string, uid int) 
 		return err
 	}
 
-	s, _, err := lxdkws.Conn.GetInstanceState(name)
+	exists, err := lxdkws.ContainerExists(name)
 	if err != nil {
-		log.Println("Failed to get the instance status")
+		log.Println("Cannot get exist status of the container")
 		return err
 	}
 
-	if s.Status == "Running" || s.Status == "Stopped" {
+	if exists {
 		return errors.New(status.CONTAINER_ALREADY_EXISTS)
 	}
 
