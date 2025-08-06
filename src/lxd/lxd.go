@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"kws/kws/consts/config"
+	"kws/kws/consts/status"
 	"kws/kws/internal/docker"
 	"kws/kws/internal/nginx"
 	"kws/kws/internal/store"
@@ -154,6 +155,16 @@ func (lxdkws *LXDKWS) CreateInstance(ctx context.Context, name string, uid int) 
 		return err
 	}
 
+	s, _, err := lxdkws.Conn.GetInstanceState(name)
+	if err != nil {
+		log.Println("Failed to get the instance status")
+		return err
+	}
+
+	if s.Status == "Running" || s.Status == "Stopped" {
+		return errors.New(status.CONTAINER_ALREADY_EXISTS)
+	}
+
 	req := api.InstancesPost{
 		Name: name,
 		InstancePut: api.InstancePut{
@@ -196,8 +207,48 @@ func (lxdkws *LXDKWS) CreateInstance(ctx context.Context, name string, uid int) 
 	return nil
 }
 
+// Check if the container exists
+func (lxdkws *LXDKWS) ContainerExists(name string) (bool, error) {
+	instances, err := lxdkws.Conn.GetInstances(api.InstanceTypeContainer)
+	if err != nil {
+		log.Println("Failed to get all the containers")
+		return false, err
+	}
+
+	for _, instance := range instances {
+		if instance.Name == name {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 // Update the instance state(start or stop)
 func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, password, state, instanceName string, exists bool, uid int) error {
+	if state == config.INSTANCE_START {
+		s, _, err := lxdkws.Conn.GetInstanceState(instanceName)
+		if err != nil {
+			log.Println("Failed to get the instance status")
+			return err
+		}
+
+		if s.Status == "Running" {
+			return errors.New(status.CONTAINER_ALREADY_RUNNING)
+		}
+	}
+
+	if state == config.INSTANCE_STOP {
+		exists, err := lxdkws.ContainerExists(instanceName)
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			return errors.New(status.CONTAINER_NOT_FOUND_TO_STOP)
+		}
+	}
+
 	req := api.InstanceStatePut{
 		Action:  state,
 		Timeout: -1,
@@ -283,7 +334,16 @@ func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, passwor
 
 // Delete instance
 func (lxdkws *LXDKWS) DeleteInstance(ctx context.Context, uid int, instanceName string) error {
-	err := lxdkws.Ip.DeAllocateLXCIP(ctx, uid)
+	exists, err := lxdkws.ContainerExists(instanceName)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return errors.New(status.CONTAINER_NOT_FOUND_TO_DELETE)
+	}
+
+	err = lxdkws.Ip.DeAllocateLXCIP(ctx, uid)
 	if err != nil {
 		log.Println("Failed to deallocate IP for the instance")
 		return err
