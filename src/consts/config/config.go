@@ -35,4 +35,5 @@ const (
 	LXD_BRIDGE       = "lxdbr0"
 	INSTANCE_START   = "start"
 	INSTANCE_STOP    = "stop"
+	STORAGE_POOL     = "kws"
 )

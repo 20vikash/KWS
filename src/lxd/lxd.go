@@ -104,7 +104,7 @@ func (lxdkws *LXDKWS) CreateBridgeNetwork() error {
 		Name: config.LXD_BRIDGE,
 		NetworkPut: api.NetworkPut{
 			Config: map[string]string{
-				"ipv4.address": "172.30.0.0/24",
+				"ipv4.address": "172.30.0.1/24",
 				"ipv4.nat":     "true",
 				"ipv6.address": "none",
 			},

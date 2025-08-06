@@ -233,6 +233,12 @@ func main() {
 		log.Fatal("Failed to create bridge network")
 	}
 
+	// Create storage pool for lxc containers
+	err = app.LXD.CreateDirStoragePool(config.STORAGE_POOL)
+	if err != nil {
+		log.Fatal("Failed to create storage pool")
+	}
+
 	// Create the main wg0 interface
 	err = app.Wg.CreateInterfaceWgMain()
 	if err != nil {
