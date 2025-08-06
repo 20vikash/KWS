@@ -227,6 +227,12 @@ func main() {
 		log.Fatal("Core network creation error")
 	}
 
+	// Create lxdbr0 network
+	err = app.LXD.CreateBridgeNetwork()
+	if err != nil {
+		log.Fatal("Failed to create bridge network")
+	}
+
 	// Create the main wg0 interface
 	err = app.Wg.CreateInterfaceWgMain()
 	if err != nil {
