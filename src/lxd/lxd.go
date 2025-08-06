@@ -2,9 +2,14 @@ package lxd_kws
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"kws/kws/consts/config"
+	"kws/kws/internal/docker"
+	"kws/kws/internal/nginx"
+	"kws/kws/internal/store"
 	"kws/kws/internal/wg"
+	"kws/kws/models"
 	"log"
 	"os"
 	"strings"
@@ -14,8 +19,10 @@ import (
 )
 
 type LXDKWS struct {
-	Conn lxd.InstanceServer
-	Ip   *wg.IPAllocator
+	Conn    lxd.InstanceServer
+	Ip      *wg.IPAllocator
+	Domains *store.Domain
+	Docker  *docker.Docker
 }
 
 // Check if the image already exists in local server
@@ -190,7 +197,7 @@ func (lxdkws *LXDKWS) CreateInstance(ctx context.Context, name string, uid int) 
 }
 
 // Update the instance state(start or stop)
-func (lxdkws *LXDKWS) UpdateInstanceState(state, instanceName string) error {
+func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, password, state, instanceName string, exists bool, uid int) error {
 	req := api.InstanceStatePut{
 		Action:  state,
 		Timeout: -1,
@@ -206,6 +213,69 @@ func (lxdkws *LXDKWS) UpdateInstanceState(state, instanceName string) error {
 	if err != nil {
 		log.Printf("Failed to update the instance %s for the state %s", instanceName, state)
 		return err
+	}
+
+	if state == config.INSTANCE_START {
+		if !exists {
+			err = lxdkws.CreateUser(instanceName, userName, password)
+			if err != nil {
+				log.Println("Failed to create user in instance")
+				return err
+			}
+
+			err = lxdkws.InstallCodeServer(instanceName)
+			if err != nil {
+				log.Println("Failed to create code server")
+				return err
+			}
+
+			err = lxdkws.ConfigSSH(instanceName)
+			if err != nil {
+				log.Println("Failed to configure SSH")
+				return err
+			}
+
+			err = lxdkws.ConfigureCodeServerLXC(instanceName, userName, password)
+			if err != nil {
+				log.Println("Failed to start code server")
+				return err
+			}
+
+			// Expose code server to the internet
+			containerIP, err := lxdkws.FindContainerIP(instanceName)
+			if err != nil {
+				log.Println("Cannot find container ip")
+				return err
+			}
+
+			nginxTemplate := &nginx.Template{
+				Domain: instanceName[:15],
+				IP:     containerIP,
+				Port:   "8099",
+			}
+
+			// Update the DB
+			err = lxdkws.Domains.AddDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: 8099})
+			if err != nil {
+				return err
+			}
+
+			err = nginxTemplate.AddNewConf()
+			if err != nil {
+				log.Println("Cannot add new nginx conf file")
+				return err
+			}
+
+			err = lxdkws.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
+			if err != nil {
+				log.Println("Failed to reload nginx conf for code server")
+				// Revert the db state
+				err = lxdkws.Docker.Domains.RemoveDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: 8099})
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
 
 	return nil
@@ -230,6 +300,36 @@ func (lxdkws *LXDKWS) DeleteInstance(ctx context.Context, uid int, instanceName 
 		log.Println("Failed to perform instance deletion operation")
 		return err
 	}
+
+	err = lxdkws.Docker.IpAlloc.DeAllocateLXCIP(ctx, uid)
+	if err != nil {
+		log.Println("Cannot de-allocate IP after deleting container")
+		return err
+	}
+
+	nginxTemplate := nginx.Template{
+		Domain: instanceName[:15],
+	}
+
+	// Update the DB
+	err = lxdkws.Docker.Domains.RemoveDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: 8099})
+	if err != nil {
+		return err
+	}
+
+	err = nginxTemplate.RemoveConf()
+	if err != nil {
+		log.Println("Cannot remove conf file nginx")
+		return err
+	}
+
+	err = lxdkws.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
+	if err != nil {
+		log.Println("Cannot reload nginx conf while removing conf")
+		return err
+	}
+
+	log.Println("Successfully deleted the container:", instanceName)
 
 	return nil
 }
@@ -378,4 +478,22 @@ cert: false
 
 	fmt.Println("code-server configured.")
 	return nil
+}
+
+func (lxdkws *LXDKWS) FindContainerIP(containerName string) (string, error) {
+	state, _, err := lxdkws.Conn.GetContainerState(containerName)
+	if err != nil {
+		log.Println("Cannot get container state")
+		return "", nil
+	}
+
+	for _, iFace := range state.Network {
+		for _, addr := range iFace.Addresses {
+			if addr.Family == "inet" && addr.Scope == "global" {
+				return addr.Address, nil
+			}
+		}
+	}
+
+	return "", errors.New("No Ip found")
 }

@@ -35,10 +35,8 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 
 	// Create the container.
 	instanceType := models.CreateInstanceType(uid, userName)
-	id, err := app.Docker.CreateContainerCore(ctx,
+	err := app.LXD.CreateInstance(ctx,
 		instanceType.ContainerName,
-		instanceType.VolumeName,
-		config.CORE_NETWORK_NAME,
 		uid,
 	)
 	if err != nil {
@@ -58,7 +56,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	}
 
 	// Start the container
-	err = app.Docker.StartContainer(ctx, id, insUser, insPass, exists, uid)
+	err = app.LXD.UpdateInstanceState(ctx, insUser, insPass, config.INSTANCE_START, instanceType.ContainerName, exists, uid)
 	if err != nil {
 		if err.Error() != status.CONTAINER_ALREADY_RUNNING {
 			d.Nack(false, false) // Send to retry queue
@@ -100,13 +98,13 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	// Ack the request once everything went well
 	d.Ack(true)
 
-	ip, err := app.Docker.FindContainerIP(ctx, instanceType.ContainerName)
+	ip, err := app.LXD.FindContainerIP(instanceType.ContainerName)
 	if err != nil {
 		log.Println("Cannot find container IP")
 	}
 
 	// Update redis
-	err = app.Store.InMemory.PutDeployResult(ctx, insUser, jobID, insPass, ip, true, id[:15])
+	err = app.Store.InMemory.PutDeployResult(ctx, insUser, jobID, insPass, ip, true, instanceType.ContainerName[:15])
 	if err != nil {
 		log.Println("Cannot push deploy success to redis")
 	}
@@ -122,7 +120,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 func (app *Application) stop(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string) {
 	// Stop the container
 	instanceType := models.CreateInstanceType(uid, userName)
-	err := app.Docker.StopContainer(ctx, instanceType.ContainerName)
+	err := app.LXD.UpdateInstanceState(ctx, "", "", config.INSTANCE_STOP, instanceType.ContainerName, true, uid)
 	if err != nil {
 		if err.Error() != status.CONTAINER_NOT_FOUND_TO_STOP {
 			log.Println("Something went wrong in stopping the container")
@@ -159,19 +157,9 @@ func (app *Application) stop(ctx context.Context, uid int, userName string, d *a
 func (app *Application) kill(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string) {
 	// kill the container
 	instanceType := models.CreateInstanceType(uid, userName)
-	err := app.Docker.DeleteContainer(ctx, instanceType.ContainerName, uid)
+	err := app.LXD.DeleteInstance(ctx, uid, instanceType.ContainerName)
 	if err != nil {
 		if err.Error() != status.CONTAINER_NOT_FOUND_TO_DELETE {
-			log.Println("Something went wrong in stopping the container")
-			d.Nack(false, false) // Send to retry queue
-			return
-		}
-	}
-
-	// Delete the attached volume
-	err = app.Docker.RemoveNamedVolume(ctx, instanceType.VolumeName)
-	if err != nil {
-		if err.Error() != status.VOLUME_NOT_FOUND {
 			log.Println("Something went wrong in stopping the container")
 			d.Nack(false, false) // Send to retry queue
 			return
