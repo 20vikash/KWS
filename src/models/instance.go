@@ -1,9 +1,8 @@
 package models
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
+	"regexp"
 )
 
 type Instance struct {
@@ -15,19 +14,37 @@ type Instance struct {
 	IsRunning     bool
 }
 
-func CreateInstanceType(uid int, userName string) *Instance {
-	s := fmt.Sprintf("%d:%s", uid, userName)
-	h := sha256.Sum256([]byte(s))
-	hashString := hex.EncodeToString(h[:])
+func sanitize(s string) string {
+	// Replace non-alphanumeric characters with underscores
+	reg := regexp.MustCompile(`[^a-zA-Z0-9]`)
+	return reg.ReplaceAllString(s, "_")
+}
 
-	containerName := hashString + "_instance"
-	volumeName := hashString + "_volume"
-	instanceType := "core"
+func CreateInstanceType(uid int, userName string) *Instance {
+	safeUserName := sanitize(userName)
+	base := fmt.Sprintf("%d_%s", uid, safeUserName)
+
+	const suffixInstance = "_instance"
+	const suffixVolume = "_volume"
+	const maxLen = 63
+
+	maxBaseLen := maxLen - len(suffixInstance)
+	if len(base) > maxBaseLen {
+		base = base[:maxBaseLen]
+	}
+	containerName := base + suffixInstance
+
+	maxBaseLen = maxLen - len(suffixVolume)
+	volumeBase := base
+	if len(base) > maxBaseLen {
+		volumeBase = base[:maxBaseLen]
+	}
+	volumeName := volumeBase + suffixVolume
 
 	return &Instance{
 		Uid:           uid,
 		VolumeName:    volumeName,
 		ContainerName: containerName,
-		InstanceType:  instanceType,
+		InstanceType:  "core",
 	}
 }
