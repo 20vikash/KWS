@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function pollDeployResult(jobID, attempts = 0) {
-    if (attempts > 20) {
+    if (attempts > 100) {
       alert("Deployment timed out.");
       unlockAllButtons();
       return;

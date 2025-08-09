@@ -104,7 +104,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	}
 
 	// Update redis
-	err = app.Store.InMemory.PutDeployResult(ctx, insUser, jobID, insPass, ip, true, instanceType.ContainerName[:15])
+	err = app.Store.InMemory.PutDeployResult(ctx, insUser, jobID, insPass, ip, true, instanceType.ContainerName)
 	if err != nil {
 		log.Println("Cannot push deploy success to redis")
 	}

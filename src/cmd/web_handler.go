@@ -209,22 +209,11 @@ func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Reques
 
 	data.Username = userName
 
-	ip, err := app.Docker.FindContainerIP(r.Context(), data.ContainerName)
+	ip, err := app.LXD.FindContainerIP(data.ContainerName)
 	if err != nil {
 		data.Instance.IP = ""
 	} else {
 		data.Instance.IP = ip
-	}
-
-	containerID, err := app.Docker.GetContainerIDByName(r.Context(), data.ContainerName)
-	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-
-	if containerID != "" {
-		containerID = containerID[:15]
-		data.ContainerName = containerID
 	}
 
 	err = templates.ExecuteTemplate(w, "instance_management", data)

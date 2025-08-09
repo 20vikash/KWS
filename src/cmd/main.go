@@ -192,8 +192,10 @@ func main() {
 
 	// Create LXDKWS struct instance
 	lxdKws := &lxd_kws.LXDKWS{
-		Conn: *c,
-		Ip:   ipAlloc,
+		Conn:    *c,
+		Ip:      ipAlloc,
+		Domains: &store.Domain{Con: connPool},
+		Docker:  docker,
 	}
 
 	// Initialize Application

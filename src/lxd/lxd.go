@@ -180,6 +180,11 @@ func (lxdkws *LXDKWS) CreateInstance(ctx context.Context, name string, uid int) 
 					"name":         "eth0",
 					"ipv4.address": ip,
 				},
+				"root": {
+					"type": "disk",
+					"path": "/",
+					"pool": config.STORAGE_POOL,
+				},
 			},
 		},
 		Source: api.InstanceSource{
@@ -274,6 +279,12 @@ func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, passwor
 				return err
 			}
 
+			err = lxdkws.InstallEssentials(instanceName)
+			if err != nil {
+				log.Println("Failed to install essentials")
+				return err
+			}
+
 			err = lxdkws.InstallCodeServer(instanceName)
 			if err != nil {
 				log.Println("Failed to create code server")
@@ -288,6 +299,12 @@ func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, passwor
 
 			err = lxdkws.ConfigureCodeServerLXC(instanceName, userName, password)
 			if err != nil {
+				log.Println("Failed to configure code server")
+				return err
+			}
+
+			err = lxdkws.StartCodeServer(instanceName, userName)
+			if err != nil {
 				log.Println("Failed to start code server")
 				return err
 			}
@@ -300,7 +317,7 @@ func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, passwor
 			}
 
 			nginxTemplate := &nginx.Template{
-				Domain: instanceName[:15],
+				Domain: instanceName,
 				IP:     containerIP,
 				Port:   "8099",
 			}
@@ -343,6 +360,11 @@ func (lxdkws *LXDKWS) DeleteInstance(ctx context.Context, uid int, instanceName 
 		return errors.New(status.CONTAINER_NOT_FOUND_TO_DELETE)
 	}
 
+	err = lxdkws.UpdateInstanceState(ctx, "", "", config.INSTANCE_STOP, instanceName, true, uid)
+	if err != nil {
+		log.Println("Failed to stop the container")
+	}
+
 	err = lxdkws.Ip.DeAllocateLXCIP(ctx, uid)
 	if err != nil {
 		log.Println("Failed to deallocate IP for the instance")
@@ -361,14 +383,8 @@ func (lxdkws *LXDKWS) DeleteInstance(ctx context.Context, uid int, instanceName 
 		return err
 	}
 
-	err = lxdkws.Docker.IpAlloc.DeAllocateLXCIP(ctx, uid)
-	if err != nil {
-		log.Println("Cannot de-allocate IP after deleting container")
-		return err
-	}
-
 	nginxTemplate := nginx.Template{
-		Domain: instanceName[:15],
+		Domain: instanceName,
 	}
 
 	// Update the DB
@@ -471,9 +487,10 @@ func (lxdkws *LXDKWS) ConfigSSH(name string) error {
 	log.Println("Updating SSH config...")
 	err := lxdkws.RunCommand(lxdkws.Conn, name, []string{"sed", "-i", "s/^#*PermitRootLogin.*/PermitRootLogin no/", "/etc/ssh/sshd_config"})
 	err = lxdkws.RunCommand(lxdkws.Conn, name, []string{"sed", "-i", "s/^#*PasswordAuthentication.*/PasswordAuthentication yes/", "/etc/ssh/sshd_config"})
+	err = lxdkws.RunCommand(lxdkws.Conn, name, []string{"sed", "-i", "s/^#*PasswordAuthentication.*/PasswordAuthentication yes/", "/etc/ssh/sshd_config.d/60-cloudimg-settings.conf"})
 
 	fmt.Println("Restarting SSH service...")
-	err = lxdkws.RunCommand(lxdkws.Conn, name, []string{"systemctl", "enable", "--now", "ssh"})
+	err = lxdkws.RunCommand(lxdkws.Conn, name, []string{"systemctl", "restart", "sshd"})
 
 	if err != nil {
 		log.Println("Failed to config SSH")
@@ -501,16 +518,11 @@ func (lxdkws *LXDKWS) InstallCodeServer(name string) error {
 }
 
 func (lxdkws *LXDKWS) ConfigureCodeServerLXC(containerName, username, vscodePassword string) error {
-	conn, err := lxd.ConnectLXDUnix("", nil)
-	if err != nil {
-		return fmt.Errorf("failed to connect to LXD: %w", err)
-	}
-
 	configDir := fmt.Sprintf("/home/%s/.config/code-server", username)
 
 	// Step 1: Create config directory
 	mkdirCmd := []string{"mkdir", "-p", configDir}
-	if err := lxdkws.RunCommand(conn, containerName, mkdirCmd); err != nil {
+	if err := lxdkws.RunCommand(lxdkws.Conn, containerName, mkdirCmd); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
@@ -526,17 +538,28 @@ cert: false
 		"bash", "-c",
 		fmt.Sprintf(`echo "%s" > %s/config.yaml`, escaped, configDir),
 	}
-	if err := lxdkws.RunCommand(conn, containerName, writeCmd); err != nil {
+	if err := lxdkws.RunCommand(lxdkws.Conn, containerName, writeCmd); err != nil {
 		return fmt.Errorf("failed to write config.yaml: %w", err)
 	}
 
 	// Step 3: Fix ownership
 	chownCmd := []string{"chown", "-R", fmt.Sprintf("%s:%s", username, username), configDir}
-	if err := lxdkws.RunCommand(conn, containerName, chownCmd); err != nil {
+	if err := lxdkws.RunCommand(lxdkws.Conn, containerName, chownCmd); err != nil {
 		return fmt.Errorf("failed to chown config directory: %w", err)
 	}
 
 	fmt.Println("code-server configured.")
+	return nil
+}
+
+func (lxdkws *LXDKWS) StartCodeServer(containerName, userName string) error {
+	startCmd := fmt.Sprintf("su - %s -c 'nohup code-server > /dev/null 2>&1 &'", userName)
+	cmd := []string{"bash", "-c", startCmd}
+
+	if err := lxdkws.RunCommand(lxdkws.Conn, containerName, cmd); err != nil {
+		return fmt.Errorf("failed to start code server: %w", err)
+	}
+
 	return nil
 }
 
