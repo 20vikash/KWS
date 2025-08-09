@@ -209,11 +209,11 @@ func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Reques
 
 	data.Username = userName
 
-	ip, err := app.LXD.FindContainerIP(data.ContainerName)
+	ip, err := app.Store.Instance.GetIPFromUID(r.Context(), uid)
 	if err != nil {
 		data.Instance.IP = ""
 	} else {
-		data.Instance.IP = ip
+		data.Instance.IP = app.IpAlloc.GenerateIPLXC(ip)
 	}
 
 	err = templates.ExecuteTemplate(w, "instance_management", data)
