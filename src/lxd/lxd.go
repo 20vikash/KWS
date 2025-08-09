@@ -149,12 +149,6 @@ func (lxdkws *LXDKWS) CreateDirStoragePool(name string) error {
 
 // Create an Instance with lxdbr0, nesting enabled, and static IP
 func (lxdkws *LXDKWS) CreateInstance(ctx context.Context, name string, uid int) error {
-	ip, err := lxdkws.Ip.AllocateFreeLXCIp(ctx, uid)
-	if err != nil {
-		log.Println("Cannot allocate IP for the instance")
-		return err
-	}
-
 	exists, err := lxdkws.ContainerExists(name)
 	if err != nil {
 		log.Println("Cannot get exist status of the container")
@@ -163,6 +157,12 @@ func (lxdkws *LXDKWS) CreateInstance(ctx context.Context, name string, uid int) 
 
 	if exists {
 		return errors.New(status.CONTAINER_ALREADY_EXISTS)
+	}
+
+	ip, err := lxdkws.Ip.AllocateFreeLXCIp(ctx, uid)
+	if err != nil {
+		log.Println("Cannot allocate IP for the instance")
+		return err
 	}
 
 	req := api.InstancesPost{

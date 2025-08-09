@@ -98,13 +98,13 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	// Ack the request once everything went well
 	d.Ack(true)
 
-	ip, err := app.LXD.FindContainerIP(instanceType.ContainerName)
+	ip, err := app.Store.Instance.GetIPFromUID(ctx, uid)
 	if err != nil {
 		log.Println("Cannot find container IP")
 	}
 
 	// Update redis
-	err = app.Store.InMemory.PutDeployResult(ctx, insUser, jobID, insPass, ip, true, instanceType.ContainerName)
+	err = app.Store.InMemory.PutDeployResult(ctx, insUser, jobID, insPass, app.IpAlloc.GenerateIPLXC(ip), true, instanceType.ContainerName)
 	if err != nil {
 		log.Println("Cannot push deploy success to redis")
 	}
