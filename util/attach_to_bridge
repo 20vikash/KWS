@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e
+
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <container_name> <bridge_name> <container_ip/CIDR>"
+    echo "Example: $0 adminer.kws.services lxdbr0 172.30.0.100/24"
+    exit 1
+fi
+
+CONTAINER="$1"
+BRIDGE="$2"
+IPADDR="$3"
+
+# Get container PID
+PID=$(docker inspect -f '{{.State.Pid}}' "$CONTAINER" 2>/dev/null || true)
+if [ -z "$PID" ] || [ "$PID" = "0" ]; then
+    echo "Error: Container '$CONTAINER' is not running or not found."
+    exit 1
+fi
+
+# Generate unique veth names
+HOST_IF="veth-${CONTAINER:0:6}-h"
+CONT_IF="veth-${CONTAINER:0:6}-c"
+
+# Clean up if they already exist
+ip link show "$HOST_IF" &>/dev/null && sudo ip link delete "$HOST_IF" || true
+ip link show "$CONT_IF" &>/dev/null && sudo ip link delete "$CONT_IF" || true
+
+echo "[+] Creating veth pair: $HOST_IF <-> $CONT_IF"
+sudo ip link add "$HOST_IF" type veth peer name "$CONT_IF"
+
+echo "[+] Attaching $HOST_IF to bridge $BRIDGE"
+sudo ip link set "$HOST_IF" master "$BRIDGE"
+sudo ip link set "$HOST_IF" up
+
+echo "[+] Moving $CONT_IF into container namespace (PID $PID)"
+sudo ip link set "$CONT_IF" netns "$PID"
+
+echo "[+] Configuring $CONT_IF inside container"
+sudo nsenter -t "$PID" -n ip link set "$CONT_IF" up
+sudo nsenter -t "$PID" -n ip addr add "$IPADDR" dev "$CONT_IF"
+
+echo "[+] Done. $CONTAINER now has $IPADDR on $BRIDGE."
