@@ -171,6 +171,7 @@ func (lxdkws *LXDKWS) CreateInstance(ctx context.Context, name string, uid int) 
 			// Enable nesting
 			Config: map[string]string{
 				"security.nesting": "true",
+				"limits.memory":    "1500MB",
 			},
 			Devices: map[string]map[string]string{
 				"eth0": {
