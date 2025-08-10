@@ -36,4 +36,6 @@ const (
 	INSTANCE_START   = "start"
 	INSTANCE_STOP    = "stop"
 	STORAGE_POOL     = "kws"
+
+	DNS_IP = "172.30.0.102"
 )

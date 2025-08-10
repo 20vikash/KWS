@@ -108,14 +108,16 @@ services:
     command: sh -c "apt-get update && apt-get install -y uuid-runtime && go run ."
 
   dnsmasq:
-    image: jpillora/dnsmasq
+    image: strm/dnsmasq
     container_name: dnsmasq_kws
     restart: unless-stopped
+    ports:
+      - "5353:53/udp"
+      - "5353:53/tcp"
+    cap_add:
+      - NET_ADMIN
     volumes:
       - ./dnsmasq.conf:/etc/dnsmasq.conf:ro
-    ports:
-      - "53:53/udp"
-      - "53:53/tcp"
     networks:
       - kws_main
 

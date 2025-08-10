@@ -285,6 +285,12 @@ func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, passwor
 				return err
 			}
 
+			err = lxdkws.SetNetplanDNS(instanceName, config.DNS_IP)
+			if err != nil {
+				log.Println("Failed to set up DNS")
+				return err
+			}
+
 			err = lxdkws.InstallCodeServer(instanceName)
 			if err != nil {
 				log.Println("Failed to create code server")
@@ -449,7 +455,7 @@ func (lxdkws *LXDKWS) InstallEssentials(name string) error {
 	err = lxdkws.RunCommand(lxdkws.Conn, name, []string{
 		"apt", "install", "-y",
 		"sudo", "bash", "vim", "curl", "wget", "openssh-server",
-		"iproute2", "net-tools", "ca-certificates",
+		"iproute2", "net-tools", "ca-certificates", "openvswitch-switch", "openvswitch-common",
 	})
 	if err != nil {
 		log.Println("Cannot install essential tools")
@@ -476,6 +482,41 @@ func (lxdkws *LXDKWS) CreateUser(containerName, userName, password string) error
 
 	if err != nil {
 		log.Println("Error while creating a user")
+		return err
+	}
+
+	return nil
+}
+
+// Set up the custom dns server to the lxc container
+func (lxdkws *LXDKWS) SetNetplanDNS(containerName string, dnsIP string) error {
+	// Prepare YAML content with the DNS IP you want
+	netplanYAML := fmt.Sprintf(`
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: true
+      nameservers:
+        addresses: [%s]
+`, dnsIP)
+
+	// Use bash -c and echo to write multi-line string to the file inside container
+	cmd := []string{
+		"bash", "-c",
+		fmt.Sprintf("echo '%s' > /etc/netplan/50-cloud-init.yaml", netplanYAML),
+	}
+
+	err := lxdkws.RunCommand(lxdkws.Conn, containerName, cmd)
+	if err != nil {
+		log.Println("Error writing netplan config:", err)
+		return err
+	}
+
+	// Run netplan apply to apply the changes
+	err = lxdkws.RunCommand(lxdkws.Conn, containerName, []string{"netplan", "apply"})
+	if err != nil {
+		log.Println("Error applying netplan config:", err)
 		return err
 	}
 

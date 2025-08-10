@@ -1,19 +1,18 @@
 include .env
 
-# Containers and their bridge settings
-SERVICES_TO_ATTACH = \
-	postgres.kws.services lxdbr0 172.30.0.100/24 \
-	adminer.kws.services  lxdbr0 172.30.0.101/24 \
-	dnsmasq_kws           lxdbr0 172.30.0.102/24
+ATTACH_SERVICES = \
+	postgres.kws.services:lxdbr0:172.30.0.100/24 \
+	adminer.kws.services:lxdbr0:172.30.0.101/24 \
+	dnsmasq_kws:lxdbr0:172.30.0.102/24
 
-# Function to attach services to bridge
 define attach_services
 	@echo "Attaching services to bridge..."
 	@set -e; \
-	for args in $(SERVICES_TO_ATTACH); do \
-		container=$$(echo $$args | awk '{print $$1}'); \
-		bridge=$$(echo $$args | awk '{print $$2}'); \
-		ipcidr=$$(echo $$args | awk '{print $$3}'); \
+	for triple in $(ATTACH_SERVICES); do \
+		container=$${triple%%:*}; \
+		tmp=$${triple#*:}; \
+		bridge=$${tmp%%:*}; \
+		ipcidr=$${tmp#*:}; \
 		echo " -> $$container to $$bridge with $$ipcidr"; \
 		attach_to_bridge $$container $$bridge $$ipcidr; \
 	done
@@ -22,6 +21,7 @@ endef
 up:
 	docker compose up -d
 	$(call attach_services)
+	docker compose logs -f
 
 down:
 	docker compose down
