@@ -4,7 +4,7 @@ include .env
 SERVICES_TO_ATTACH = \
 	postgres.kws.services lxdbr0 172.30.0.100/24 \
 	adminer.kws.services  lxdbr0 172.30.0.101/24 \
-	dnsmasq_kws           lxdbr0 172.30.0.102
+	dnsmasq_kws           lxdbr0 172.30.0.102/24
 
 # Function to attach services to bridge
 define attach_services
