@@ -1,10 +1,15 @@
 package models
 
 type Tunnels struct {
-	ID     int
 	UID    int
 	Domain string
 	Host   string
 }
 
-// Test commit 4
+func CreateTunnel(uid int, domain string, host string) *Tunnels {
+	return &Tunnels{
+		UID:    uid,
+		Domain: domain,
+		Host:   host,
+	}
+}
