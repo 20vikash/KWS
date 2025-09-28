@@ -50,7 +50,7 @@ func (app *Application) IsTunnelUserAuthorized(next http.Handler) http.Handler {
 		// Check if the tunnel request is authorized
 		uid, err := app.Store.InMemory.GetUidFromTunnelSecret(r.Context(), secret)
 		ctx := context.WithValue(r.Context(), "uid", uid)
-		r.WithContext(ctx)
+		r = r.WithContext(ctx)
 		if err != nil {
 			http.Error(w, "Unauthorized request", http.StatusUnauthorized)
 			return
