@@ -23,6 +23,8 @@ func NewRouter(app *Application) http.Handler {
 	// Define a sub-router for protected tunnel routes
 	r.Group(func(protected chi.Router) {
 		protected.Use(app.IsTunnelUserAuthorized)
+		protected.Post("/create_tunnel", app.CreateTunnel)
+		protected.Post("/destroy_tunnel", app.DestroyTunnel)
 	})
 
 	// Define a sub-router for protected routes
