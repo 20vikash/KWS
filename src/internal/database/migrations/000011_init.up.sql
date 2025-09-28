@@ -1,5 +1,6 @@
 CREATE TABLE tunnels (
     id SERIAL PRIMARY KEY,
+    tunnel_name VARCHAR(100),
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     domain VARCHAR(100) NOT NULL UNIQUE,
     is_custom BOOLEAN NOT NULL,
