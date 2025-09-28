@@ -38,6 +38,10 @@ func (app *Application) LoginRateLimitMiddleware(next http.Handler) http.Handler
 func (app *Application) IsTunnelUserAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		secret := r.Header.Get("secret")
+		if secret == "" {
+			http.Error(w, "Missing secret header", http.StatusUnauthorized)
+			return
+		}
 
 		// Check if the tunnel request is authorized
 		uid, err := app.Store.InMemory.GetUidFromTunnelSecret(r.Context(), secret)
