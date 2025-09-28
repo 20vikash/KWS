@@ -29,6 +29,8 @@ type Storage struct {
 		GetStopResult(ctx context.Context, jobID string) (bool, bool, error)
 		PutKillResult(ctx context.Context, result bool, jobID string) error
 		GetKillResult(ctx context.Context, jobID string) (bool, bool, error)
+		SetTunnelLogin(ctx context.Context, secret string, uid int) error
+		GetUidFromTunnelSecret(ctx context.Context, secret string) int
 	}
 
 	Instance interface {
@@ -70,6 +72,11 @@ type Storage struct {
 		AddUserDomain(ctx context.Context, domain *models.Domain) error
 		DeleteUserDomains(ctx context.Context, domain *models.Domain) error
 	}
+
+	Tunnels interface {
+		CreateTunnel(ctx context.Context, tunnel models.Tunnels) error
+		DestroyTunnel(ctx context.Context, tunnel models.Tunnels) error
+	}
 }
 
 func NewStore(pg *pgxpool.Pool, redis *redis.Client, mq *MQ) *Storage {
@@ -95,6 +102,9 @@ func NewStore(pg *pgxpool.Pool, redis *redis.Client, mq *MQ) *Storage {
 		},
 		Domains: &Domain{
 			Con: pg,
+		},
+		Tunnels: &TunnelStore{
+			db: pg,
 		},
 	}
 }
