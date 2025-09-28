@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 )
@@ -40,12 +41,16 @@ func (app *Application) IsTunnelUserAuthorized(next http.Handler) http.Handler {
 		err := r.ParseForm()
 		if err != nil {
 			log.Println("Failed to parse form")
+			http.Error(w, "Invalid form", http.StatusBadRequest)
+			return
 		}
 
 		secret := r.Form.Get("secret")
 
 		// Check if the tunnel request is authorized
-		_, err = app.Store.InMemory.GetUidFromTunnelSecret(r.Context(), secret)
+		uid, err := app.Store.InMemory.GetUidFromTunnelSecret(r.Context(), secret)
+		ctx := context.WithValue(r.Context(), "uid", uid)
+		r.WithContext(ctx)
 		if err != nil {
 			http.Error(w, "Unauthorized request", http.StatusUnauthorized)
 			return

@@ -20,6 +20,11 @@ func NewRouter(app *Application) http.Handler {
 	r.Use(sessionManager.LoadAndSave)
 	// r.Use(app.LoginRateLimitMiddleware)
 
+	// Define a sub-router for protected tunnel routes
+	r.Group(func(protected chi.Router) {
+		protected.Use(app.IsTunnelUserAuthorized)
+	})
+
 	// Define a sub-router for protected routes
 	r.Group(func(protected chi.Router) {
 		protected.Use(app.IsAuthorized)
@@ -56,6 +61,7 @@ func NewRouter(app *Application) http.Handler {
 	r.Post("/login", app.LoginUser)
 	r.Get("/kws_register", app.RenderRegisterPage)
 	r.Get("/kws_signin", app.RenderSignInPage)
+	r.Post("/tunnel_login", app.LoginTunnelUser)
 
 	// Serve static files
 	r.Handle("/js/*", http.StripPrefix("/js/", http.FileServer(http.Dir("../web/js"))))

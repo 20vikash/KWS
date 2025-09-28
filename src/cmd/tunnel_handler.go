@@ -5,7 +5,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"kws/kws/consts/status"
+	"kws/kws/models"
+	"log"
 	"net/http"
+	"strconv"
 )
 
 func (app *Application) LoginTunnelUser(w http.ResponseWriter, r *http.Request) {
@@ -57,4 +60,38 @@ func (app *Application) LoginTunnelUser(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
+}
+
+func (app *Application) CreateTunnel(w http.ResponseWriter, r *http.Request) {
+	// Parse form fields
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Invalid form", http.StatusBadRequest)
+		return
+	}
+
+	uid := r.Context().Value("uid").(int)
+
+	// Get the field values
+	domain := r.FormValue("domain")
+	isCustom := r.FormValue("is_custom")
+
+	isCustomB, err := strconv.ParseBool(isCustom)
+	if err != nil {
+		log.Println("Cannot parse isCustom bool")
+		http.Error(w, "Bad format", http.StatusBadRequest)
+		return
+	}
+
+	err = app.Store.Tunnels.CreateTunnel(r.Context(), models.Tunnels{
+		UID:      uid,
+		Domain:   domain,
+		IsCustom: isCustomB,
+	})
+
+	if err != nil {
+		log.Println("Something went wrong with creating a tunnel(handler)")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }
