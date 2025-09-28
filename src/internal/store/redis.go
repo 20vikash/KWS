@@ -45,6 +45,27 @@ func (r *RedisStore) GetEmailFromToken(ctx context.Context, token string) string
 	return val
 }
 
+// Tunnel
+func (r *RedisStore) SetTunnelLogin(ctx context.Context, secret string, uid int) error {
+	err := r.Ds.Set(ctx, secret, uid, 24*time.Hour).Err()
+	if err != nil {
+		log.Println(err.Error())
+		log.Println("Failed to set tunnel login token")
+		return err
+	}
+
+	return nil
+}
+
+func (r *RedisStore) GetUidFromTunnelSecret(ctx context.Context, secret string) int {
+	val, err := r.Ds.Get(ctx, secret).Int()
+	if err != nil {
+		log.Println("Failed to get tunnel UID int")
+	}
+
+	return val
+}
+
 // Wireguard
 func (r *RedisStore) PushFreeIp(ctx context.Context, ip int, key string) error {
 	err := r.Ds.LPush(ctx, key, ip).Err()
