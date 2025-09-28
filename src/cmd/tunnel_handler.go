@@ -75,6 +75,7 @@ func (app *Application) CreateTunnel(w http.ResponseWriter, r *http.Request) {
 	// Get the field values
 	domain := r.FormValue("domain")
 	isCustom := r.FormValue("is_custom")
+	tunnelName := r.FormValue("name")
 
 	isCustomB, err := strconv.ParseBool(isCustom)
 	if err != nil {
@@ -87,10 +88,35 @@ func (app *Application) CreateTunnel(w http.ResponseWriter, r *http.Request) {
 		UID:      uid,
 		Domain:   domain,
 		IsCustom: isCustomB,
+		Name:     tunnelName,
 	})
 
 	if err != nil {
 		log.Println("Something went wrong with creating a tunnel(handler)")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+}
+
+func (app *Application) DestroyTunnel(w http.ResponseWriter, r *http.Request) {
+	// Parse form fields
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Invalid form", http.StatusBadRequest)
+		return
+	}
+
+	uid := r.Context().Value("uid").(int)
+
+	tunnelName := r.FormValue("name")
+
+	err = app.Store.Tunnels.DestroyTunnel(r.Context(), models.Tunnels{
+		UID:  uid,
+		Name: tunnelName,
+	})
+
+	if err != nil {
+		log.Println("Cannot delete tunnel (handler)")
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
