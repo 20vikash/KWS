@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 func (app *Application) IsAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,6 +27,27 @@ func (app *Application) LoginRateLimitMiddleware(next http.Handler) http.Handler
 
 		if !limiter.Allow() {
 			http.Error(w, "Too many login attempts. Try again later.", http.StatusTooManyRequests)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// Tunnel authorization
+func (app *Application) IsTunnelUserAuthorized(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseForm()
+		if err != nil {
+			log.Println("Failed to parse form")
+		}
+
+		secret := r.Form.Get("secret")
+
+		// Check if the tunnel request is authorized
+		_, err = app.Store.InMemory.GetUidFromTunnelSecret(r.Context(), secret)
+		if err != nil {
+			http.Error(w, "Unauthorized request", http.StatusUnauthorized)
 			return
 		}
 
