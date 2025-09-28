@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 )
 
@@ -38,14 +37,7 @@ func (app *Application) LoginRateLimitMiddleware(next http.Handler) http.Handler
 // Tunnel authorization
 func (app *Application) IsTunnelUserAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := r.ParseForm()
-		if err != nil {
-			log.Println("Failed to parse form")
-			http.Error(w, "Invalid form", http.StatusBadRequest)
-			return
-		}
-
-		secret := r.Form.Get("secret")
+		secret := r.Header.Get("secret")
 
 		// Check if the tunnel request is authorized
 		uid, err := app.Store.InMemory.GetUidFromTunnelSecret(r.Context(), secret)
