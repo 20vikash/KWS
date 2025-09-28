@@ -30,7 +30,7 @@ type Storage struct {
 		PutKillResult(ctx context.Context, result bool, jobID string) error
 		GetKillResult(ctx context.Context, jobID string) (bool, bool, error)
 		SetTunnelLogin(ctx context.Context, secret string, uid int) error
-		GetUidFromTunnelSecret(ctx context.Context, secret string) int
+		GetUidFromTunnelSecret(ctx context.Context, secret string) (int, error)
 	}
 
 	Instance interface {

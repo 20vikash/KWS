@@ -57,13 +57,14 @@ func (r *RedisStore) SetTunnelLogin(ctx context.Context, secret string, uid int)
 	return nil
 }
 
-func (r *RedisStore) GetUidFromTunnelSecret(ctx context.Context, secret string) int {
+func (r *RedisStore) GetUidFromTunnelSecret(ctx context.Context, secret string) (int, error) {
 	val, err := r.Ds.Get(ctx, secret).Int()
 	if err != nil {
 		log.Println("Failed to get tunnel UID int")
+		return -1, err
 	}
 
-	return val
+	return val, nil
 }
 
 // Wireguard

@@ -16,13 +16,14 @@ type TunnelStore struct {
 
 func (ts *TunnelStore) CreateTunnel(ctx context.Context, tunnel models.Tunnels) error {
 	sql := `
-		INSERT INTO tunnels (user_id, domain, is_custom) VALUES($1, $2, $3)
+		INSERT INTO tunnels (user_id, domain, is_custom, tunnel_name) VALUES($1, $2, $3, $4)
 	`
 
 	_, err := ts.db.Exec(ctx, sql,
 		tunnel.UID,
 		tunnel.Domain,
 		tunnel.IsCustom,
+		tunnel.Name,
 	)
 	if err != nil {
 		if strings.Contains(err.Error(), "23505") { // 23505 is the error code for duplicate violation
@@ -40,10 +41,11 @@ func (ts *TunnelStore) CreateTunnel(ctx context.Context, tunnel models.Tunnels) 
 
 func (ts *TunnelStore) DestroyTunnel(ctx context.Context, tunnel models.Tunnels) error {
 	sql := `
-		DELETE FROM tunnels WHERE uid = $1
+		DELETE FROM tunnels WHERE tunnel_name = $1 AND uid = $2
 	`
 
 	_, err := ts.db.Exec(ctx, sql,
+		tunnel.Name,
 		tunnel.UID,
 	)
 	if err != nil {
