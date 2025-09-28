@@ -217,18 +217,6 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// Initialize the server with the docker images
-	err = docker.CreateImageCore(context.Background())
-	if err != nil {
-		log.Fatal("Core image creation error")
-	}
-
-	// Initialize the server with custom bridge networks
-	err = docker.CreateCustomNetwork(context.Background())
-	if err != nil {
-		log.Fatal("Core network creation error")
-	}
-
 	// Create lxdbr0 network
 	err = app.LXD.CreateBridgeNetwork()
 	if err != nil {
