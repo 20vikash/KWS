@@ -268,6 +268,9 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 				go app.stop(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
 			case config.KILL:
 				go app.kill(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
+			case config.CERTGEN:
+    			go app.certGen(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID, queueMessage.Domain)
+	
 			}
 		}
 	}()

@@ -95,6 +95,11 @@ func (app *Application) KillResult(w http.ResponseWriter, r *http.Request) {
 	app.handleSKResult(w, r, app.Store.InMemory.GetKillResult)
 }
 
+ //CertGen
+func (app *Application) CertGen(w http.ResponseWriter, r *http.Request) {
+    app.handleInstanceAction(w, r, config.CERTGEN)
+}
+
 func (app *Application) handleDeployResult(w http.ResponseWriter, r *http.Request) {
 	jobID := r.URL.Query().Get("jobID")
 
