@@ -74,6 +74,30 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to create a Mq channel")
 	}
+     //CertGen worker function
+	func (app *Application) certGen(ctx context.Context, uid int, userName string, d *amqp091.Delivery, jobID string, domain string) {
+    log.Printf("Generating certificate for user %s, domain %s, jobID %s", userName, domain, jobID)
+
+    // TODO: Replace with actual certificate generation logic
+    time.Sleep(2 * time.Second)
+
+    // Ack the message
+    d.Ack(true)
+
+    // Update redis to indicate success
+    err := app.Store.InMemory.PutCertGenResult(ctx, true, jobID)
+    if err != nil {
+        log.Println("Failed to update redis with cert generation result")
+    }
+
+    // Delete retry entry
+    mutex.Lock()
+    delete(retries, jobID)
+    mutex.Unlock()
+
+    log.Printf("Certificate generation completed for jobID %s", jobID)
+}
+
 
 	// Initialize mq main instance queue
 	queue, err := mq.CreateQueueInstance(mqCh, config.MAIN_INSTANCE_QUEUE, config.RETRY_QUEUE)

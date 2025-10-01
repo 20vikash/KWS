@@ -38,4 +38,5 @@ const (
 	STORAGE_POOL     = "kws"
 
 	DNS_IP = "172.30.0.102"
+	CERTGEN = "certgen"
 )

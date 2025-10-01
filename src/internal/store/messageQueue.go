@@ -22,6 +22,7 @@ type QueueMessage struct {
 	InsUser     string
 	InsPassword string
 	Action      string
+    Domain      string // new field
 }
 
 func (mq *MQ) PushMessageInstance(ctx context.Context, message *QueueMessage) error {
