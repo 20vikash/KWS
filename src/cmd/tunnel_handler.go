@@ -4,7 +4,9 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"kws/kws/consts/config"
 	"kws/kws/consts/status"
+	"kws/kws/internal/nginx"
 	"kws/kws/models"
 	"log"
 	"net/http"
@@ -94,6 +96,31 @@ func (app *Application) CreateTunnel(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Something went wrong with creating a tunnel(handler)")
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// TODO: Make it all async using MQ
+	// Create nginx conf
+
+	if isCustomB {
+		// TODO: Use certbot to generate SSL certs
+	}
+
+	template := nginx.Template{
+		Domain: domain,
+	}
+	err = template.AddNewConf(config.DOMAIN_TEMPLATE)
+	if err != nil {
+		log.Println("Failed to create nginx conf file for tunnel")
+		http.Error(w, "cannot create nginx conf file", http.StatusInternalServerError)
+		return
+	}
+
+	err = app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
+	if err != nil {
+		template.RemoveConf()
+		log.Println("Failed to create nginx conf file for tunnel")
+		http.Error(w, "cannot create nginx conf file", http.StatusInternalServerError)
 		return
 	}
 }
