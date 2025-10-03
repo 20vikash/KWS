@@ -38,4 +38,7 @@ const (
 	STORAGE_POOL     = "kws"
 
 	DNS_IP = "172.30.0.102"
+
+	INSTANCE_TEMPLATE = "instance_template"
+	DOMAIN_TEMPLATE   = "domain_template"
 )

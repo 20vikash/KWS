@@ -52,7 +52,7 @@ func (app *Application) AddUserDomain(w http.ResponseWriter, r *http.Request) {
 		Port:   portStr,
 	}
 
-	err = nginxTemplate.AddNewConf()
+	err = nginxTemplate.AddNewConf(config.INSTANCE_TEMPLATE)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return

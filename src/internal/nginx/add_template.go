@@ -2,9 +2,10 @@ package nginx
 
 import (
 	"fmt"
+	"html/template"
+	"kws/kws/consts/config"
 	"log"
 	"os"
-	"text/template"
 )
 
 type Template struct {
@@ -45,8 +46,51 @@ server {
 }
 `
 
-func (t *Template) AddNewConf() error {
-	tmpl, err := template.New("nginx").Parse(nginxTemplate)
+const domainTemplate = `
+server {
+    listen 80;
+    server_name {{ .Domain }};
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name {{ .Domain }};
+
+    ssl_certificate     /etc/letsencrypt/live/{{ .Domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ .Domain }}/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # preserve client Host header
+        proxy_set_header Host $http_host;
+
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_buffering off;
+    }
+}
+`
+
+func (t *Template) AddNewConf(templateType string) error {
+	var finalTemplate string
+
+	switch templateType {
+	case config.INSTANCE_TEMPLATE:
+		finalTemplate = nginxTemplate
+	case config.DOMAIN_TEMPLATE:
+		finalTemplate = domainTemplate
+	}
+
+	tmpl, err := template.New("nginx").Parse(finalTemplate)
 	if err != nil {
 		panic(err)
 	}

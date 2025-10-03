@@ -335,7 +335,7 @@ func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, passwor
 				return err
 			}
 
-			err = nginxTemplate.AddNewConf()
+			err = nginxTemplate.AddNewConf(config.INSTANCE_TEMPLATE)
 			if err != nil {
 				log.Println("Cannot add new nginx conf file")
 				return err
