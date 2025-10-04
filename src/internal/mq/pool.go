@@ -1,6 +1,10 @@
 package mq
 
-import amqp "github.com/rabbitmq/amqp091-go"
+import (
+	"log"
+
+	amqp "github.com/rabbitmq/amqp091-go"
+)
 
 var chanPool chan *amqp.Channel
 
@@ -31,7 +35,11 @@ func GetFreeChannel(conn *amqp.Connection) *amqp.Channel {
 	ch := <-chanPool
 
 	if ch.IsClosed() { // Close in other part of code, or broker closed it
-		newCh, _ := conn.Channel()
+		newCh, err := conn.Channel()
+		if err != nil {
+			log.Println("Cannot create a new channel")
+			return nil
+		}
 		return newCh
 	}
 
