@@ -73,7 +73,7 @@ func main() {
 	}
 
 	// Create chan pool struct
-	chPool, err := mq.CreateChannelPool(32, con)
+	chPool, err := mq.CreateChannelPool(32, 3, con)
 	if err != nil {
 		log.Fatal("Failed to create pool")
 	}

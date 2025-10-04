@@ -11,7 +11,7 @@ type ChannelPool struct {
 	Conn *amqp.Connection
 }
 
-func CreateChannelPool(size int, mqCon *amqp.Connection) (*ChannelPool, error) {
+func CreateChannelPool(size int, prefetchCount int, mqCon *amqp.Connection) (*ChannelPool, error) {
 	chPool := &ChannelPool{
 		Pool: make(chan *amqp.Channel, size),
 		Conn: mqCon,
@@ -19,6 +19,7 @@ func CreateChannelPool(size int, mqCon *amqp.Connection) (*ChannelPool, error) {
 
 	for range size {
 		ch, err := mqCon.Channel()
+		ch.Qos(prefetchCount, 0, false)
 		if err != nil {
 			return nil, err
 		}
