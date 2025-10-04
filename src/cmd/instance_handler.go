@@ -57,7 +57,7 @@ func (app *Application) handleInstanceAction(w http.ResponseWriter, r *http.Requ
 		UserName:    userName,
 		JobID:       jid,
 		Action:      action,
-	})
+	}, app.MqPool)
 	if err != nil {
 		http.Error(w, "failed to handle your request", http.StatusInternalServerError)
 		return

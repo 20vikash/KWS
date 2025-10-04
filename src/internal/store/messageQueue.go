@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"kws/kws/internal/mq"
 	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -24,7 +25,7 @@ type QueueMessage struct {
 	Action      string
 }
 
-func (mq *MQ) PushMessageInstance(ctx context.Context, message *QueueMessage) error {
+func (mq *MQ) PushMessageInstance(ctx context.Context, message *QueueMessage, pool *mq.ChannelPool) error {
 	var bin_buf bytes.Buffer
 
 	// Convert the message struct into bytes.
@@ -33,6 +34,10 @@ func (mq *MQ) PushMessageInstance(ctx context.Context, message *QueueMessage) er
 		log.Println("Cannot encode the message struct")
 		return err
 	}
+
+	// Get a free channel
+	ch := pool.GetFreeChannel()
+	mq.Ch = ch
 
 	// Publish the message to the queue
 	err = mq.Ch.PublishWithContext(ctx,
@@ -45,8 +50,13 @@ func (mq *MQ) PushMessageInstance(ctx context.Context, message *QueueMessage) er
 			Body:        []byte(bin_buf.Bytes()),
 		})
 	if err != nil {
+		// Release the channel
+		pool.PushChannel(ch)
 		return err
 	}
+
+	// Release the channel
+	pool.PushChannel(ch)
 
 	return nil
 }

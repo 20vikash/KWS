@@ -45,6 +45,8 @@ func (mq *Mq) CreateQueueInstance(ch *amqp.Channel, queueName string, retryQueue
 		},
 	)
 	if err != nil {
+		// Release the channel
+		pool.PushChannel(ch)
 		return nil, err
 	}
 
@@ -68,6 +70,8 @@ func (mq *Mq) CreateRetryQueue(ch *amqp.Channel, queueName string, pool *Channel
 		},
 	)
 	if err != nil {
+		// Release the channel
+		pool.PushChannel(ch)
 		return nil, err
 	}
 
@@ -88,6 +92,8 @@ func (mq *Mq) CreateConsumer(ch *amqp.Channel, queue *amqp.Queue, pool *ChannelP
 		nil,        // args
 	)
 	if err != nil {
+		// Release the channel
+		pool.PushChannel(ch)
 		return nil, err
 	}
 

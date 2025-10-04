@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"kws/kws/internal/mq"
 	"kws/kws/models"
 	"kws/kws/models/web"
 
@@ -44,7 +45,7 @@ type Storage struct {
 	}
 
 	MessageQueue interface {
-		PushMessageInstance(ctx context.Context, message *QueueMessage) error
+		PushMessageInstance(ctx context.Context, message *QueueMessage, pool *mq.ChannelPool) error
 	}
 
 	Wireguard interface {

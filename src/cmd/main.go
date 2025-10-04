@@ -40,6 +40,7 @@ type Application struct {
 	SessionManager *scs.SessionManager
 	Docker         *docker.Docker
 	Mq             *store.MQ
+	MqPool         *mq.ChannelPool
 	Wg             *wg.WgOperations
 	IpAlloc        *wg.IPAllocator
 	Services       *services.Services
@@ -209,6 +210,7 @@ func main() {
 		SessionManager: sessionManager,
 		Docker:         docker,
 		Mq:             mqType,
+		MqPool:         chPool,
 		Wg:             wgOp,
 		IpAlloc:        ipAlloc,
 		Services:       services,
@@ -254,6 +256,8 @@ func main() {
 	}
 
 	// Start the rabbitmq consumer to listen in the background
+	mqCh = chPool.GetFreeChannel()
+	app.Mq.Ch = mqCh
 	app.ConsumeMessageInstance(app.Mq)
 
 	// HTTP server
