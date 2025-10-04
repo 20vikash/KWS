@@ -41,4 +41,6 @@ const (
 
 	INSTANCE_TEMPLATE = "instance_template"
 	DOMAIN_TEMPLATE   = "domain_template"
+
+	NO_DOMAIN_FOR_TUNNEL = "no_domain_for_tunnel"
 )

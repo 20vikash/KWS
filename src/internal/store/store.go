@@ -76,6 +76,7 @@ type Storage struct {
 	Tunnels interface {
 		CreateTunnel(ctx context.Context, tunnel models.Tunnels) error
 		DestroyTunnel(ctx context.Context, tunnel models.Tunnels) error
+		GetDomainFromTunnel(ctx context.Context, tunnel models.Tunnels) (string, error)
 	}
 }
 
