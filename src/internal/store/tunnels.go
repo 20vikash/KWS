@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"kws/kws/consts/config"
 	"kws/kws/models"
 	"log"
 	"strings"
@@ -41,7 +42,7 @@ func (ts *TunnelStore) CreateTunnel(ctx context.Context, tunnel models.Tunnels) 
 
 func (ts *TunnelStore) DestroyTunnel(ctx context.Context, tunnel models.Tunnels) error {
 	sql := `
-		DELETE FROM tunnels WHERE tunnel_name = $1 AND uid = $2
+		DELETE FROM tunnels WHERE tunnel_name = $1 AND user_id = $2
 	`
 
 	_, err := ts.db.Exec(ctx, sql,
@@ -53,4 +54,20 @@ func (ts *TunnelStore) DestroyTunnel(ctx context.Context, tunnel models.Tunnels)
 	}
 
 	return nil
+}
+
+func (ts *TunnelStore) GetDomainFromTunnel(ctx context.Context, tunnel models.Tunnels) (string, error) {
+	var domainName string
+
+	sql := `
+		SELECT domain FROM tunnels WHERE tunnel_name = $1 AND user_id = $2
+	`
+
+	err := ts.db.QueryRow(ctx, sql, tunnel.Name, tunnel.UID).Scan(&domainName)
+	if err != nil {
+		log.Println("Cannot get domain from tunnel")
+		return "", errors.New(config.NO_DOMAIN_FOR_TUNNEL)
+	}
+
+	return domainName, nil
 }
