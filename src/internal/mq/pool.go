@@ -6,36 +6,42 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-var chanPool chan *amqp.Channel
+type ChannelPool struct {
+	Pool chan *amqp.Channel
+	Conn *amqp.Connection
+}
 
-func CreateChannelPool(size int, mqCon *amqp.Connection) error {
-	chanPool = make(chan *amqp.Channel, size)
+func CreateChannelPool(size int, mqCon *amqp.Connection) (*ChannelPool, error) {
+	chPool := &ChannelPool{
+		Pool: make(chan *amqp.Channel, size),
+		Conn: mqCon,
+	}
 
 	for range size {
 		ch, err := mqCon.Channel()
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		chanPool <- ch
+		chPool.Pool <- ch
 	}
 
-	return nil
+	return chPool, nil
 }
 
-func PushChannel(ch *amqp.Channel) {
+func (cp *ChannelPool) PushChannel(ch *amqp.Channel) {
 	select {
-	case chanPool <- ch:
+	case cp.Pool <- ch:
 	default:
 		_ = ch.Close() // pool full, close the extra channel
 	}
 }
 
-func GetFreeChannel(conn *amqp.Connection) *amqp.Channel {
-	ch := <-chanPool
+func (cp *ChannelPool) GetFreeChannel() *amqp.Channel {
+	ch := <-cp.Pool
 
 	if ch.IsClosed() { // Close in other part of code, or broker closed it
-		newCh, err := conn.Channel()
+		newCh, err := cp.Conn.Channel()
 		if err != nil {
 			log.Println("Cannot create a new channel")
 			return nil
