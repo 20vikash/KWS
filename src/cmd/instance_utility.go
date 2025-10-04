@@ -96,7 +96,7 @@ func (app *Application) deploy(ctx context.Context, uid int, userName string, d 
 	log.Println("Successfully running a container and updated the database records")
 
 	// Ack the request once everything went well
-	d.Ack(true)
+	d.Ack(false)
 
 	ip, err := app.Store.Instance.GetIPFromUID(ctx, uid)
 	if err != nil {
@@ -138,7 +138,7 @@ func (app *Application) stop(ctx context.Context, uid int, userName string, d *a
 	}
 
 	log.Println("Successfully stopped the container and updated the database")
-	d.Ack(true) // Ack the message once its all done
+	d.Ack(false) // Ack the message once its all done
 
 	// Update redis
 	err = app.Store.InMemory.PutStopResult(ctx, true, jobID)
@@ -175,7 +175,7 @@ func (app *Application) kill(ctx context.Context, uid int, userName string, d *a
 	}
 
 	log.Println("Successfully killed the container and updated the database")
-	d.Ack(true) // Ack the message once its all done
+	d.Ack(false) // Ack the message once its all done
 
 	// Delete all the related user domain names
 	domains, err := app.Store.Domains.GetUserDomains(ctx, &models.Domain{Uid: uid})
