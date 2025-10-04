@@ -20,11 +20,20 @@ func CreateChannelPool(size int, mqCon *amqp.Connection) error {
 }
 
 func PushChannel(ch *amqp.Channel) {
-	chanPool <- ch
+	select {
+	case chanPool <- ch:
+	default:
+		_ = ch.Close() // pool full, close the extra channel
+	}
 }
 
-func GetFreeChannel() *amqp.Channel {
+func GetFreeChannel(conn *amqp.Connection) *amqp.Channel {
 	ch := <-chanPool
+
+	if ch.IsClosed() { // Close in other part of code, or broker closed it
+		newCh, _ := conn.Channel()
+		return newCh
+	}
 
 	return ch
 }
