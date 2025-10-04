@@ -60,35 +60,40 @@ func main() {
 	}
 
 	// Get rabbitmq connection and set up channel.
-	mq := mq.Mq{
+	mqCon := mq.Mq{
 		User: env.GetMqUser(),
 		Pass: env.GetMqPassword(),
 		Port: env.GetMqPort(),
 		Host: env.GetMqHost(),
 	}
-	con, err := mq.ConnectToMq() // TCP connection
+	con, err := mqCon.ConnectToMq() // TCP connection
 	if err != nil {
 		log.Fatal("Failed to connect to rabbitmq")
 	}
-	mqCh, err := mq.CreateChannel(con) // Channel connection
+
+	// Create chan pool struct
+	chPool, err := mq.CreateChannelPool(32, con)
 	if err != nil {
-		log.Fatal("Failed to create a Mq channel")
+		log.Fatal("Failed to create pool")
 	}
 
+	mqCh := chPool.GetFreeChannel()
 	// Initialize mq main instance queue
-	queue, err := mq.CreateQueueInstance(mqCh, config.MAIN_INSTANCE_QUEUE, config.RETRY_QUEUE)
+	queue, err := mqCon.CreateQueueInstance(mqCh, config.MAIN_INSTANCE_QUEUE, config.RETRY_QUEUE, chPool)
 	if err != nil {
 		log.Fatal("Failed to create instance queue")
 	}
 
+	mqCh = chPool.GetFreeChannel()
 	// Initialize mq retry queue
-	_, err = mq.CreateRetryQueue(mqCh, config.RETRY_QUEUE)
+	_, err = mqCon.CreateRetryQueue(mqCh, config.RETRY_QUEUE, chPool)
 	if err != nil {
 		log.Fatal("Failed to create retry queue")
 	}
 
+	mqCh = chPool.GetFreeChannel()
 	// Create a consumer for that queue
-	consumer, err := mq.CreateConsumer(mqCh, queue)
+	consumer, err := mqCon.CreateConsumer(mqCh, queue, chPool)
 	if err != nil {
 		log.Fatal("Failed to create a consumer")
 	}
@@ -96,7 +101,6 @@ func main() {
 	// Create MQ struct instance.
 	mqType := &store.MQ{
 		Consumer: consumer,
-		Ch:       mqCh,
 		Queue:    queue,
 	}
 

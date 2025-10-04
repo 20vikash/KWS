@@ -32,16 +32,7 @@ func (mq *Mq) ConnectToMq() (*amqp.Connection, error) {
 	return nil, err
 }
 
-func (mq *Mq) CreateChannel(con *amqp.Connection) (*amqp.Channel, error) {
-	ch, err := con.Channel()
-	if err != nil {
-		return nil, err
-	}
-
-	return ch, nil
-}
-
-func (mq *Mq) CreateQueueInstance(ch *amqp.Channel, queueName string, retryQueue string) (*amqp.Queue, error) {
+func (mq *Mq) CreateQueueInstance(ch *amqp.Channel, queueName string, retryQueue string, pool *ChannelPool) (*amqp.Queue, error) {
 	q, err := ch.QueueDeclare(
 		queueName, // name
 		true,      // durable
@@ -57,10 +48,13 @@ func (mq *Mq) CreateQueueInstance(ch *amqp.Channel, queueName string, retryQueue
 		return nil, err
 	}
 
+	// Release the channel
+	pool.PushChannel(ch)
+
 	return &q, nil
 }
 
-func (mq *Mq) CreateRetryQueue(ch *amqp.Channel, queueName string) (*amqp.Queue, error) {
+func (mq *Mq) CreateRetryQueue(ch *amqp.Channel, queueName string, pool *ChannelPool) (*amqp.Queue, error) {
 	q, err := ch.QueueDeclare(
 		queueName, // name
 		true,      // durable
@@ -77,10 +71,13 @@ func (mq *Mq) CreateRetryQueue(ch *amqp.Channel, queueName string) (*amqp.Queue,
 		return nil, err
 	}
 
+	// Release the channel
+	pool.PushChannel(ch)
+
 	return &q, nil
 }
 
-func (mq *Mq) CreateConsumer(ch *amqp.Channel, queue *amqp.Queue) (<-chan amqp.Delivery, error) {
+func (mq *Mq) CreateConsumer(ch *amqp.Channel, queue *amqp.Queue, pool *ChannelPool) (<-chan amqp.Delivery, error) {
 	msgs, err := ch.Consume(
 		queue.Name, // queue
 		"",         // consumer
@@ -93,6 +90,9 @@ func (mq *Mq) CreateConsumer(ch *amqp.Channel, queue *amqp.Queue) (<-chan amqp.D
 	if err != nil {
 		return nil, err
 	}
+
+	// Release the channel
+	pool.PushChannel(ch)
 
 	return msgs, nil
 }
