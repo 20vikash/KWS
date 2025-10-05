@@ -2,7 +2,6 @@ package mq
 
 import (
 	"fmt"
-	"kws/kws/consts/config"
 	"log"
 	"time"
 
@@ -56,7 +55,7 @@ func (mq *Mq) CreateQueueInstance(ch *amqp.Channel, queueName string, retryQueue
 	return &q, nil
 }
 
-func (mq *Mq) CreateRetryQueue(ch *amqp.Channel, queueName string, pool *ChannelPool) (*amqp.Queue, error) {
+func (mq *Mq) CreateRetryQueue(ch *amqp.Channel, queueName string, dlq string, pool *ChannelPool) (*amqp.Queue, error) {
 	q, err := ch.QueueDeclare(
 		queueName, // name
 		true,      // durable
@@ -64,9 +63,9 @@ func (mq *Mq) CreateRetryQueue(ch *amqp.Channel, queueName string, pool *Channel
 		false,     // exclusive
 		false,     // no-wait
 		amqp.Table{
-			"x-message-ttl":             int32(1000),                // Wait 5 seconds
-			"x-dead-letter-exchange":    "",                         // Use default exchange
-			"x-dead-letter-routing-key": config.MAIN_INSTANCE_QUEUE, // Send back to main
+			"x-message-ttl":             int32(1000), // Wait 5 seconds
+			"x-dead-letter-exchange":    "",          // Use default exchange
+			"x-dead-letter-routing-key": dlq,         // Send back to main
 		},
 	)
 	if err != nil {

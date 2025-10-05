@@ -87,7 +87,7 @@ func main() {
 
 	mqCh = chPool.GetFreeChannel()
 	// Initialize mq retry queue
-	_, err = mqCon.CreateRetryQueue(mqCh, config.RETRY_QUEUE, chPool)
+	_, err = mqCon.CreateRetryQueue(mqCh, config.RETRY_QUEUE, config.MAIN_INSTANCE_QUEUE, chPool)
 	if err != nil {
 		log.Fatal("Failed to create retry queue")
 	}
