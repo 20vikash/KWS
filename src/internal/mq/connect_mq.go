@@ -92,13 +92,8 @@ func (mq *Mq) CreateConsumer(ch *amqp.Channel, queue *amqp.Queue, pool *ChannelP
 		nil,        // args
 	)
 	if err != nil {
-		// Release the channel
-		pool.PushChannel(ch)
 		return nil, err
 	}
-
-	// Release the channel
-	pool.PushChannel(ch)
 
 	return msgs, nil
 }

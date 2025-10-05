@@ -256,8 +256,6 @@ func main() {
 	}
 
 	// Start the rabbitmq consumer to listen in the background
-	mqCh = chPool.GetFreeChannel()
-	app.Mq.Ch = mqCh
 	app.ConsumeMessageInstance(app.Mq)
 
 	// HTTP server

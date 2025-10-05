@@ -270,7 +270,5 @@ func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 				go app.kill(context.Background(), queueMessage.UserID, queueMessage.UserName, &d, queueMessage.JobID)
 			}
 		}
-		// Release the channel
-		app.MqPool.PushChannel(mq.Ch)
 	}()
 }
