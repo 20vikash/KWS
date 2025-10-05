@@ -36,9 +36,11 @@ func (q *InstanceQueueMessage) WhoAmI() string { return config.MAIN_INSTANCE_QUE
 type TunnelQueueMessage struct {
 	Domain   string
 	IsCustom bool
+	Name     string
+	Uid      int
 }
 
-func (t *TunnelQueueMessage) Dummy() string { return config.MAIN_TUNNEL_QUEUE }
+func (t *TunnelQueueMessage) WhoAmI() string { return config.MAIN_TUNNEL_QUEUE }
 
 func (mq *MQ) PushMessageInstance(ctx context.Context, message QueueMessageInter, pool *mq.ChannelPool) error {
 	var bin_buf bytes.Buffer

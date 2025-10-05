@@ -278,8 +278,9 @@ func main() {
 		log.Fatal("Cannot set forward bit to 1")
 	}
 
-	// Start the rabbitmq consumer to listen in the background
+	// Start the rabbitmq consumers to listen in the background
 	app.ConsumeMessageInstance(app.Mq)
+	app.ConsumeMessageTunnel(app.Mq)
 
 	// HTTP server
 	http.ListenAndServe(app.Port, NewRouter(&app))

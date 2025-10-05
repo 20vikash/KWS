@@ -7,6 +7,7 @@ import (
 	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/internal/nginx"
+	"kws/kws/internal/store"
 	"kws/kws/models"
 	"log"
 	"net/http"
@@ -86,11 +87,20 @@ func (app *Application) CreateTunnel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Make it all async using MQ
-	// Create nginx conf
+	// Create message for the queue
+	tunnelMessage := &store.TunnelQueueMessage{
+		Domain:   domain,
+		IsCustom: isCustomB,
+		Name:     tunnelName,
+		Uid:      uid,
+	}
 
-	if isCustomB {
-		// TODO: Use certbot to generate SSL certs
+	// Push the message to the queue
+	err = app.Mq.PushMessageInstance(r.Context(), tunnelMessage, app.MqPool)
+	if err != nil {
+		log.Println("Failed to push the tunnel message")
+		http.Error(w, "failed to process your tunnel request", http.StatusInternalServerError)
+		return
 	}
 
 	template := nginx.Template{
