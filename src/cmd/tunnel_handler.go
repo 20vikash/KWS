@@ -66,6 +66,8 @@ func (app *Application) LoginTunnelUser(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *Application) CreateTunnel(w http.ResponseWriter, r *http.Request) {
+	// TODO: Store the state in redis to prevent duplicate request while the original is still processing
+
 	// Parse form fields
 	err := r.ParseForm()
 	if err != nil {
