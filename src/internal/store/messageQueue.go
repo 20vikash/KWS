@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"kws/kws/consts/config"
 	"kws/kws/internal/mq"
 	"log"
 
@@ -18,7 +19,7 @@ type MQ struct {
 }
 
 type QueueMessageInter interface {
-	Dummy()
+	WhoAmI() string
 }
 
 type InstanceQueueMessage struct {
@@ -30,14 +31,14 @@ type InstanceQueueMessage struct {
 	Action      string
 }
 
-func (q *InstanceQueueMessage) Dummy() {}
+func (q *InstanceQueueMessage) WhoAmI() string { return config.MAIN_INSTANCE_QUEUE }
 
 type TunnelQueueMessage struct {
 	Domain   string
 	IsCustom bool
 }
 
-func (t *TunnelQueueMessage) Dummy() {}
+func (t *TunnelQueueMessage) Dummy() string { return config.MAIN_TUNNEL_QUEUE }
 
 func (mq *MQ) PushMessageInstance(ctx context.Context, message QueueMessageInter, pool *mq.ChannelPool) error {
 	var bin_buf bytes.Buffer
@@ -52,12 +53,20 @@ func (mq *MQ) PushMessageInstance(ctx context.Context, message QueueMessageInter
 	// Get a free channel
 	ch := pool.GetFreeChannel()
 
+	var routingKey string
+
+	if message.WhoAmI() == config.MAIN_INSTANCE_QUEUE {
+		routingKey = mq.InstanceQueue.Name
+	} else if message.WhoAmI() == config.MAIN_TUNNEL_QUEUE {
+		routingKey = mq.TunnelQueue.Name
+	}
+
 	// Publish the message to the queue
 	err = ch.PublishWithContext(ctx,
-		"",                    // exchange
-		mq.InstanceQueue.Name, // routing key
-		false,                 // mandatory
-		false,                 // immediate
+		"",         // exchange
+		routingKey, // routing key
+		false,      // mandatory
+		false,      // immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte(bin_buf.Bytes()),
