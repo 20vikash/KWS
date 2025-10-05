@@ -102,38 +102,6 @@ func (app *Application) CreateTunnel(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to process your tunnel request", http.StatusInternalServerError)
 		return
 	}
-
-	template := nginx.Template{
-		Domain: domain,
-	}
-	err = template.AddNewConf(config.DOMAIN_TEMPLATE)
-	if err != nil {
-		log.Println("Failed to create nginx conf file for tunnel")
-		http.Error(w, "cannot create nginx conf file", http.StatusInternalServerError)
-		return
-	}
-
-	err = app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
-	if err != nil {
-		template.RemoveConf()
-		app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
-		log.Println("Failed to create nginx conf file for tunnel")
-		http.Error(w, "cannot create nginx conf file", http.StatusInternalServerError)
-		return
-	}
-
-	err = app.Store.Tunnels.CreateTunnel(r.Context(), models.Tunnels{
-		UID:      uid,
-		Domain:   domain,
-		IsCustom: isCustomB,
-		Name:     tunnelName,
-	})
-
-	if err != nil {
-		log.Println("Something went wrong with creating a tunnel(handler)")
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
 }
 
 func (app *Application) DestroyTunnel(w http.ResponseWriter, r *http.Request) {
