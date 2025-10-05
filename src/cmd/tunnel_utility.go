@@ -8,9 +8,27 @@ import (
 	"kws/kws/internal/nginx"
 	"kws/kws/internal/store"
 	"kws/kws/models"
+	"strconv"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
+
+func (app *Application) IncrementRetryCounter(d *amqp.Delivery) {
+	var retryCount int
+
+	if val, ok := d.Headers[config.X_RETRY_COUNTER]; ok {
+		switch v := val.(type) {
+		case int32:
+			retryCount = int(v)
+		case int64:
+			retryCount = int(v)
+		case string:
+			retryCount, _ = strconv.Atoi(v)
+		}
+	}
+
+	d.Headers[config.X_RETRY_COUNTER] = retryCount + 1
+}
 
 func (app *Application) CreateTunnelUtility(tunnelMessage *store.TunnelQueueMessage, d *amqp.Delivery) {
 	// TODO: Use certbot if its custom domain
@@ -20,14 +38,16 @@ func (app *Application) CreateTunnelUtility(tunnelMessage *store.TunnelQueueMess
 	}
 	err := template.AddNewConf(config.DOMAIN_TEMPLATE)
 	if err != nil {
-		d.Nack(false, false) // Send it to the retry queue
+		app.IncrementRetryCounter(d) // Increment retry count by 1
+		d.Nack(false, false)         // Send it to the retry queue
 	}
 
 	err = app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
 	if err != nil {
 		template.RemoveConf()
 		app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
-		d.Nack(false, false) // Send it to the retry queue
+		app.IncrementRetryCounter(d) // Increment retry count by 1
+		d.Nack(false, false)         // Send it to the retry queue
 	}
 
 	err = app.Store.Tunnels.CreateTunnel(context.Background(), models.Tunnels{
@@ -40,8 +60,11 @@ func (app *Application) CreateTunnelUtility(tunnelMessage *store.TunnelQueueMess
 	if err != nil {
 		template.RemoveConf()
 		app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
-		d.Nack(false, false) // Send it to the retry queue
+		app.IncrementRetryCounter(d) // Increment retry count by 1
+		d.Nack(false, false)         // Send it to the retry queue
 	}
+
+	d.Ack(false) // Once everything passed
 }
 
 func (app *Application) ConsumeMessageTunnel(mq *store.MQ) {
@@ -52,7 +75,11 @@ func (app *Application) ConsumeMessageTunnel(mq *store.MQ) {
 			body := d.Body
 			gob.NewDecoder(bytes.NewReader(body)).Decode(&queueMessage)
 
-			go app.CreateTunnelUtility(&queueMessage, &d)
+			if d.Headers[config.X_RETRY_COUNTER] == 3 {
+				d.Ack(false)
+			} else {
+				go app.CreateTunnelUtility(&queueMessage, &d)
+			}
 		}
 	}()
 }

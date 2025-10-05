@@ -64,7 +64,7 @@ func (mq *MQ) PushMessageInstance(ctx context.Context, message QueueMessageInter
 	}
 
 	headers := make(amqp.Table)
-	headers["x-retry-counter"] = 1
+	headers[config.X_RETRY_COUNTER] = 1
 
 	// Publish the message to the queue
 	err = ch.PublishWithContext(ctx,

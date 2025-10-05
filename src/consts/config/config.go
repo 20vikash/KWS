@@ -45,4 +45,5 @@ const (
 	DOMAIN_TEMPLATE   = "domain_template"
 
 	NO_DOMAIN_FOR_TUNNEL = "no_domain_for_tunnel"
+	X_RETRY_COUNTER      = "x-retry-counter"
 )
