@@ -79,30 +79,53 @@ func main() {
 	}
 
 	mqCh := chPool.GetFreeChannel()
-	// Initialize mq main instance queue
-	queue, err := mqCon.CreateQueueInstance(mqCh, config.MAIN_INSTANCE_QUEUE, config.RETRY_QUEUE, chPool)
+	// Initialize mq main instance instanceQueue
+	instanceQueue, err := mqCon.CreateQueueInstance(mqCh, config.MAIN_INSTANCE_QUEUE, config.INSTANCE_RETRY_QUEUE, chPool)
 	if err != nil {
 		log.Fatal("Failed to create instance queue")
 	}
 
 	mqCh = chPool.GetFreeChannel()
 	// Initialize mq retry queue
-	_, err = mqCon.CreateRetryQueue(mqCh, config.RETRY_QUEUE, config.MAIN_INSTANCE_QUEUE, chPool)
+	_, err = mqCon.CreateRetryQueue(mqCh, config.INSTANCE_RETRY_QUEUE, config.MAIN_INSTANCE_QUEUE, chPool)
 	if err != nil {
 		log.Fatal("Failed to create retry queue")
 	}
 
+	InstanceMqConsumerCh := chPool.GetFreeChannel()
+	// Create a instanceConsumer for that queue
+	instanceConsumer, err := mqCon.CreateConsumer(InstanceMqConsumerCh, instanceQueue)
+	if err != nil {
+		log.Fatal("Failed to create a consumer")
+	}
+
+	// Create tunnel queue, retry queue and tunnel consumer
 	mqCh = chPool.GetFreeChannel()
-	// Create a consumer for that queue
-	consumer, err := mqCon.CreateConsumer(mqCh, queue, chPool)
+	tunnelQueue, err := mqCon.CreateQueueInstance(mqCh, config.MAIN_TUNNEL_QUEUE, config.TUNNEL_RETRY_QUEUE, chPool)
+	if err != nil {
+		log.Fatal("Failed to create instance queue")
+	}
+
+	mqCh = chPool.GetFreeChannel()
+	// Initialize mq retry queue
+	_, err = mqCon.CreateRetryQueue(mqCh, config.TUNNEL_RETRY_QUEUE, config.MAIN_TUNNEL_QUEUE, chPool)
+	if err != nil {
+		log.Fatal("Failed to create retry queue")
+	}
+
+	TunnelMqConsumerCh := chPool.GetFreeChannel()
+	// Create a instanceConsumer for that queue
+	tunnelConsumer, err := mqCon.CreateConsumer(TunnelMqConsumerCh, tunnelQueue)
 	if err != nil {
 		log.Fatal("Failed to create a consumer")
 	}
 
 	// Create MQ struct instance.
 	mqType := &store.MQ{
-		InstanceConsumer: consumer,
-		InstanceQueue:    queue,
+		InstanceConsumer: instanceConsumer,
+		InstanceQueue:    instanceQueue,
+		TunnelQueue:      tunnelQueue,
+		TunnelConsumer:   tunnelConsumer,
 	}
 
 	// Set up redis db pool for session manager.

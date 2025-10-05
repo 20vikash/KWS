@@ -80,7 +80,7 @@ func (mq *Mq) CreateRetryQueue(ch *amqp.Channel, queueName string, dlq string, p
 	return &q, nil
 }
 
-func (mq *Mq) CreateConsumer(ch *amqp.Channel, queue *amqp.Queue, pool *ChannelPool) (<-chan amqp.Delivery, error) {
+func (mq *Mq) CreateConsumer(ch *amqp.Channel, queue *amqp.Queue) (<-chan amqp.Delivery, error) {
 	msgs, err := ch.Consume(
 		queue.Name, // queue
 		"",         // consumer

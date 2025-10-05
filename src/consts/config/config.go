@@ -8,9 +8,10 @@ const (
 
 	SERVICES_NETWORK_NAME = "kws_kws_services"
 
-	MAIN_INSTANCE_QUEUE = "instance_queue"
-	RETRY_QUEUE         = "retry_queue"
-	MAIN_TUNNEL_QUEUE   = "tunnel_queue"
+	MAIN_INSTANCE_QUEUE  = "instance_queue"
+	INSTANCE_RETRY_QUEUE = "instance_retry_queue"
+	MAIN_TUNNEL_QUEUE    = "tunnel_queue"
+	TUNNEL_RETRY_QUEUE   = "tunnel_retry_queue"
 
 	DEPLOY = "deploy"
 	STOP   = "stop"
