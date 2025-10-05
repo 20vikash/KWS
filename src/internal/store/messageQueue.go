@@ -63,6 +63,9 @@ func (mq *MQ) PushMessageInstance(ctx context.Context, message QueueMessageInter
 		routingKey = mq.TunnelQueue.Name
 	}
 
+	headers := make(amqp.Table)
+	headers["x-retry-counter"] = 1
+
 	// Publish the message to the queue
 	err = ch.PublishWithContext(ctx,
 		"",         // exchange
@@ -70,6 +73,7 @@ func (mq *MQ) PushMessageInstance(ctx context.Context, message QueueMessageInter
 		false,      // mandatory
 		false,      // immediate
 		amqp.Publishing{
+			Headers:     headers,
 			ContentType: "text/plain",
 			Body:        []byte(bin_buf.Bytes()),
 		})
