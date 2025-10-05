@@ -11,12 +11,17 @@ import (
 )
 
 type MQ struct {
-	Ch       *amqp.Channel
-	Queue    *amqp.Queue
-	Consumer <-chan amqp.Delivery
+	InstanceQueue    *amqp.Queue
+	InstanceConsumer <-chan amqp.Delivery
+	TunnelQueue      *amqp.Queue
+	TunnelConsumer   <-chan amqp.Delivery
 }
 
-type QueueMessage struct {
+type QueueMessageInter interface {
+	Dummy()
+}
+
+type InstanceQueueMessage struct {
 	JobID       string
 	UserID      int
 	UserName    string
@@ -25,7 +30,16 @@ type QueueMessage struct {
 	Action      string
 }
 
-func (mq *MQ) PushMessageInstance(ctx context.Context, message *QueueMessage, pool *mq.ChannelPool) error {
+func (q *InstanceQueueMessage) Dummy() {}
+
+type TunnelQueueMessage struct {
+	Domain   string
+	IsCustom bool
+}
+
+func (t *TunnelQueueMessage) Dummy() {}
+
+func (mq *MQ) PushMessageInstance(ctx context.Context, message QueueMessageInter, pool *mq.ChannelPool) error {
 	var bin_buf bytes.Buffer
 
 	// Convert the message struct into bytes.
@@ -37,14 +51,13 @@ func (mq *MQ) PushMessageInstance(ctx context.Context, message *QueueMessage, po
 
 	// Get a free channel
 	ch := pool.GetFreeChannel()
-	mq.Ch = ch
 
 	// Publish the message to the queue
-	err = mq.Ch.PublishWithContext(ctx,
-		"",            // exchange
-		mq.Queue.Name, // routing key
-		false,         // mandatory
-		false,         // immediate
+	err = ch.PublishWithContext(ctx,
+		"",                    // exchange
+		mq.InstanceQueue.Name, // routing key
+		false,                 // mandatory
+		false,                 // immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte(bin_buf.Bytes()),

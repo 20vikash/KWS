@@ -50,14 +50,16 @@ func (app *Application) handleInstanceAction(w http.ResponseWriter, r *http.Requ
 	jid := generateHashedJobID(uid, userName)
 
 	// Push the message to the queue.
-	err := app.Store.MessageQueue.PushMessageInstance(r.Context(), &store.QueueMessage{
+	err := app.Store.MessageQueue.PushMessageInstance(r.Context(), &store.InstanceQueueMessage{
 		InsUser:     insUser,
 		InsPassword: insPassword,
 		UserID:      uid,
 		UserName:    userName,
 		JobID:       jid,
 		Action:      action,
-	}, app.MqPool)
+	},
+		app.MqPool,
+	)
 	if err != nil {
 		http.Error(w, "failed to handle your request", http.StatusInternalServerError)
 		return

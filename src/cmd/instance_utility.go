@@ -225,8 +225,8 @@ func (app *Application) kill(ctx context.Context, uid int, userName string, d *a
 func (app *Application) ConsumeMessageInstance(mq *store.MQ) {
 	// Consumer goroutine that runs in the background listening for incoming requests in the queue.
 	go func() {
-		for d := range mq.Consumer {
-			var queueMessage store.QueueMessage
+		for d := range mq.InstanceConsumer {
+			var queueMessage store.InstanceQueueMessage
 			body := d.Body
 			gob.NewDecoder(bytes.NewReader(body)).Decode(&queueMessage)
 

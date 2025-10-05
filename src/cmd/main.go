@@ -101,8 +101,8 @@ func main() {
 
 	// Create MQ struct instance.
 	mqType := &store.MQ{
-		Consumer: consumer,
-		Queue:    queue,
+		InstanceConsumer: consumer,
+		InstanceQueue:    queue,
 	}
 
 	// Set up redis db pool for session manager.

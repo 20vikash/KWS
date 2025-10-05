@@ -45,7 +45,7 @@ type Storage struct {
 	}
 
 	MessageQueue interface {
-		PushMessageInstance(ctx context.Context, message *QueueMessage, pool *mq.ChannelPool) error
+		PushMessageInstance(ctx context.Context, message QueueMessageInter, pool *mq.ChannelPool) error
 	}
 
 	Wireguard interface {
@@ -92,10 +92,7 @@ func NewStore(pg *pgxpool.Pool, redis *redis.Client, mq *MQ) *Storage {
 		Instance: &InstanceStore{
 			Db: pg,
 		},
-		MessageQueue: &MQ{
-			Ch:    mq.Ch,
-			Queue: mq.Queue,
-		},
+		MessageQueue: &MQ{},
 		Wireguard: &WireguardStore{
 			Con: pg,
 		},
