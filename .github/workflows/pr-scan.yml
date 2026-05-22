@@ -1,6 +1,7 @@
 # Main CI workflow for pull request validation.
 # Runs linting and spell checking.
-# this help lot but we need more upgradation in future to add more checks and tests.
+# This setup can be upgraded later with tests and security scanning.
+
 name: PR Scan
 
 on:
@@ -33,9 +34,9 @@ jobs:
           pip install pre-commit
 
       - name: Run GolangCI-Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v3
         with:
-          version: v2.1
+          version: v1.58
 
       - name: Install CSpell
         run: |
