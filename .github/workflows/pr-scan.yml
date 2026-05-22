@@ -1,7 +1,7 @@
 # Main CI workflow for pull request validation.
 # Runs linting and spell checking.
 # This setup can be upgraded later with tests and security scanning.
-
+#we need correct version of tools
 name: PR Scan
 
 on:
