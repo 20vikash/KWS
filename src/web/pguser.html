@@ -51,7 +51,7 @@
         <div class="flex items-center justify-between mb-6">
           <div>
             <h1 class="text-3xl md:text-4xl font-bold text-white flex items-center">
-              <img src="https://www.postgresql.org/media/img/about/press/elephant.png" 
+              <img src="https://www.postgresql.org/media/img/about/press/elephant.png"
                    alt="PostgreSQL Logo"
                    class="postgres-logo mr-3 floating">
               PostgreSQL Management
@@ -78,7 +78,7 @@
             <i class="fas fa-copy text-sm"></i>
           </div>
         </div>
-        
+
         <div class="info-card">
           <p class="text-xs text-gray-400 mb-1">Service IP</p>
           <p class="text-white font-mono text-sm truncate">{{ .ServiceIP }}</p>
@@ -86,7 +86,7 @@
             <i class="fas fa-copy text-sm"></i>
           </div>
         </div>
-        
+
         <div class="info-card">
           <p class="text-xs text-gray-400 mb-1">Port</p>
           <p class="text-white font-mono text-sm truncate">{{ .Port }}</p>
@@ -105,13 +105,13 @@
             <span class="text-white ml-2">{{ len .Users }}/{{ .UserLimit }}</span>
         </div>
         </div>
-        
+
         <div class="overflow-x-auto">
           <table class="user-table">
             <thead>
               <tr>
                 <th>Username</th>
-                <th>Password</th> 
+                <th>Password</th>
                 <th>Permissions</th>
                 <th>Actions</th>
               </tr>
@@ -160,14 +160,14 @@
           <h2 class="text-2xl font-bold text-white">Add New User</h2>
           <span class="user-limit">Limit: {{ .UserLimit }} users</span>
         </div>
-        
+
         <div class="form-card">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="form-group">
               <label class="form-label">Username</label>
               <input type="text" class="form-input" placeholder="Enter username">
             </div>
-            
+
             <div class="form-group">
               <label class="form-label">Role</label>
               <select class="form-input">
@@ -175,7 +175,7 @@
               </select>
             </div>
           </div>
-          
+
           <div class="form-group">
             <label class="form-label">Password</label>
             <div class="password-field">
@@ -188,12 +188,12 @@
               <div class="password-strength-fill" id="passwordStrength"></div>
             </div>
           </div>
-          
+
           <div class="form-group">
             <label class="form-label">Confirm Password</label>
             <input type="password" class="form-input" placeholder="Confirm your password">
           </div>
-          
+
           <div class="flex justify-end mt-8">
             <button class="btn-primary">
               <i class="fas fa-user-plus mr-2"></i> Create User

@@ -34,7 +34,7 @@ services:
       - "127.0.0.1:${DB_PORT}:${DB_PORT}"
     networks:
       - kws_main
-  
+
   rabbitmq:
     image: rabbitmq:4.0.7-management-alpine
     container_name: mq_q_kws
@@ -121,7 +121,7 @@ services:
     networks:
       - kws_main
 
-  # ------------------------------Services-------------------------------  
+  # ------------------------------Services-------------------------------
   postgres_service:
     image: postgres:alpine
     container_name: postgres.kws.services

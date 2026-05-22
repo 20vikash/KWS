@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const deviceList = document.querySelector(".card-grid");
     const addForm = document.querySelector(".add-device-form"); // Changed to class selector
     const registerForm = document.getElementById("register-form");
-    
+
     // Event delegation for remove forms
     if (deviceList) {
         deviceList.addEventListener("submit", handleRemoveSubmit);
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateUI() {
         const deviceCount = deviceList.querySelectorAll(".device-card").length;
-        
+
         // Find or create the warning element
         let warning = document.querySelector(".device-limit-warning");
         if (!warning) {
@@ -70,11 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const mainContent = document.querySelector('main > .max-w-6xl');
-        
+
         if (deviceCount >= MAX_DEVICES) {
             // Hide add form and show warning
             if (addForm) addForm.classList.add("hidden");
-            
+
             // Insert warning if not already present
             if (!document.querySelector(".device-limit-warning")) {
                 const header = document.querySelector('.flex.items-center.mb-8');
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             // Show add form and hide warning
             if (addForm) addForm.classList.remove("hidden");
-            
+
             // Remove warning if present
             const existingWarning = document.querySelector(".device-limit-warning");
             if (existingWarning) existingWarning.remove();
@@ -114,8 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="flex justify-between items-start">
                     <div>
                         <div class="device-icon mb-3">
-                            ${newDevice.active 
-                                ? '<i class="fas fa-laptop-code text-blue-400"></i>' 
+                            ${newDevice.active
+                                ? '<i class="fas fa-laptop-code text-blue-400"></i>'
                                 : '<i class="fas fa-laptop text-gray-500"></i>'}
                         </div>
                         <h3 class="text-lg font-bold text-white">Device</h3>

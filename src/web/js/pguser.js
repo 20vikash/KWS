@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Generate sparkles for background
   const sparkleContainer = document.getElementById('sparkle-container');
   const sparkleCount = 60;
-  
+
   for (let i = 0; i < sparkleCount; i++) {
     const sparkle = document.createElement('div');
     sparkle.classList.add('sparkle');
@@ -14,19 +14,19 @@ document.addEventListener('DOMContentLoaded', function() {
     sparkle.style.animationDelay = `${Math.random() * 10}s`;
     sparkleContainer.appendChild(sparkle);
   }
-  
+
   // Copy functionality for connection info
   const copyButtons = document.querySelectorAll('.copy-btn');
   copyButtons.forEach(button => {
     button.addEventListener('click', function() {
       const text = this.getAttribute('data-copy');
       navigator.clipboard.writeText(text);
-      
+
       // Visual feedback
       const icon = this.querySelector('i');
       icon.className = 'fas fa-check';
       this.classList.add('copied');
-      
+
       // Reset after 2 seconds
       setTimeout(() => {
         icon.className = 'fas fa-copy';
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         if (!response.ok) throw new Error(`Failed to delete user. Status: ${response.status}`);
-        
+
         // Remove the row
         const row = this.closest('tr');
         row.remove();
@@ -87,12 +87,12 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = `/kws_services/postgres/db?pid=${encodeURIComponent(pid)}&owner=${encodeURIComponent(owner)}`;
         });
     });
-  
+
   // Toggle password visibility in form
   const togglePassword = document.getElementById('togglePassword');
   const password = document.getElementById('password');
   const passwordStrength = document.getElementById('passwordStrength');
-  
+
   if (togglePassword && password) {
     togglePassword.addEventListener('click', function() {
       const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
       this.querySelector('i').classList.toggle('fa-eye-slash');
     });
   }
-  
+
   // Password strength indicator
   if (password && passwordStrength) {
     password.addEventListener('input', function() {
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
       passwordStrength.className = 'password-strength-fill ' + strength.class;
     });
   }
-  
+
   // Password toggle for table rows
   document.querySelectorAll('.password-toggle').forEach(button => {
     button.addEventListener('click', function() {
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const passwordSpan = document.getElementById(`password-${username}`);
       const hiddenPassword = document.getElementById(`real-password-${username}`);
       const icon = this.querySelector('i');
-      
+
       if (passwordSpan.textContent === '••••••••') {
         // Show the actual password
         passwordSpan.textContent = hiddenPassword.value;
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const icon = this.querySelector('i');
 
       navigator.clipboard.writeText(hiddenPassword.value);
-      
+
       // Visual feedback
       icon.className = 'fas fa-check';
       setTimeout(() => {
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 2000);
     });
   });
-  
+
   // Add event listener to Create User button
   const createUserBtn = document.querySelector('.btn-primary');
   if (createUserBtn) {
@@ -158,13 +158,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const usernameInput = document.querySelector('.form-input[placeholder="Enter username"]');
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.querySelector('.form-input[placeholder="Confirm your password"]');
-    
+
     // Basic validation
     if (!usernameInput.value || !passwordInput.value) {
       alert('Please fill in all fields');
       return;
     }
-    
+
     if (passwordInput.value !== confirmPasswordInput.value) {
       alert('Passwords do not match!');
       return;
@@ -215,15 +215,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function addUserToTable(user) {
     const tbody = document.querySelector('.user-table tbody');
-    
+
     // Create new table row
     const newRow = document.createElement('tr');
-    
+
     // Username cell
     const usernameCell = document.createElement('td');
     usernameCell.className = 'font-mono';
     usernameCell.textContent = user.Username;
-    
+
     // Password cell
     const passwordCell = document.createElement('td');
     passwordCell.innerHTML = `
@@ -241,13 +241,13 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
     `;
-    
+
     // Permissions cell
     const permissionsCell = document.createElement('td');
     permissionsCell.innerHTML = `
       <span class="status-badge status-active">${user.Permissions}</span>
     `;
-    
+
     // Actions cell
     const actionsCell = document.createElement('td');
     actionsCell.innerHTML = `
@@ -258,13 +258,13 @@ document.addEventListener('DOMContentLoaded', function() {
         <i class="fas fa-database mr-1"></i> Manage
       </button>
     `;
-    
+
     // Assemble row
     newRow.appendChild(usernameCell);
     newRow.appendChild(passwordCell);
     newRow.appendChild(permissionsCell);
     newRow.appendChild(actionsCell);
-    
+
     // Add to table
     tbody.appendChild(newRow);
 
@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         if (!response.ok) throw new Error(`Failed to delete user. Status: ${response.status}`);
-        
+
         // Remove the row
         const row = this.closest('tr');
         row.remove();
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = `/kws_services/postgres/db?pid=${encodeURIComponent(pid)}&owner=${encodeURIComponent(owner)}`;
     });
 
-    
+
     // Attach event listeners to new password controls
     attachPasswordListeners(newRow);
   }
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const passwordSpan = document.getElementById(`password-${username}`);
       const hiddenPassword = document.getElementById(`real-password-${username}`);
       const icon = this.querySelector('i');
-      
+
       if (passwordSpan.textContent === '••••••••') {
         passwordSpan.textContent = hiddenPassword.value;
         icon.classList.replace('fa-eye-slash', 'fa-eye');
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const icon = this.querySelector('i');
 
       navigator.clipboard.writeText(hiddenPassword.value);
-      
+
       // Visual feedback
       icon.className = 'fas fa-check';
       setTimeout(() => {
@@ -353,20 +353,20 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 2000);
     });
   }
-  
+
   function calculatePasswordStrength(password) {
     let strength = 0;
-    
+
     // Length check
     if (password.length >= 8) strength += 25;
     if (password.length >= 12) strength += 25;
-    
+
     // Character variety
     if (/[A-Z]/.test(password)) strength += 15;
     if (/[a-z]/.test(password)) strength += 15;
     if (/[0-9]/.test(password)) strength += 10;
     if (/[^A-Za-z0-9]/.test(password)) strength += 10;
-    
+
     // Classify strength
     let strengthClass = '';
     if (strength < 50) {
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       strengthClass = 'strong';
     }
-    
+
     return {
       percentage: strength,
       class: strengthClass

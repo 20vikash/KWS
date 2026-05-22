@@ -13,7 +13,7 @@ Every deployed container is accessible privately through a VPN — ensuring netw
 
 ### 💻 Browser-Based VS Code for Every Instance
 Each container comes with a live, browser-accessible VS Code IDE.
-Access it from a unique URL like:  
+Access it from a unique URL like:
 `<container-id>.kwscloud.in`
 
 No setup needed. Just open, code, and run.
@@ -25,8 +25,8 @@ Use powerful managed PostgreSQL from your web dashboard.
 - Users can't elevate privileges inside the DB
 
 ### 🌐 One-Click Public Hosting
-Deploy your app and make it public in seconds.  
-Just select a subdomain and port — your app is live at:  
+Deploy your app and make it public in seconds.
+Just select a subdomain and port — your app is live at:
 `<your-app>.kwscloud.in`
 
 No manual DNS or reverse proxy config required.
@@ -53,7 +53,7 @@ Just real deployment power, in your control.
 
 ## 🤝 Bring KWS to Your Campus
 
-I'm on a mission to make cloud education accessible.  
+I'm on a mission to make cloud education accessible.
 
 Let students learn cloud by using it.
 
@@ -71,6 +71,3 @@ Because the best way to learn cloud isn’t reading about it — it’s **deploy
 
 <img width="1512" height="853" alt="Screenshot 2025-07-12 at 8 19 25 PM" src="https://github.com/user-attachments/assets/8abd5524-074e-4aeb-8197-6a7a5677ee3c" />
 <img width="1512" height="856" alt="Screenshot 2025-07-12 at 8 24 34 PM" src="https://github.com/user-attachments/assets/07e524cc-65df-4670-a684-22cd2e3fe19a" />
-
-
-

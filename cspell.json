@@ -1,0 +1,14 @@
+{
+  "//": "CSpell configuration for repository spell checking.",
+  "//2": "Ignores dependency folders during scans.",
+
+
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "node_modules",
+    "vendor",
+    ".git",
+    "dist"
+    ]
+}
