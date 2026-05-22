@@ -38,6 +38,7 @@ jobs:
         with:
           version: v1.58
           working-directory: src
+          args: --out-format colored-line-number
 
       - name: Install CSpell
         run: |
