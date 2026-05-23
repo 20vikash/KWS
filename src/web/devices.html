@@ -94,7 +94,7 @@
               {{ if .Active }}Active{{ else }}Disconnected{{ end }}
             </span>
           </div>
-          
+
           <div class="mt-5">
             <div>
               <p class="text-gray-500 text-sm mb-1">Public Key</p>
@@ -102,7 +102,7 @@
                 {{ .PublicKey }}
               </div>
             </div>
-            
+
             <div class="mt-4">
               <form class="remove-device">
                 <input id="{{ .PublicKey }}" type="hidden" name="public_key" value="{{ .PublicKey }}" />
@@ -129,7 +129,7 @@
           <i class="fas fa-plus-circle text-blue-400 text-xl mr-3"></i>
           <h3 class="text-xl text-blue-300 font-semibold">Add New Device</h3>
         </div>
-        
+
         <form id="register-form">
           <div class="mb-5">
             <label class="block text-sm text-gray-300 mb-2">WireGuard Public Key</label>
@@ -137,7 +137,7 @@
               class="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
             <p class="text-gray-500 text-sm mt-2">Generate a WireGuard key pair on your device</p>
           </div>
-          
+
           <button type="submit"
             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center">
             <i class="fas fa-plus mr-2"></i>Register Device
@@ -153,23 +153,23 @@
     document.addEventListener('DOMContentLoaded', function() {
       const sparkleContainer = document.getElementById('sparkle-container');
       const sparkleCount = 50;
-      
+
       for (let i = 0; i < sparkleCount; i++) {
         const sparkle = document.createElement('div');
         sparkle.classList.add('sparkle');
-        
+
         // Random position
         sparkle.style.left = `${Math.random() * 100}vw`;
         sparkle.style.top = `${Math.random() * 100}vh`;
-        
+
         // Random size
         const size = 1 + Math.random() * 2;
         sparkle.style.width = `${size}px`;
         sparkle.style.height = `${size}px`;
-        
+
         // Random animation delay
         sparkle.style.animationDelay = `${Math.random() * 12}s`;
-        
+
         sparkleContainer.appendChild(sparkle);
       }
     });

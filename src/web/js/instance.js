@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Sparkle effect
   const sparkleContainer = document.getElementById('sparkle-container');
   const sparkleCount = 60;
-  
+
   for (let i = 0; i < sparkleCount; i++) {
     const sparkle = document.createElement('div');
     sparkle.classList.add('sparkle');
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Initialize button states
   function updateButtonStates() {
     const state = stateInput.value;
-    
+
     deployBtn.disabled = (state === 'active');
     killBtn.disabled = (state !== 'active' && state !== 'stopped');
     stopBtn.disabled = (state !== 'active');
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Update UI based on state
   function updateUIFromState() {
     const state = stateInput.value;
-    
+
     // Update status badge
     statusBadge.className = 'status-badge';
     if (state === 'active') {
@@ -65,24 +65,24 @@ document.addEventListener('DOMContentLoaded', function () {
       instanceDetails.classList.add('hidden');
       emptyState.classList.remove('hidden');
     }
-    
+
     updateButtonStates();
   }
-  
+
   // Update visible instance details
   function updateInstanceDetails(instance) {
     document.getElementById('instance-username').textContent = instance.Username;
     document.getElementById('instance-password').textContent = '••••••••';
     document.getElementById('instance-ip').textContent = instance.IP;
     document.getElementById('instance-ssh').textContent = `${instance.Username}@${instance.IP}`;
-    
+
     // Update copy buttons
     document.querySelector('[data-copy]').setAttribute('data-copy', instance.Username);
     document.querySelectorAll('.copy-btn')[1].setAttribute('data-copy', instance.Password);
     document.querySelectorAll('.copy-btn')[2].setAttribute('data-copy', instance.IP);
     document.querySelectorAll('.copy-btn')[3].setAttribute('data-copy', `ssh ${instance.Username}@${instance.IP}`);
   }
-  
+
   // Set initial state
   updateUIFromState();
 
@@ -93,17 +93,17 @@ document.addEventListener('DOMContentLoaded', function () {
     killBtn.disabled = true;
     stopBtn.disabled = true;
     codeBtn.disabled = true;
-    
+
     // Remove blinking from all buttons
     deployBtn.classList.remove("action-blinking");
     killBtn.classList.remove("action-blinking");
     stopBtn.classList.remove("action-blinking");
     codeBtn.classList.remove("action-blinking");
-    
+
     // Add blinking to the active button (and keep it disabled)
     activeButton.classList.add("action-blinking");
   }
-  
+
   // Re-enable all buttons and remove blinking
   function unlockAllButtons() {
     // Remove blinking from all buttons
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
     killBtn.classList.remove("action-blinking");
     stopBtn.classList.remove("action-blinking");
     codeBtn.classList.remove("action-blinking");
-    
+
     // Re-enable buttons based on current state
     updateButtonStates();
   }
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Button event handlers
   deployBtn.addEventListener('click', function () {
     lockButton(this);
-    
+
     if (stateInput.value === 'inactive') {
       deployModal.classList.remove('hidden');
     } else if (stateInput.value === 'stopped') {
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
     deployModal.classList.add('hidden');
     unlockAllButtons();
   });
-  
+
   cancelDeploy.addEventListener('click', () => {
     deployModal.classList.add('hidden');
     unlockAllButtons();
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
       unlockAllButtons();
       return;
     }
-    
+
     if (password !== confirm) {
       alert('Passwords do not match!');
       unlockAllButtons();
@@ -266,10 +266,10 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('hidden-username').value = data.Instance.Username;
         document.getElementById('hidden-password').value = data.Instance.Password;
         document.getElementById("container-name").value = data.Instance.ContainerID;
-        
+
         // Update visible instance details
         updateInstanceDetails(data.Instance);
-        
+
         stateInput.value = 'active';
         updateUIFromState();
         // Show the publish section again

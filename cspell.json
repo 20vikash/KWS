@@ -1,0 +1,79 @@
+{
+  "//": "CSpell configuration for repository spell checking.",
+  "//2": "Ignores dependency folders during scans.",
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "kwscloud",
+    "dnsmasq",
+    "rabbitmqctl",
+    "gomail",
+    "pgxpool",
+    "pgconn",
+    "wgctrl",
+    "wgpeer",
+    "wgtypes",
+    "LXDKWS",
+    "lxdbr",
+    "amqp",
+    "certbot",
+    "netplan",
+    "openvswitch",
+    "redigo",
+    "redisstore",
+    "godotenv",
+    "letsencrypt",
+    "fullchain",
+    "privkey",
+    "DBNAME",
+    "healthcheck",
+    "requirepass",
+    "hackathons",
+    "IPLXC",
+    "alexedwards",
+    "gomodule",
+    "createpguser",
+    "createpgdb",
+    "deletepguser",
+    "deletepgdb",
+    "deployresult",
+    "stopresult",
+    "adddomain",
+    "removedomain",
+    "pgusers",
+    "pubins",
+    "sslmode",
+    "NOSUPERUSER",
+    "NOCREATEDB",
+    "NOCREATEROLE",
+    "NOINHERIT",
+    "DBSQL",
+    "uuidgen",
+    "userip",
+    "tmpl",
+    "LXCIP",
+    "nictype",
+    "usermod",
+    "cloudimg",
+    "nohup",
+    "netlink"
+  ],
+  "ignorePaths": [
+
+
+    ".git"
+
+  ],
+
+
+  "dictionaries": [
+    "custom-dictionary"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "custom-dictionary",
+      "path": "./.cspell/custom-dictionary.txt",
+      "addWords": true
+    }
+  ]
+}

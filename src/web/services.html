@@ -64,7 +64,7 @@
             </span>
           </div>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
           <!-- Adminer Service Card -->
           <div class="card p-6">
@@ -83,7 +83,7 @@
                 </span>
                 </div>
             </div>
-            
+
             <div class="space-y-4 mt-6">
                 <!-- Service IP -->
                 <div class="info-card">
@@ -113,7 +113,7 @@
                 </div>
             </div>
           </div>
-          
+
           <!-- Loop through all services -->
           {{ range .Services }}
           <div class="card p-6">
@@ -132,7 +132,7 @@
                 </span>
                 </div>
             </div>
-            
+
             <div class="space-y-4 mt-6">
                 <!-- Service IP -->
                 <div class="info-card">
@@ -172,7 +172,7 @@
             </div>
           </div>
           {{ end }}
-          
+
           <!-- Placeholder for future services -->
           <div class="card p-6 flex flex-col items-center justify-center border-2 border-dashed border-gray-700 hover:border-blue-400/50">
             <div class="service-icon bg-gray-800/50 mb-4">
@@ -191,7 +191,7 @@
       // Generate sparkles for background
       const sparkleContainer = document.getElementById('sparkle-container');
       const sparkleCount = 60;
-      
+
       for (let i = 0; i < sparkleCount; i++) {
         const sparkle = document.createElement('div');
         sparkle.classList.add('sparkle');
@@ -220,12 +220,12 @@
         button.addEventListener('click', function() {
           const text = this.getAttribute('data-copy');
           navigator.clipboard.writeText(text);
-          
+
           // Visual feedback
           const icon = this.querySelector('i');
           icon.className = 'fas fa-check';
           this.classList.add('copied');
-          
+
           // Reset after 2 seconds
           setTimeout(() => {
             icon.className = 'fas fa-copy';

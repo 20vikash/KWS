@@ -1,0 +1,49 @@
+# Main CI workflow for pull request validation.
+# Runs linting and spell checking.
+# This setup can be upgraded later with tests and security scanning.
+#we need correct version of tools
+# For GolangCI-Lint, we specify version v1.58 to ensure compatibility with our codebase and to avoid issues with newer versions that may have breaking changes.
+name: PR Scan
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Install Python Tools
+        run: |
+          pip install pre-commit
+
+
+
+      - name: Install CSpell
+        run: |
+          npm install -g cspell
+
+      - name: Run Pre-Commit
+        run: |
+          pre-commit run --all-files
+
+      - name: Run CSpell
+        run: |
+          cspell "**/*.{js,ts,go,py,md,html,yaml,yml}"

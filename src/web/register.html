@@ -23,7 +23,7 @@
       <h1 class="text-2xl font-bold text-white glow-text">KWS Cloud</h1>
       <p class="mt-1 text-gray-400 text-sm">Create your account to launch your next big thing</p>
     </div>
-    
+
     <form class="flex flex-col compact-form" method="post" action="/create_user">
       <div class="space-y-1">
         <label class="block text-xs font-medium text-gray-300 uppercase tracking-wider">Email</label>
@@ -33,7 +33,7 @@
             class="input-field pl-10" />
         </div>
       </div>
-      
+
       <div class="space-y-1">
         <label class="block text-xs font-medium text-gray-300 uppercase tracking-wider">Username</label>
         <div class="relative">
@@ -42,7 +42,7 @@
             class="input-field pl-10" />
         </div>
       </div>
-      
+
       <div class="grid grid-cols-2 gap-3">
         <div class="space-y-1">
           <label class="block text-xs font-medium text-gray-300 uppercase tracking-wider">First Name</label>
@@ -52,7 +52,7 @@
               class="input-field pl-10" />
           </div>
         </div>
-        
+
         <div class="space-y-1">
           <label class="block text-xs font-medium text-gray-300 uppercase tracking-wider">Last Name</label>
           <div class="relative">
@@ -62,7 +62,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="space-y-1">
         <label class="block text-xs font-medium text-gray-300 uppercase tracking-wider">Password</label>
         <div class="relative">
@@ -72,7 +72,7 @@
         </div>
         <div class="password-strength" id="password-strength"></div>
       </div>
-      
+
       <div class="space-y-1">
         <label class="block text-xs font-medium text-gray-300 uppercase tracking-wider">Confirm Password</label>
         <div class="relative">
@@ -81,25 +81,25 @@
             class="input-field pl-10" />
         </div>
       </div>
-      
+
       <div class="flex items-center mt-1">
         <input id="terms" type="checkbox" class="h-3.5 w-3.5 text-blue-600 focus:ring-blue-500 border-gray-600 rounded bg-gray-800" required>
         <label for="terms" class="ml-2 block text-xs text-gray-300">
           Agree to <a href="#" class="text-blue-400 hover:underline">Terms</a> & <a href="#" class="text-blue-400 hover:underline">Privacy</a>
         </label>
       </div>
-      
+
       <div id="error-box" class="hidden bg-red-900/70 text-red-300 text-xs rounded px-3 py-2 border border-red-600 flex items-start mt-1">
         <i class="fas fa-exclamation-circle mt-0.5 mr-2 text-xs"></i>
         <div id="error-message" class="text-xs"></div>
       </div>
-      
+
       <button type="submit"
         class="btn-primary w-full text-white text-center flex items-center justify-center py-2.5 mt-2 text-xs font-medium">
         <i class="fas fa-user-plus mr-2"></i> Create Account
       </button>
     </form>
-    
+
     <div class="relative compact-divider">
       <div class="absolute inset-0 flex items-center">
         <div class="w-full border-t border-gray-700"></div>
@@ -108,7 +108,7 @@
         <span class="px-2 text-gray-500 bg-gray-900">Already registered?</span>
       </div>
     </div>
-    
+
     <div class="text-center compact-footer">
       <a href="/kws_signin" class="inline-flex items-center text-blue-400 hover:underline text-xs">
         <i class="fas fa-sign-in-alt mr-1.5"></i> Sign in to your account

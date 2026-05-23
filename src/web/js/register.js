@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Generate sparkles for background
     const sparkleContainer = document.getElementById('sparkle-container');
     const sparkleCount = 100;
-    
+
     for (let i = 0; i < sparkleCount; i++) {
         const sparkle = document.createElement('div');
         sparkle.classList.add('sparkle');
@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sparkle.style.animationDelay = `${Math.random() * 10}s`;
         sparkleContainer.appendChild(sparkle);
     }
-    
+
     // Form validation and password strength
     const form = document.querySelector("form");
     const errorBox = document.getElementById("error-box");
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function showError(message) {
         errorMessage.textContent = message;
         errorBox.classList.remove("hidden");
-        
+
         // Auto-hide error after 5 seconds
         setTimeout(() => {
             errorBox.classList.add("hidden");
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll("input").forEach(input => {
         input.addEventListener("input", () => {
             hideError();
-            
+
             // Update password strength indicator
             if (input === passwordInput) {
                 updatePasswordStrength();
@@ -65,13 +65,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function updatePasswordStrength() {
         const password = passwordInput.value;
         let strength = 0;
-        
+
         // Calculate strength based on password criteria
         if (password.length >= 8) strength += 1;
         if (/[A-Z]/.test(password)) strength += 1;
         if (/[0-9]/.test(password)) strength += 1;
         if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-        
+
         // Update the strength indicator
         passwordStrength.className = 'password-strength password-strength-' + strength;
     }
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize password strength indicator
     updatePasswordStrength();
-    
+
     // Add event listener specifically for password input
     passwordInput.addEventListener("input", updatePasswordStrength);
 });

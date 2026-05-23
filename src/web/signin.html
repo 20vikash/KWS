@@ -23,7 +23,7 @@
       <h1 class="text-4xl font-bold text-white glow-text floating">KWS Cloud</h1>
       <p class="mt-3 text-gray-400">Welcome back, developer. Sign in to your secure environment.</p>
     </div>
-    
+
     <form id="signin-form" class="space-y-6">
       <div class="space-y-2">
         <label class="block text-sm font-medium text-gray-300">Username</label>
@@ -33,7 +33,7 @@
             class="input-field w-full pl-12" />
         </div>
       </div>
-      
+
       <div class="space-y-2">
         <label class="block text-sm font-medium text-gray-300">Password</label>
         <div class="relative">
@@ -42,18 +42,18 @@
             class="input-field w-full pl-12" />
         </div>
       </div>
-      
+
       <div id="error-box" class="hidden bg-red-900/70 text-red-300 text-sm rounded-md px-4 py-3 border border-red-600 flex items-start">
         <i class="fas fa-exclamation-circle mt-1 mr-3"></i>
         <div id="error-message"></div>
       </div>
-      
+
       <button type="submit"
         class="btn-primary w-full text-white text-center flex items-center justify-center">
         <i class="fas fa-sign-in-alt mr-3"></i> Sign In
       </button>
     </form>
-    
+
     <div class="relative my-6">
       <div class="absolute inset-0 flex items-center">
         <div class="w-full border-t border-gray-700"></div>
@@ -62,7 +62,7 @@
         <span class="px-2 text-gray-500 bg-gray-900">New to KWS?</span>
       </div>
     </div>
-    
+
     <div class="text-center">
       <a href="/kws_register" class="inline-flex items-center text-blue-400 hover:underline">
         <i class="fas fa-user-plus mr-2"></i> Create your account
@@ -71,29 +71,29 @@
   </div>
 
   <script src="js/signin.js"></script>
-  
+
   <script>
     // Generate sparkles for background
     document.addEventListener('DOMContentLoaded', function() {
       const sparkleContainer = document.getElementById('sparkle-container');
       const sparkleCount = 100;
-      
+
       for (let i = 0; i < sparkleCount; i++) {
         const sparkle = document.createElement('div');
         sparkle.classList.add('sparkle');
-        
+
         // Random position
         sparkle.style.left = `${Math.random() * 100}vw`;
         sparkle.style.top = `${Math.random() * 100}vh`;
-        
+
         // Random size
         const size = 1 + Math.random() * 3;
         sparkle.style.width = `${size}px`;
         sparkle.style.height = `${size}px`;
-        
+
         // Random animation delay
         sparkle.style.animationDelay = `${Math.random() * 12}s`;
-        
+
         sparkleContainer.appendChild(sparkle);
       }
     });

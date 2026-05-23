@@ -1,6 +1,8 @@
 package database
 
-import "github.com/redis/go-redis/v9"
+import (
+    redis "github.com/redis/go-redis/v9"
+)
 
 type RedisDB struct {
 	Addr     string

@@ -1,0 +1,11 @@
+# GolangCI-Lint configuration.
+# Enables static analysis and Go code quality checks.
+
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - govet
+    - ineffassign
+    - staticcheck
