@@ -177,7 +177,7 @@ func main() {
 		log.Fatal("Cannot connect to the wireguard server.")
 	}
 
-	// Create WgOprations struct
+	// Create WgOperations struct
 	wgOp := &wg.WgOperations{
 		Con:        wgCli,
 		PrivateKey: env.GetWireguardPrivateKey(),

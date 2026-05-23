@@ -1,12 +1,9 @@
 {
   "//": "CSpell configuration for repository spell checking.",
   "//2": "Ignores dependency folders during scans.",
-
-
   "version": "0.2",
   "language": "en",
-
-   "words": [
+  "words": [
     "kwscloud",
     "dnsmasq",
     "rabbitmqctl",
@@ -61,11 +58,22 @@
     "nohup",
     "netlink"
   ],
-
   "ignorePaths": [
-    "node_modules",
-    "vendor",
-    ".git",
-    "dist"
-    ]
+
+
+    ".git"
+
+  ],
+
+
+  "dictionaries": [
+    "custom-dictionary"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "custom-dictionary",
+      "path": "./.cspell/custom-dictionary.txt",
+      "addWords": true
+    }
+  ]
 }

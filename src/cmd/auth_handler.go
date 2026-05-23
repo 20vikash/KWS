@@ -102,7 +102,7 @@ func (a *Application) VerifyUser(w http.ResponseWriter, r *http.Request) {
 	err := a.Store.InMemory.DeleteEmailToken(r.Context(), token)
 	if err != nil {
 		w.WriteHeader(http.StatusGone)
-		w.Write([]byte("The link got expied. Try again"))
+		w.Write([]byte("The link got expired. Try again"))
 		return
 	}
 
