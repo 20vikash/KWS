@@ -5,6 +5,17 @@
 
   "version": "0.2",
   "language": "en",
+
+   "words": [
+    "KWS",
+    "pgx",
+    "gomail",
+    "wireguard",
+    "amqp091",
+    "scs",
+    "redis"
+  ],
+
   "ignorePaths": [
     "node_modules",
     "vendor",

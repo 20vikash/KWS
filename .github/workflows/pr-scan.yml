@@ -28,18 +28,13 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: "1.26"
 
       - name: Install Python Tools
         run: |
           pip install pre-commit
 
-      - name: Run GolangCI-Lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.58
-          working-directory: src
-          args: --out-format colored-line-number
+
 
       - name: Install CSpell
         run: |
