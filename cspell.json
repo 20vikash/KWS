@@ -7,13 +7,28 @@
   "language": "en",
 
    "words": [
-    "KWS",
-    "pgx",
+    "kwscloud",
+    "dnsmasq",
+    "rabbitmqctl",
     "gomail",
-    "wireguard",
-    "amqp091",
-    "scs",
-    "redis"
+    "pgxpool",
+    "pgconn",
+    "wgctrl",
+    "wgpeer",
+    "wgtypes",
+    "LXDKWS",
+    "lxdbr",
+    "amqp",
+    "certbot",
+    "netplan",
+    "openvswitch",
+    "redigo",
+    "redisstore",
+    "godotenv",
+    "letsencrypt",
+    "fullchain",
+    "privkey",
+    "DBNAME"
   ],
 
   "ignorePaths": [
