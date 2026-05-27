@@ -66,7 +66,7 @@ func (app *Application) CreatePGUser(w http.ResponseWriter, r *http.Request) {
 		Username:    userName,
 		Password:    password,
 		Permissions: "Limited",
-		UserLimit:   config.MAX_SERVICE_DB_USERS,
+		UserLimit:   config.MAX_SERVICE_DB_USERS(),
 	}
 
 	w.Header().Set("Content-Type", "application/json")

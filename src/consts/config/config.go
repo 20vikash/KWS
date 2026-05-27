@@ -1,11 +1,12 @@
 package config
 
-const (
-	CORE_IMAGE_NAME      = "core_ubuntu:latest"
-	CORE_NETWORK_NAME    = "kws_instance"
-	CORE_NETWORK_SUBNET  = "172.35.0.0/24"
-	CORE_NETWORK_GATEWAY = "172.35.0.1"
+import "kws/kws/internal/kwsconfig"
 
+// --- Truly constant values (protocol/application level, never change per deployment) ---
+
+const (
+	CORE_IMAGE_NAME       = "core_ubuntu:latest"
+	CORE_NETWORK_NAME     = "kws_instance"
 	SERVICES_NETWORK_NAME = "kws_kws_services"
 
 	MAIN_INSTANCE_QUEUE  = "instance_queue"
@@ -17,29 +18,13 @@ const (
 	STOP   = "stop"
 	KILL   = "kill"
 
-	INTERFACE_NAME    = "wg0"
-	INTERFACE_ADDRESS = "10.0.0.1/24"
-	CIDR              = 24
-
 	STACK_KEY = "ip_stack"
 	LXC_IP    = "lxc_ip"
 
-	MAX_WG_DEVICES_PER_USER = 3
-
-	MAX_SERVICE_DB_USERS = 5
-	MAX_SERVICE_DB_DB    = 10
-
 	NGINX_CONTAINER = "nginx_proxy"
 
-	USER_DOMAIN_LIMIT = 3
-
-	LXC_UBUNTU_ALIAS = "ubuntu-22:04"
-	LXD_BRIDGE       = "lxdbr0"
-	INSTANCE_START   = "start"
-	INSTANCE_STOP    = "stop"
-	STORAGE_POOL     = "kws"
-
-	DNS_IP = "172.30.0.102"
+	INSTANCE_START = "start"
+	INSTANCE_STOP  = "stop"
 
 	INSTANCE_TEMPLATE = "instance_template"
 	DOMAIN_TEMPLATE   = "domain_template"
@@ -47,3 +32,43 @@ const (
 	NO_DOMAIN_FOR_TUNNEL = "no_domain_for_tunnel"
 	X_RETRY_COUNTER      = "x-retry-counter"
 )
+
+// --- Deployment-specific values (read from kws_config.yaml) ---
+
+func CORE_NETWORK_SUBNET() string  { return kwsconfig.Get().Network.CoreNetworkSubnet }
+func CORE_NETWORK_GATEWAY() string { return kwsconfig.Get().Network.CoreNetworkGateway }
+
+func INTERFACE_NAME() string    { return kwsconfig.Get().Wireguard.InterfaceName }
+func INTERFACE_ADDRESS() string { return kwsconfig.Get().Wireguard.Address }
+func CIDR() int                 { return kwsconfig.Get().Wireguard.CIDR }
+func WG_LISTEN_PORT() int       { return kwsconfig.Get().Wireguard.ListenPort }
+func WG_KEEPALIVE_SEC() int     { return kwsconfig.Get().Wireguard.KeepAliveSec }
+
+func MAX_WG_DEVICES_PER_USER() int { return kwsconfig.Get().Limits.MaxWGDevicesPerUser }
+func MAX_SERVICE_DB_USERS() int    { return kwsconfig.Get().Limits.MaxServiceDBUsers }
+func MAX_SERVICE_DB_DB() int       { return kwsconfig.Get().Limits.MaxServiceDBDatabases }
+func USER_DOMAIN_LIMIT() int       { return kwsconfig.Get().Limits.UserDomainLimit }
+
+func LXC_UBUNTU_ALIAS() string { return kwsconfig.Get().Instance.UbuntuAlias }
+func LXD_BRIDGE() string       { return kwsconfig.Get().Network.LXDBridgeName }
+func STORAGE_POOL() string     { return kwsconfig.Get().Instance.StoragePool }
+func DNS_IP() string           { return kwsconfig.Get().Network.DNSIP }
+
+func DOMAIN() string              { return kwsconfig.Get().Domain }
+func GATEWAY_PORT() int           { return kwsconfig.Get().Server.GatewayPort }
+func CODE_SERVER_PORT() int       { return kwsconfig.Get().Server.CodeServerPort }
+func TUNNEL_PROXY_PORT() int      { return kwsconfig.Get().Server.TunnelProxyPort }
+func INSTANCE_MEMORY_LIMIT() string { return kwsconfig.Get().Instance.MemoryLimit }
+
+func SSL_CERT_PATH() string         { return kwsconfig.Get().SSL.CertPath }
+func SSL_KEY_PATH() string          { return kwsconfig.Get().SSL.KeyPath }
+func SSL_WILDCARD_CERT_PATH() string { return kwsconfig.Get().SSL.WildcardCertPath }
+func SSL_WILDCARD_KEY_PATH() string  { return kwsconfig.Get().SSL.WildcardKeyPath }
+
+func LXD_BRIDGE_SUBNET() string  { return kwsconfig.Get().Network.LXDBridgeSubnet }
+func LXD_BRIDGE_GATEWAY() string { return kwsconfig.Get().Network.LXDBridgeGateway }
+func LXD_SOCKET_PATH() string    { return kwsconfig.Get().Paths.LXDSocket }
+func NGINX_CONF_DIR() string     { return kwsconfig.Get().Paths.NginxConfDir }
+
+func PG_SERVICE_PORT() int   { return kwsconfig.Get().Services.PostgresPort }
+func ADMINER_PORT() int      { return kwsconfig.Get().Services.AdminerPort }

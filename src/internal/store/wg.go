@@ -59,7 +59,7 @@ func (wg *WireguardStore) HitMaxLimit(ctx context.Context, uid int) (bool, error
 		return false, err
 	}
 
-	if numberOfDevices == config.MAX_WG_DEVICES_PER_USER {
+	if numberOfDevices == config.MAX_WG_DEVICES_PER_USER() {
 		log.Println("Hit the max device count. Could not add more")
 		return true, nil
 	}

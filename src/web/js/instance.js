@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const containerName = document.getElementById('container-name').value;
     // Open VS Code in a new tab
     if (containerName) {
-      window.open(`http://${containerName}.kwscloud.in`, '_blank');
+      window.open(`http://${containerName}.${window.KWS_DOMAIN}`, '_blank');
     } else {
       alert('Container name not found!');
     }

@@ -1,0 +1,69 @@
+---
+# LXD: install LXD via snap and initialize with bridge networking.
+
+- name: Install LXD via snap
+  community.general.snap:
+    name: lxd
+    state: present
+
+- name: Check if LXD is already initialized
+  command: lxd init --dump
+  register: lxd_dump
+  changed_when: false
+
+- name: Initialize LXD with preseed configuration
+  block:
+    - name: Create LXD preseed YAML
+      copy:
+        content: |
+          config: {}
+          networks:
+            - config:
+                ipv4.address: "{{ lxd_bridge_gateway }}/24"
+                ipv4.nat: "true"
+                ipv6.address: none
+              description: "KWS bridge network for LXC containers"
+              name: "{{ lxd_bridge_name }}"
+              type: bridge
+              project: default
+          storage_pools:
+            - config:
+                source: /var/snap/lxd/common/lxd/storage-pools/kws
+              description: "KWS storage pool"
+              name: kws
+              driver: dir
+          profiles:
+            - config: {}
+              description: "Default LXD profile"
+              devices:
+                eth0:
+                  name: eth0
+                  network: "{{ lxd_bridge_name }}"
+                  type: nic
+                root:
+                  path: /
+                  pool: kws
+                  type: disk
+              name: default
+          projects: []
+          cluster: null
+        dest: /tmp/lxd_preseed.yaml
+        mode: '0644'
+
+    - name: Run LXD initialization
+      command: lxd init --preseed
+      args:
+        stdin: "{{ lookup('file', '/tmp/lxd_preseed.yaml') }}"
+      changed_when: true
+
+    - name: Clean up preseed file
+      file:
+        path: /tmp/lxd_preseed.yaml
+        state: absent
+  when: "'lxdbr0' not in lxd_dump.stdout"
+
+- name: Add current user to lxd group
+  user:
+    name: "{{ ansible_user }}"
+    groups: lxd
+    append: yes

@@ -1,0 +1,14 @@
+---
+- name: Bootstrap and configure KWS hosting server
+  hosts: kws_hosts
+  become: yes
+  vars:
+    kws_domain: "{{ kws_domain | mandatory }}"
+    kws_public_ip: "{{ kws_public_ip | mandatory }}"
+
+  roles:
+    - bootstrap
+    - docker
+    - lxd
+    - wireguard
+    - iptables

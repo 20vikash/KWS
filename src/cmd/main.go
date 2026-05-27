@@ -19,6 +19,7 @@ import (
 	"kws/kws/internal/docker"
 	"kws/kws/internal/docker/services"
 	serviceConn "kws/kws/internal/docker/services/connections"
+	"kws/kws/internal/kwsconfig"
 	"kws/kws/internal/mq"
 	"kws/kws/internal/store"
 	"kws/kws/internal/wg"
@@ -48,6 +49,12 @@ type Application struct {
 }
 
 func main() {
+	// Load KWS platform config (kws_config.yaml from project root)
+	err := kwsconfig.Init("../../kws_config.yaml")
+	if err != nil {
+		log.Fatalf("Failed to load KWS config: %v", err)
+	}
+
 	// Load .env variables into OS.
 	env.LoadEnv()
 
@@ -185,7 +192,7 @@ func main() {
 
 	// Create IPAllocator
 	ipAlloc := &wg.IPAllocator{
-		CidrValue:     config.CIDR,
+		CidrValue:     config.CIDR(),
 		RedisStore:    &store.RedisStore{Ds: rc},
 		WgStore:       &store.WireguardStore{Con: connPool},
 		InstanceStore: &store.InstanceStore{Db: connPool},
@@ -228,7 +235,7 @@ func main() {
 
 	// Initialize Application
 	app := Application{
-		Port:           ":8080",
+		Port:           fmt.Sprintf(":%d", config.GATEWAY_PORT()),
 		Store:          store.NewStore(connPool, rc, mqType),
 		SessionManager: sessionManager,
 		Docker:         docker,
@@ -253,7 +260,7 @@ func main() {
 	}
 
 	// Create storage pool for lxc containers
-	err = app.LXD.CreateDirStoragePool(config.STORAGE_POOL)
+	err = app.LXD.CreateDirStoragePool(config.STORAGE_POOL())
 	if err != nil {
 		log.Fatal("Failed to create storage pool")
 	}

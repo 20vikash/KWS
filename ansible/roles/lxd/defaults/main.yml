@@ -1,0 +1,4 @@
+---
+lxd_bridge_name: lxdbr0
+lxd_bridge_subnet: 172.30.0.0/24
+lxd_bridge_gateway: 172.30.0.1

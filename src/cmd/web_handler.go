@@ -139,9 +139,9 @@ func (app *Application) RenderPgUsersPage(w http.ResponseWriter, r *http.Request
 	pgData := web.PGUserPageData{
 		HostName:     pg.Hostname,
 		ServiceIP:    pg.IP,
-		Port:         "5432",
+		Port:         strconv.Itoa(config.PG_SERVICE_PORT()),
 		LoggedInUser: userName,
-		UserLimit:    config.MAX_SERVICE_DB_USERS,
+		UserLimit:    config.MAX_SERVICE_DB_USERS(),
 		Users:        users,
 	}
 
@@ -185,10 +185,10 @@ func (app *Application) RenderPgDatabasesPage(w http.ResponseWriter, r *http.Req
 		Username:       userName,
 		Owner:          owner,
 		TotalDatabases: count,
-		Limit:          config.MAX_SERVICE_DB_DB,
-		AvailableSlots: config.MAX_SERVICE_DB_DB - count,
+		Limit:          config.MAX_SERVICE_DB_DB(),
+		AvailableSlots: config.MAX_SERVICE_DB_DB() - count,
 		Databases:      dbs,
-		UsagePercent:   int(float64(count) / float64(config.MAX_SERVICE_DB_DB) * 100),
+		UsagePercent:   int(float64(count) / float64(config.MAX_SERVICE_DB_DB()) * 100),
 	}
 
 	err = templates.ExecuteTemplate(w, "db_management", pgDB)
@@ -208,6 +208,7 @@ func (app *Application) RenderInstancePage(w http.ResponseWriter, r *http.Reques
 	}
 
 	data.Username = userName
+	data.BaseDomain = config.DOMAIN()
 
 	ip, err := app.Store.Instance.GetIPFromUID(r.Context(), uid)
 	if err != nil {
@@ -239,6 +240,7 @@ func (app *Application) RenderPublishPage(w http.ResponseWriter, r *http.Request
 		LoggedInUser: userName,
 		Domains:      *domains,
 		HasDomains:   hasDomains,
+		BaseDomain:   config.DOMAIN(),
 	}
 
 	err = templates.ExecuteTemplate(w, "publish_instance", pubinsData)

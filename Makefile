@@ -1,6 +1,7 @@
 include .env
 
-ATTACH_SERVICES = \
+SERVICES_LIST := $(shell echo $(ATTACH_SERVICES))
+ATTACH_SERVICES ?= \
 	postgres.kws.services:lxdbr0:172.30.0.100/24 \
 	adminer.kws.services:lxdbr0:172.30.0.101/24 \
 	dnsmasq_kws:lxdbr0:172.30.0.102/24

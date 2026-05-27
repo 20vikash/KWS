@@ -3,6 +3,7 @@ package env
 import (
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -58,6 +59,26 @@ func GetGmailAppPassword() string {
 
 func GetGmail() string {
 	return os.Getenv("GMAIL_ADDRESS")
+}
+
+func GetSMTPHost() string {
+	host := os.Getenv("SMTP_HOST")
+	if host == "" {
+		return "smtp.gmail.com"
+	}
+	return host
+}
+
+func GetSMTPPort() int {
+	portStr := os.Getenv("SMTP_PORT")
+	if portStr == "" {
+		return 587
+	}
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		return 587
+	}
+	return port
 }
 
 // Environment

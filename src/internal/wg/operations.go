@@ -51,14 +51,14 @@ func interfaceExists(inter string) bool {
 
 func (wg *WgOperations) CreateInterfaceWgMain() error {
 	// Check if the interface already exists.
-	if interfaceExists(config.INTERFACE_NAME) {
+	if interfaceExists(config.INTERFACE_NAME()) {
 		log.Println("The interface already exists")
 		return errors.New(status.INTERFACE_ALREADY_EXISTS)
 	}
 
 	// Create interace config.
 	link := &netlink.GenericLink{
-		LinkAttrs: netlink.LinkAttrs{Name: config.INTERFACE_NAME},
+		LinkAttrs: netlink.LinkAttrs{Name: config.INTERFACE_NAME()},
 		LinkType:  "wireguard",
 	}
 
@@ -69,7 +69,7 @@ func (wg *WgOperations) CreateInterfaceWgMain() error {
 		return err
 	}
 
-	addr, err := netlink.ParseAddr(config.INTERFACE_ADDRESS)
+	addr, err := netlink.ParseAddr(config.INTERFACE_ADDRESS())
 	if err != nil {
 		log.Println("Cannot parse interface address")
 		return err
@@ -102,11 +102,11 @@ func (wg *WgOperations) ConfigureWireguard() error {
 
 	wgConfig := wgtypes.Config{
 		PrivateKey:   &privateKey,
-		ListenPort:   getIntPtr(51820),
+		ListenPort:   getIntPtr(config.WG_LISTEN_PORT()),
 		ReplacePeers: false,
 	}
 
-	err = wg.Con.ConfigureDevice(config.INTERFACE_NAME, wgConfig)
+	err = wg.Con.ConfigureDevice(config.INTERFACE_NAME(), wgConfig)
 	if err != nil {
 		log.Println("Cannot configure wireguard interface")
 		return err
@@ -137,7 +137,7 @@ func (wg *WgOperations) AddPeer(ctx context.Context, uid int, pubKey string, ipA
 		Mask: net.CIDRMask(32, 32),
 	}
 
-	keepAlive := 25 * time.Second // 25 seconds poll
+	keepAlive := time.Duration(config.WG_KEEPALIVE_SEC()) * time.Second
 
 	// Peer config
 	peerConf := wgtypes.PeerConfig{
@@ -150,7 +150,7 @@ func (wg *WgOperations) AddPeer(ctx context.Context, uid int, pubKey string, ipA
 	}
 
 	// Configure peer and load it to the kernel module
-	err = wg.Con.ConfigureDevice(config.INTERFACE_NAME, wgtypes.Config{
+	err = wg.Con.ConfigureDevice(config.INTERFACE_NAME(), wgtypes.Config{
 		Peers: []wgtypes.PeerConfig{peerConf},
 	})
 	if err != nil {
@@ -177,7 +177,7 @@ func (wg *WgOperations) RemovePeer(ctx context.Context, pubKey string, uid int, 
 	}
 
 	// Remove peer
-	err = wg.Con.ConfigureDevice(config.INTERFACE_NAME, wgtypes.Config{
+	err = wg.Con.ConfigureDevice(config.INTERFACE_NAME(), wgtypes.Config{
 		Peers: []wgtypes.PeerConfig{
 			{
 				PublicKey: peerPubKey,
@@ -202,7 +202,7 @@ func (wg *WgOperations) IsOnline(publicKey string) (bool, error) {
 		log.Fatalf("Invalid public key: %v", err)
 	}
 
-	device, err := wg.Con.Device("wg0")
+	device, err := wg.Con.Device(config.INTERFACE_NAME())
 	if err != nil {
 		log.Println("Cannot get the wg0 device")
 		return false, err

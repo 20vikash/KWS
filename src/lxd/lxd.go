@@ -40,7 +40,7 @@ func (lxdkws *LXDKWS) AliasExists(name string) (bool, error) {
 
 // Pull ubuntu lxc image from official repository
 func (lxdkws *LXDKWS) PullUbuntuImage() error {
-	ex, err := lxdkws.AliasExists(config.LXC_UBUNTU_ALIAS)
+	ex, err := lxdkws.AliasExists(config.LXC_UBUNTU_ALIAS())
 	if err != nil {
 		log.Println("Failed to check alias existance")
 		return err
@@ -71,7 +71,7 @@ func (lxdkws *LXDKWS) PullUbuntuImage() error {
 
 	op, err := lxdkws.Conn.CopyImage(remote, *image, &lxd.ImageCopyArgs{
 		Aliases: []api.ImageAlias{
-			{Name: config.LXC_UBUNTU_ALIAS, Description: "Stable version of ubuntu cloud"},
+			{Name: config.LXC_UBUNTU_ALIAS(), Description: "Stable version of ubuntu cloud"},
 		},
 	})
 	if err != nil {
@@ -93,7 +93,7 @@ func (lxdkws *LXDKWS) PullUbuntuImage() error {
 // Creates a bridged network for lxc containers to live
 func (lxdkws *LXDKWS) CreateBridgeNetwork() error {
 	// Check if it already exists
-	_, _, err := lxdkws.Conn.GetNetwork(config.LXD_BRIDGE)
+	_, _, err := lxdkws.Conn.GetNetwork(config.LXD_BRIDGE())
 	if err == nil {
 		log.Println("Bridge network already exists")
 		return nil
@@ -101,10 +101,10 @@ func (lxdkws *LXDKWS) CreateBridgeNetwork() error {
 
 	// Network configurations
 	network := api.NetworksPost{
-		Name: config.LXD_BRIDGE,
+		Name: config.LXD_BRIDGE(),
 		NetworkPut: api.NetworkPut{
 			Config: map[string]string{
-				"ipv4.address": "172.30.0.1/24",
+				"ipv4.address": config.LXD_BRIDGE_GATEWAY() + "/24",
 				"ipv4.nat":     "true",
 				"ipv6.address": "none",
 			},
@@ -171,26 +171,26 @@ func (lxdkws *LXDKWS) CreateInstance(ctx context.Context, name string, uid int) 
 			// Enable nesting
 			Config: map[string]string{
 				"security.nesting": "true",
-				"limits.memory":    "1500MB",
+				"limits.memory":    config.INSTANCE_MEMORY_LIMIT(),
 			},
 			Devices: map[string]map[string]string{
 				"eth0": {
 					"type":         "nic",
 					"nictype":      "bridged",
-					"parent":       config.LXD_BRIDGE,
+					"parent":       config.LXD_BRIDGE(),
 					"name":         "eth0",
 					"ipv4.address": ip,
 				},
 				"root": {
 					"type": "disk",
 					"path": "/",
-					"pool": config.STORAGE_POOL,
+					"pool": config.STORAGE_POOL(),
 				},
 			},
 		},
 		Source: api.InstanceSource{
 			Type:  "image",
-			Alias: config.LXC_UBUNTU_ALIAS,
+			Alias: config.LXC_UBUNTU_ALIAS(),
 		},
 	}
 
@@ -286,7 +286,7 @@ func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, passwor
 				return err
 			}
 
-			err = lxdkws.SetNetplanDNS(instanceName, config.DNS_IP)
+			err = lxdkws.SetNetplanDNS(instanceName, config.DNS_IP())
 			if err != nil {
 				log.Println("Failed to set up DNS")
 				return err
@@ -326,11 +326,11 @@ func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, passwor
 			nginxTemplate := &nginx.Template{
 				Domain: instanceName,
 				IP:     containerIP,
-				Port:   "8099",
+				Port:   fmt.Sprintf("%d", config.CODE_SERVER_PORT()),
 			}
 
 			// Update the DB
-			err = lxdkws.Domains.AddDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: 8099})
+			err = lxdkws.Domains.AddDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: config.CODE_SERVER_PORT()})
 			if err != nil {
 				return err
 			}
@@ -345,7 +345,7 @@ func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, passwor
 			if err != nil {
 				log.Println("Failed to reload nginx conf for code server")
 				// Revert the db state
-				err = lxdkws.Docker.Domains.RemoveDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: 8099})
+				err = lxdkws.Docker.Domains.RemoveDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: config.CODE_SERVER_PORT()})
 				if err != nil {
 					return err
 				}
@@ -395,7 +395,7 @@ func (lxdkws *LXDKWS) DeleteInstance(ctx context.Context, uid int, instanceName 
 	}
 
 	// Update the DB
-	err = lxdkws.Docker.Domains.RemoveDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: 8099})
+	err = lxdkws.Docker.Domains.RemoveDomain(ctx, &models.Domain{Domain: nginxTemplate.Domain, Uid: uid, Port: config.CODE_SERVER_PORT()})
 	if err != nil {
 		return err
 	}

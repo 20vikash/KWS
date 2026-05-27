@@ -94,7 +94,7 @@
             <ul class="space-y-3 text-gray-400">
               <li class="flex items-start">
                 <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
-                <span>Your instance will be accessible at <code class="bg-gray-800 px-2 py-1 rounded">[domain].kwscloud.in</code></span>
+                <span>Your instance will be accessible at <code class="bg-gray-800 px-2 py-1 rounded">[domain].{{ .BaseDomain }}</code></span>
               </li>
               <li class="flex items-start">
                 <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
@@ -128,8 +128,8 @@
                   </button>
                 </div>
                 <div class="domain-url-container">
-                  <div class="domain-url">https://{{ .Name }}.kwscloud.in</div>
-                  <button class="copy-domain-btn" data-url="https://{{ .Name }}.kwscloud.in">
+                  <div class="domain-url">https://{{ .Name }}.{{ $.BaseDomain }}</div>
+                  <button class="copy-domain-btn" data-url="https://{{ .Name }}.{{ $.BaseDomain }}">
                     <i class="fas fa-copy"></i>
                   </button>
                 </div>
@@ -175,6 +175,7 @@
     </div>
   </div>
 
+  <script>window.KWS_DOMAIN = "{{ .BaseDomain }}";</script>
   <script src="/js/publish.js"></script>
 </body>
 </html>

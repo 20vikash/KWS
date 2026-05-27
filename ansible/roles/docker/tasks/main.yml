@@ -1,0 +1,79 @@
+---
+# Docker: install Docker Engine and Docker Compose plugin.
+
+- name: Remove conflicting packages
+  apt:
+    name:
+      - docker.io
+      - docker-doc
+      - docker-compose
+      - docker-compose-v2
+      - podman-docker
+      - containerd
+      - runc
+    state: absent
+  ignore_errors: yes
+
+- name: Create keyrings directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download Docker GPG key
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /tmp/docker.gpg
+    mode: '0644'
+
+- name: Dearmor Docker GPG key
+  command: gpg --dearmor -o /etc/apt/keyrings/docker.gpg /tmp/docker.gpg
+  args:
+    creates: /etc/apt/keyrings/docker.gpg
+
+- name: Detect architecture
+  command: dpkg --print-architecture
+  register: dpkg_arch
+  changed_when: false
+
+- name: Detect distribution codename
+  shell: . /etc/os-release && echo "$VERSION_CODENAME"
+  register: distro_codename
+  changed_when: false
+
+- name: Add Docker repository
+  apt_repository:
+    repo: >-
+      deb [arch={{ dpkg_arch.stdout }}
+      signed-by=/etc/apt/keyrings/docker.gpg]
+      https://download.docker.com/linux/ubuntu
+      {{ distro_codename.stdout }} stable
+    state: present
+    filename: docker
+    update_cache: yes
+
+- name: Install Docker Engine and plugins
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+
+- name: Start and enable Docker service
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Verify Docker is running
+  command: docker info
+  register: docker_info
+  changed_when: false
+  ignore_errors: yes
+
+- name: Display Docker status
+  debug:
+    msg: "Docker is {{ 'running' if docker_info.rc == 0 else 'NOT running (check logs)' }}"

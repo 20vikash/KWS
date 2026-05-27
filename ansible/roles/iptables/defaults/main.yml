@@ -1,0 +1,5 @@
+---
+wg_interface: wg0
+wg_listen_port: 51820
+lxd_bridge_name: lxdbr0
+lxd_bridge_subnet: 172.30.0.0/24

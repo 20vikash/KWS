@@ -9,24 +9,40 @@ import (
 )
 
 type Template struct {
-	Domain string
-	IP     string
-	Port   string
+	Domain     string
+	IP         string
+	Port       string
+	BaseDomain string
+	SSLCert    string
+	SSLKey     string
+}
+
+// populateFromConfig fills in BaseDomain and SSL fields from the global config.
+func (t *Template) populateFromConfig() {
+	if t.BaseDomain == "" {
+		t.BaseDomain = config.DOMAIN()
+	}
+	if t.SSLCert == "" {
+		t.SSLCert = config.SSL_WILDCARD_CERT_PATH()
+	}
+	if t.SSLKey == "" {
+		t.SSLKey = config.SSL_WILDCARD_KEY_PATH()
+	}
 }
 
 const nginxTemplate = `
 server {
     listen 80;
-    server_name {{ .Domain }}.kwscloud.in;
+    server_name {{ .Domain }}.{{ .BaseDomain }};
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name {{ .Domain }}.kwscloud.in;
+    server_name {{ .Domain }}.{{ .BaseDomain }};
 
-    ssl_certificate     /etc/letsencrypt/live/kwscloud.in-0001/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/kwscloud.in-0001/privkey.pem;
+    ssl_certificate     {{ .SSLCert }};
+    ssl_certificate_key {{ .SSLKey }};
 
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
@@ -64,7 +80,7 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
 
     location / {
-        proxy_pass http://127.0.0.1:8081;
+        proxy_pass http://127.0.0.1:{{ .Port }};
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -81,12 +97,18 @@ server {
 `
 
 func (t *Template) AddNewConf(templateType string) error {
+	t.populateFromConfig()
+
 	var finalTemplate string
 
 	switch templateType {
 	case config.INSTANCE_TEMPLATE:
 		finalTemplate = nginxTemplate
 	case config.DOMAIN_TEMPLATE:
+		// For domain (tunnel) template, set the tunnel proxy port from config
+		if t.Port == "" {
+			t.Port = fmt.Sprintf("%d", config.TUNNEL_PROXY_PORT())
+		}
 		finalTemplate = domainTemplate
 	}
 
@@ -96,7 +118,7 @@ func (t *Template) AddNewConf(templateType string) error {
 	}
 
 	// Path to write the new Nginx config file
-	filePath := fmt.Sprintf("/app/nginx_conf/%s.conf", t.Domain)
+	filePath := fmt.Sprintf("%s/%s.conf", config.NGINX_CONF_DIR(), t.Domain)
 
 	// Create and write to the file
 	f, err := os.Create(filePath)
@@ -116,7 +138,7 @@ func (t *Template) AddNewConf(templateType string) error {
 
 func (t *Template) RemoveConf() error {
 	// Path to the config file to be removed
-	filePath := fmt.Sprintf("/app/nginx_conf/%s.conf", t.Domain)
+	filePath := fmt.Sprintf("%s/%s.conf", config.NGINX_CONF_DIR(), t.Domain)
 
 	// Attempt to remove the file
 	if err := os.Remove(filePath); err != nil {
@@ -131,3 +153,4 @@ func (t *Template) RemoveConf() error {
 	log.Printf("Config file %s successfully removed.", filePath)
 	return nil
 }
+

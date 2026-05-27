@@ -1,0 +1,70 @@
+# KWS Configuration Example
+# Copy this file to kws_config.yaml and fill in your values.
+# Run `kws_install` to generate this file interactively.
+
+# Your domain name (e.g., kwscloud.in, mycloud.example.com)
+domain: kwscloud.in
+
+# Public IP address of your server
+public_ip: 203.0.113.10
+
+server:
+  gateway_port: 8080           # KWS gateway HTTP port
+  code_server_port: 8099       # code-server port inside LXC containers
+  tunnel_proxy_port: 8081      # Tunnel reverse proxy port
+
+ssl:
+  cert_path: /etc/letsencrypt/live/kwscloud.in/fullchain.pem
+  key_path: /etc/letsencrypt/live/kwscloud.in/privkey.pem
+  wildcard_cert_path: /etc/letsencrypt/live/kwscloud.in-0001/fullchain.pem
+  wildcard_key_path: /etc/letsencrypt/live/kwscloud.in-0001/privkey.pem
+
+network:
+  lxd_bridge_name: lxdbr0
+  lxd_bridge_subnet: 172.30.0.0/24
+  lxd_bridge_gateway: 172.30.0.1
+  services_subnet: 172.25.0.0/24
+  services_gateway: 172.25.0.1
+  core_network_subnet: 172.35.0.0/24
+  core_network_gateway: 172.35.0.1
+  dns_ip: 172.30.0.102
+
+wireguard:
+  interface_name: wg0
+  address: 10.0.0.1/24
+  cidr: 24
+  listen_port: 51820
+  keepalive_sec: 25
+
+services:
+  postgres_ip: 172.25.0.2
+  postgres_hostname: postgres.kws.services
+  postgres_port: 5432
+  adminer_ip: 172.25.0.4
+  adminer_hostname: adminer.kws.services
+  adminer_port: 8080
+  bridge_attach:
+    - container: postgres.kws.services
+      bridge: lxdbr0
+      ip_cidr: 172.30.0.100/24
+    - container: adminer.kws.services
+      bridge: lxdbr0
+      ip_cidr: 172.30.0.101/24
+    - container: dnsmasq_kws
+      bridge: lxdbr0
+      ip_cidr: 172.30.0.102/24
+
+instance:
+  memory_limit: 1500MB
+  storage_pool: kws
+  ubuntu_alias: "ubuntu-22:04"
+
+limits:
+  max_wg_devices_per_user: 3
+  max_service_db_users: 5
+  max_service_db_databases: 10
+  user_domain_limit: 3
+
+paths:
+  lxd_socket: /var/snap/lxd/common/lxd/unix.socket
+  nginx_conf_dir: /app/nginx_conf

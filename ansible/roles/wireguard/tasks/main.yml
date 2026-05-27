@@ -1,0 +1,66 @@
+---
+# WireGuard: install wireguard-tools and create initial interface config.
+
+- name: Install WireGuard tools
+  apt:
+    name:
+      - wireguard
+      - wireguard-tools
+      - resolvconf
+    state: present
+
+- name: Check if WireGuard interface config already exists
+  stat:
+    path: /etc/wireguard/{{ wg_interface }}.conf
+  register: existing_wg_conf
+
+- name: Determine WireGuard private key
+  block:
+    - name: Use provided private key from inventory
+      set_fact:
+        wg_privkey: "{{ wg_private_key }}"
+      when: wg_private_key is defined and wg_private_key != ''
+  when: not existing_wg_conf.stat.exists
+
+- name: Generate WireGuard keypair when not provided
+  block:
+    - name: Generate private key on server
+      command: wg genkey
+      register: wg_genkey_out
+      changed_when: false
+
+    - name: Set generated private key
+      set_fact:
+        wg_privkey: "{{ wg_genkey_out.stdout }}"
+
+    - name: Echo generated public key
+      shell: echo "{{ wg_genkey_out.stdout }}" | wg pubkey
+      register: wg_pubkey_out
+      changed_when: false
+
+    - name: Debug generated public key
+      debug:
+        msg: "Generated new WireGuard public key: {{ wg_pubkey_out.stdout }}"
+  when:
+    - not existing_wg_conf.stat.exists
+    - wg_privkey is not defined or wg_privkey == ''
+
+- name: Create WireGuard interface config file
+  copy:
+    content: |
+      [Interface]
+      Address = {{ wg_address }}
+      ListenPort = {{ wg_listen_port }}
+      SaveConfig = true
+      PrivateKey = {{ wg_privkey }}
+    dest: /etc/wireguard/{{ wg_interface }}.conf
+    mode: '0600'
+    owner: root
+    group: root
+  when: not existing_wg_conf.stat.exists
+
+- name: Enable WireGuard interface on boot
+  systemd:
+    name: "wg-quick@{{ wg_interface }}"
+    enabled: yes
+    state: started

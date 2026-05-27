@@ -1,0 +1,30 @@
+---
+# Bootstrap: update package cache and upgrade all packages.
+# Must be the first role executed.
+
+- name: Update apt package cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Upgrade all installed packages
+  apt:
+    upgrade: dist
+    autoremove: yes
+    autoclean: yes
+
+- name: Install essential system packages
+  apt:
+    name:
+      - curl
+      - wget
+      - gnupg
+      - ca-certificates
+      - lsb-release
+      - software-properties-common
+      - ufw
+      - net-tools
+      - iproute2
+      - htop
+      - git
+    state: present

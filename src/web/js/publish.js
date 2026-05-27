@@ -128,8 +128,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             </button>
                         </div>
                         <div class="domain-url-container">
-                            <div class="domain-url">https://${data.Domain}.kwscloud.in</div>
-                            <button class="copy-domain-btn" data-url="https://${data.Domain}.kwscloud.in">
+                            <div class="domain-url">https://${data.Domain}.${window.KWS_DOMAIN}</div>
+                            <button class="copy-domain-btn" data-url="https://${data.Domain}.${window.KWS_DOMAIN}">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>

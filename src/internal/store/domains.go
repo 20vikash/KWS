@@ -100,7 +100,7 @@ func (d *Domain) AddUserDomain(ctx context.Context, domain *models.Domain) error
 		return err
 	}
 
-	if count >= config.USER_DOMAIN_LIMIT {
+	if count >= config.USER_DOMAIN_LIMIT() {
 		return errors.New(status.DOMAIN_LIMIT_EXCEEDED)
 	}
 

@@ -52,7 +52,7 @@ func (pg *PgServiceStore) AddUser(ctx context.Context, pgUser *models.PGServiceU
 		return -1, err
 	}
 
-	if count >= config.MAX_SERVICE_DB_USERS {
+	if count >= config.MAX_SERVICE_DB_USERS() {
 		log.Println("Exceeded the pg user limit")
 		return -1, errors.New(status.PG_MAX_USER_LIMIT)
 	}
@@ -100,7 +100,7 @@ func (pg *PgServiceStore) AddDatabase(ctx context.Context, pgUser *models.PGServ
 		return err
 	}
 
-	if dbCount >= config.MAX_SERVICE_DB_DB {
+	if dbCount >= config.MAX_SERVICE_DB_DB() {
 		log.Println("DB limit for user exceeded")
 		return errors.New(status.PG_MAX_DB_LIMIT)
 	}

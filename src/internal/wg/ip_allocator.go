@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"kws/kws/consts/config"
 	"kws/kws/consts/status"
+	"kws/kws/internal/kwsconfig"
 	"kws/kws/internal/store"
 	"kws/kws/models"
 	"log"
 	"math"
+	"strings"
 )
 
 type IPAllocator struct {
@@ -43,6 +45,10 @@ func (ip *IPAllocator) FindNoOfUsableHostsDocker() int {
 }
 
 func (ip *IPAllocator) GenerateIP(hostNumber int) string {
+	// Parse the WG address prefix from config (e.g., "10.0.0.1/24" -> base "10")
+	wgAddr := kwsconfig.Get().Wireguard.Address
+	baseOctet := strings.Split(wgAddr, ".")[0]
+
 	firstOctet, secondOctet, thirdOctet := 0, 0, 0
 
 	c := hostNumber / 256
@@ -50,17 +56,22 @@ func (ip *IPAllocator) GenerateIP(hostNumber int) string {
 	if c < 256 {
 		thirdOctet = hostNumber % 256
 		secondOctet = c
-		return fmt.Sprintf("10.%d.%d.%d", firstOctet, secondOctet, thirdOctet)
+		return fmt.Sprintf("%s.%d.%d.%d", baseOctet, firstOctet, secondOctet, thirdOctet)
 	}
 
 	firstOctet = c / 256
 	secondOctet = c % 256
 	thirdOctet = hostNumber % 256
 
-	return fmt.Sprintf("10.%d.%d.%d", firstOctet, secondOctet, thirdOctet)
+	return fmt.Sprintf("%s.%d.%d.%d", baseOctet, firstOctet, secondOctet, thirdOctet)
 }
 
 func (ip *IPAllocator) GenerateIPLXC(hostNumber int) string {
+	// Parse the LXD bridge gateway to get the first two octets (e.g., "172.30.0.1" -> "172.30")
+	gateway := kwsconfig.Get().Network.LXDBridgeGateway
+	parts := strings.Split(gateway, ".")
+	base := parts[0] + "." + parts[1]
+
 	secondOctet, thirdOctet := 0, 0
 
 	c := hostNumber / 256
@@ -68,13 +79,13 @@ func (ip *IPAllocator) GenerateIPLXC(hostNumber int) string {
 	if c < 256 {
 		thirdOctet = hostNumber % 256
 		secondOctet = c
-		return fmt.Sprintf("172.30.%d.%d", secondOctet, thirdOctet)
+		return fmt.Sprintf("%s.%d.%d", base, secondOctet, thirdOctet)
 	}
 
 	secondOctet = c % 256
 	thirdOctet = hostNumber % 256
 
-	return fmt.Sprintf("172.30.%d.%d", secondOctet, thirdOctet)
+	return fmt.Sprintf("%s.%d.%d", base, secondOctet, thirdOctet)
 }
 
 func (ip *IPAllocator) AllocateFreeIp(ctx context.Context, uid int, pubKey string) (string, error) {

@@ -1,0 +1,94 @@
+---
+# iptables: configure IP forwarding and NAT rules for KWS.
+# Allows traffic to flow from WireGuard interface to LXD container bridge.
+
+- name: Enable IP forwarding (runtime)
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Ensure IP forwarding persists across reboots
+  lineinfile:
+    path: /etc/sysctl.conf
+    regexp: '^net\.ipv4\.ip_forward'
+    line: 'net.ipv4.ip_forward = 1'
+    state: present
+  notify: reload sysctl
+
+- name: Apply sysctl settings
+  command: sysctl -p
+  changed_when: false
+
+- name: Install iptables-persistent for rule persistence
+  apt:
+    name:
+      - iptables
+      - iptables-persistent
+    state: present
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: Add NAT masquerade rule for LXD bridge (runtime)
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    source: "{{ lxd_bridge_subnet }}"
+    out_interface: "{{ ansible_default_ipv4.interface | default('eth0') }}"
+    jump: MASQUERADE
+    comment: "KWS LXD NAT masquerade"
+
+- name: Add forward rule WireGuard -> LXD bridge (runtime)
+  iptables:
+    chain: FORWARD
+    in_interface: "{{ wg_interface }}"
+    out_interface: "{{ lxd_bridge_name }}"
+    jump: ACCEPT
+    comment: "KWS WG to LXD forward"
+
+- name: Add forward rule LXD bridge -> WireGuard (runtime)
+  iptables:
+    chain: FORWARD
+    in_interface: "{{ lxd_bridge_name }}"
+    out_interface: "{{ wg_interface }}"
+    jump: ACCEPT
+    comment: "KWS LXD to WG forward"
+
+- name: Allow forward from LXD bridge to internet (runtime)
+  iptables:
+    chain: FORWARD
+    in_interface: "{{ lxd_bridge_name }}"
+    out_interface: "{{ ansible_default_ipv4.interface | default('eth0') }}"
+    jump: ACCEPT
+    comment: "KWS LXD to internet"
+
+- name: Allow established/related connections (runtime)
+  iptables:
+    chain: FORWARD
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+    comment: "KWS established/related"
+
+- name: Save iptables rules for persistence
+  shell: netfilter-persistent save
+  changed_when: false
+
+- name: Allow WireGuard port through UFW (if enabled)
+  ufw:
+    rule: allow
+    port: "{{ wg_listen_port }}"
+    proto: udp
+    comment: "WireGuard"
+  ignore_errors: yes
+
+- name: Allow HTTP/HTTPS through UFW (if enabled)
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+    comment: "KWS web"
+  loop:
+    - '80'
+    - '443'
+  ignore_errors: yes

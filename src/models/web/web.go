@@ -58,6 +58,7 @@ type InsData struct {
 	InstanceStatus string // "inactive", "active", "stopped"
 	Active         string // "exists", "no"
 	Instance       Instance
+	BaseDomain     string
 }
 
 type Domain struct {
@@ -70,4 +71,5 @@ type PublishInstancePageData struct {
 	LoggedInUser string
 	Domains      []Domain
 	HasDomains   bool
+	BaseDomain   string
 }

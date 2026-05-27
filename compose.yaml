@@ -5,8 +5,8 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.25.0.0/24
-          gateway: 172.25.0.1
+        - subnet: ${SERVICES_SUBNET:-172.25.0.0/24}
+          gateway: ${SERVICES_GATEWAY:-172.25.0.1}
 
 volumes:
   #Main
@@ -137,7 +137,7 @@ services:
       - "127.0.0.1:${PG_SERVICE_PORT}:5432"
     networks:
       kws_services:
-        ipv4_address: 172.25.0.2
+        ipv4_address: ${PG_SERVICE_IP:-172.25.0.2}
 
   adminer:
     image: adminer
@@ -145,4 +145,4 @@ services:
     restart: always
     networks:
       kws_services:
-        ipv4_address: 172.25.0.4
+        ipv4_address: ${ADMINER_IP:-172.25.0.4}
