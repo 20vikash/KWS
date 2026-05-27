@@ -28,3 +28,39 @@
       - htop
       - git
     state: present
+
+- name: Detect architecture for migrate binary
+  command: uname -m
+  register: uname_arch
+  changed_when: false
+
+- name: Install golang-migrate CLI
+  block:
+    - name: Set migrate download URL
+      set_fact:
+        migrate_arch: "{{ 'amd64' if uname_arch.stdout == 'x86_64' else 'arm64' }}"
+        migrate_version: "4.18.2"
+
+    - name: Download migrate binary
+      get_url:
+        url: "https://github.com/golang-migrate/migrate/releases/download/v{{ migrate_version }}/migrate.linux-{{ migrate_arch }}.tar.gz"
+        dest: /tmp/migrate.tar.gz
+        mode: '0644'
+
+    - name: Extract migrate to /usr/local/bin
+      unarchive:
+        src: /tmp/migrate.tar.gz
+        dest: /usr/local/bin
+        remote_src: yes
+        creates: /usr/local/bin/migrate
+
+    - name: Make migrate executable
+      file:
+        path: /usr/local/bin/migrate
+        mode: '0755'
+        state: file
+
+    - name: Clean up download
+      file:
+        path: /tmp/migrate.tar.gz
+        state: absent

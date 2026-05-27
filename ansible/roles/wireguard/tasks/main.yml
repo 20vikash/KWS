@@ -59,6 +59,26 @@
     group: root
   when: not existing_wg_conf.stat.exists
 
+- name: Derive public key from private key
+  shell: echo "{{ wg_privkey }}" | wg pubkey
+  register: wg_pubkey_derived
+  changed_when: false
+  when: not existing_wg_conf.stat.exists
+
+- name: Store public key persistently
+  copy:
+    content: "{{ wg_pubkey_derived.stdout }}"
+    dest: /etc/wireguard/publickey
+    mode: '0644'
+    owner: root
+    group: root
+  when: not existing_wg_conf.stat.exists
+
+- name: Display public key
+  debug:
+    msg: "WireGuard public key: {{ wg_pubkey_derived.stdout }}"
+  when: not existing_wg_conf.stat.exists
+
 - name: Enable WireGuard interface on boot
   systemd:
     name: "wg-quick@{{ wg_interface }}"
