@@ -23,10 +23,10 @@ func (t *Template) populateFromConfig() {
 		t.BaseDomain = config.DOMAIN()
 	}
 	if t.SSLCert == "" {
-		t.SSLCert = config.SSL_WILDCARD_CERT_PATH()
+		t.SSLCert = config.SSL_CERT_PATH()
 	}
 	if t.SSLKey == "" {
-		t.SSLKey = config.SSL_WILDCARD_KEY_PATH()
+		t.SSLKey = config.SSL_KEY_PATH()
 	}
 }
 

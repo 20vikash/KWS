@@ -110,13 +110,11 @@ func collectSSL(cfg *KWSConfig) {
 
 	defaultCert := fmt.Sprintf("/etc/letsencrypt/live/%s/fullchain.pem", cfg.Domain)
 	defaultKey := fmt.Sprintf("/etc/letsencrypt/live/%s/privkey.pem", cfg.Domain)
-	defaultWildcardCert := fmt.Sprintf("/etc/letsencrypt/live/%s-0001/fullchain.pem", cfg.Domain)
-	defaultWildcardKey := fmt.Sprintf("/etc/letsencrypt/live/%s-0001/privkey.pem", cfg.Domain)
+	fmt.Println("  The certificate is wildcard by default (*.your-domain).")
+	fmt.Println("  One cert/key pair covers all subdomains.")
 
 	cfg.SSL.CertPath = prompt("SSL certificate path", defaultCert)
 	cfg.SSL.KeyPath = prompt("SSL private key path", defaultKey)
-	cfg.SSL.WildcardCertPath = prompt("Wildcard SSL certificate path", defaultWildcardCert)
-	cfg.SSL.WildcardKeyPath = prompt("Wildcard SSL private key path", defaultWildcardKey)
 }
 
 // collectGmail gathers Gmail SMTP credentials.

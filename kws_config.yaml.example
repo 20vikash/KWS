@@ -16,8 +16,6 @@ server:
 ssl:
   cert_path: /etc/letsencrypt/live/kwscloud.in/fullchain.pem
   key_path: /etc/letsencrypt/live/kwscloud.in/privkey.pem
-  wildcard_cert_path: /etc/letsencrypt/live/kwscloud.in-0001/fullchain.pem
-  wildcard_key_path: /etc/letsencrypt/live/kwscloud.in-0001/privkey.pem
 
 network:
   lxd_bridge_name: lxdbr0

@@ -60,10 +60,8 @@ func CODE_SERVER_PORT() int       { return kwsconfig.Get().Server.CodeServerPort
 func TUNNEL_PROXY_PORT() int      { return kwsconfig.Get().Server.TunnelProxyPort }
 func INSTANCE_MEMORY_LIMIT() string { return kwsconfig.Get().Instance.MemoryLimit }
 
-func SSL_CERT_PATH() string         { return kwsconfig.Get().SSL.CertPath }
-func SSL_KEY_PATH() string          { return kwsconfig.Get().SSL.KeyPath }
-func SSL_WILDCARD_CERT_PATH() string { return kwsconfig.Get().SSL.WildcardCertPath }
-func SSL_WILDCARD_KEY_PATH() string  { return kwsconfig.Get().SSL.WildcardKeyPath }
+func SSL_CERT_PATH() string { return kwsconfig.Get().SSL.CertPath }
+func SSL_KEY_PATH() string  { return kwsconfig.Get().SSL.KeyPath }
 
 func LXD_BRIDGE_SUBNET() string  { return kwsconfig.Get().Network.LXDBridgeSubnet }
 func LXD_BRIDGE_GATEWAY() string { return kwsconfig.Get().Network.LXDBridgeGateway }

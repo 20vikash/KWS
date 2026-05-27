@@ -23,10 +23,8 @@ type ServerConfig struct {
 }
 
 type SSLConfig struct {
-	CertPath         string `yaml:"cert_path"`
-	KeyPath          string `yaml:"key_path"`
-	WildcardCertPath string `yaml:"wildcard_cert_path"`
-	WildcardKeyPath  string `yaml:"wildcard_key_path"`
+	CertPath string `yaml:"cert_path"`
+	KeyPath  string `yaml:"key_path"`
 }
 
 type NetworkConfig struct {
