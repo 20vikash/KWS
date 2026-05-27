@@ -4,7 +4,7 @@
 [![Go](https://img.shields.io/badge/Go-1.25-00ADD8.svg)](https://go.dev/)
 [![Docker](https://img.shields.io/badge/Docker-✓-2496ED.svg)](https://docker.com)
 
-KWS is a self-hosted cloud platform that gives each user a private, VPN-protected LXC container with a browser-based VS Code environment, managed PostgreSQL databases, custom domain publishing, and secure tunnels — all behind WireGuard.
+KWS is a self-hosted cloud platform that gives each user a private, VPN-protected LXC container with a browser-based VS Code environment, managed PostgreSQL databases, and custom domain publishing — all behind WireGuard.
 
 ---
 
@@ -57,7 +57,7 @@ KWS is a self-hosted cloud platform that gives each user a private, VPN-protecte
 | **Docker Engine** | Installed by Ansible if you use it |
 | **LXD** (snap) | Installed by Ansible if you use it |
 | **WireGuard** | Kernel module + tools |
-| **Go 1.25** | Only needed if building from source |
+| **Go 1.25+** | Only needed if building from source |
 | **Domain name** | Pointed to your server's public IP |
 | **SSL certificate** | Wildcard recommended (e.g. LetsEncrypt) |
 
@@ -81,7 +81,7 @@ go run .       # or use the pre-built binary: ./kws_install
 
 The installer asks for:
 - **Domain name** and **public IP**
-- **SSL certificate paths** (defaults to LetsEncrypt paths derived from your domain)
+- **Wildcard SSL certificate paths** (defaults to LetsEncrypt paths derived from your domain)
 - **Gmail SMTP credentials** (for email verification)
 - **Service passwords** (auto-generated if you press Enter)
 - **Instance memory limit**
