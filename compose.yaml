@@ -20,8 +20,9 @@ volumes:
 services:
   # ------------------------------Main-------------------------------
   postgres:
-    image: postgres:alpine
+    image: postgres:17-alpine
     container_name: postgres_db_kws
+    restart: unless-stopped
     env_file:
       - .env
     environment:
@@ -90,9 +91,11 @@ services:
     image: golang:latest
     container_name: kws_gateway
     privileged: true
+    restart: unless-stopped
     volumes:
       - ./nginx/conf.d:/app/nginx_conf:rw
       - ./src/:/app/data
+      - ./kws_config.yaml:/app/kws_config.yaml
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/snap/lxd/common/lxd/unix.socket:/var/snap/lxd/common/lxd/unix.socket
       - /etc/wireguard:/etc/wireguard:ro
@@ -111,9 +114,6 @@ services:
     image: strm/dnsmasq
     container_name: dnsmasq_kws
     restart: unless-stopped
-    ports:
-      - "5353:53/udp"
-      - "5353:53/tcp"
     cap_add:
       - NET_ADMIN
     volumes:
@@ -123,8 +123,9 @@ services:
 
   # ------------------------------Services-------------------------------
   postgres_service:
-    image: postgres:alpine
+    image: postgres:17-alpine
     container_name: postgres.kws.services
+    restart: unless-stopped
     env_file:
       - .env
     environment:

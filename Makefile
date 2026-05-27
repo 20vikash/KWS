@@ -2,9 +2,9 @@ include .env
 
 SERVICES_LIST := $(shell echo $(ATTACH_SERVICES))
 ATTACH_SERVICES ?= \
-	postgres.kws.services:lxdbr0:172.30.0.100/24 \
-	adminer.kws.services:lxdbr0:172.30.0.101/24 \
-	dnsmasq_kws:lxdbr0:172.30.0.102/24
+	postgres.kws.services:lxdbr0:172.30.0.2/24 \
+	adminer.kws.services:lxdbr0:172.30.0.3/24 \
+	dnsmasq_kws:lxdbr0:172.30.0.4/24
 
 define attach_services
 	@echo "Attaching services to bridge..."
@@ -15,7 +15,7 @@ define attach_services
 		bridge=$${tmp%%:*}; \
 		ipcidr=$${tmp#*:}; \
 		echo " -> $$container to $$bridge with $$ipcidr"; \
-		attach_to_bridge $$container $$bridge $$ipcidr; \
+		attach_to_bridge $$container $$bridge $$ipcidr || echo "    ⚠ Failed (container may need time to start)"; \
 	done
 endef
 

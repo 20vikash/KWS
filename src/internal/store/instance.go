@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"kws/kws/consts/config"
 	"kws/kws/consts/status"
 	"kws/kws/models"
 	"kws/kws/models/web"
@@ -248,7 +249,7 @@ func (in *InstanceStore) AllocateNextFreeIP(ctx context.Context, maxHostNumber i
 			if err != nil {
 				if err == pgx.ErrNoRows {
 					log.Println("Cannot find the max of the ip. This is the start it seems")
-					ip = 2
+					ip = config.LXC_IP_START()
 				} else {
 					log.Println("Cannot find max of the IP. Something went wrong.")
 					return err

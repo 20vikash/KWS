@@ -112,6 +112,10 @@ func GetWireguardPrivateKey() string {
 	return os.Getenv("WG_PRIVATE_KEY")
 }
 
+func GetWireguardPublicKey() string {
+	return os.Getenv("WG_PUBLIC_KEY")
+}
+
 // ------------------------------Services-------------------------------
 // Postgres
 func GetPGServiceUserName() string {

@@ -45,6 +45,7 @@ type NetworkConfig struct {
 	CoreNetworkSubnet  string `yaml:"core_network_subnet"`
 	CoreNetworkGateway string `yaml:"core_network_gateway"`
 	DNSIP              string `yaml:"dns_ip"`
+	LXCIPStart         int    `yaml:"lxc_ip_start"`
 }
 
 type WireguardConfig struct {
@@ -170,7 +171,10 @@ func applyDefaults(cfg *KWSConfig) {
 		cfg.Network.CoreNetworkGateway = "172.35.0.1"
 	}
 	if cfg.Network.DNSIP == "" {
-		cfg.Network.DNSIP = "172.30.0.102"
+		cfg.Network.DNSIP = "172.30.0.4"
+	}
+	if cfg.Network.LXCIPStart == 0 {
+		cfg.Network.LXCIPStart = 11
 	}
 
 	// Wireguard defaults

@@ -47,6 +47,7 @@ func main() {
 		wgPubKey = ""
 	} else {
 		envCfg.WGPrivateKey = wgPrivKey
+		envCfg.WGPublicKey = wgPubKey
 		fmt.Printf("  ✓ Private key: (saved to .env)\n")
 		fmt.Printf("  ✓ Public key:  %s\n", wgPubKey)
 		fmt.Println("  ℹ Share the public key with clients for WireGuard peer configuration.")

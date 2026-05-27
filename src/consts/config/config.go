@@ -67,6 +67,7 @@ func LXD_BRIDGE_SUBNET() string  { return kwsconfig.Get().Network.LXDBridgeSubne
 func LXD_BRIDGE_GATEWAY() string { return kwsconfig.Get().Network.LXDBridgeGateway }
 func LXD_SOCKET_PATH() string    { return kwsconfig.Get().Paths.LXDSocket }
 func NGINX_CONF_DIR() string     { return kwsconfig.Get().Paths.NginxConfDir }
+func LXC_IP_START() int          { return kwsconfig.Get().Network.LXCIPStart }
 
 func PG_SERVICE_PORT() int   { return kwsconfig.Get().Services.PostgresPort }
 func ADMINER_PORT() int      { return kwsconfig.Get().Services.AdminerPort }

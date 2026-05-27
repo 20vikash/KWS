@@ -3,7 +3,7 @@ set -e
 
 if [ "$#" -ne 3 ]; then
     echo "Usage: $0 <container_name> <bridge_name> <container_ip/CIDR>"
-    echo "Example: $0 adminer.kws.services lxdbr0 172.30.0.100/24"
+    echo "Example: $0 adminer.kws.services lxdbr0 172.30.0.3/24"
     exit 1
 fi
 

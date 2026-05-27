@@ -25,7 +25,8 @@ network:
   services_gateway: 172.25.0.1
   core_network_subnet: 172.35.0.0/24
   core_network_gateway: 172.35.0.1
-  dns_ip: 172.30.0.102
+  dns_ip: 172.30.0.4
+  lxc_ip_start: 11                  # .2-.10 reserved for Docker services
 
 wireguard:
   interface_name: wg0
@@ -44,13 +45,13 @@ services:
   bridge_attach:
     - container: postgres.kws.services
       bridge: lxdbr0
-      ip_cidr: 172.30.0.100/24
+      ip_cidr: 172.30.0.2/24
     - container: adminer.kws.services
       bridge: lxdbr0
-      ip_cidr: 172.30.0.101/24
+      ip_cidr: 172.30.0.3/24
     - container: dnsmasq_kws
       bridge: lxdbr0
-      ip_cidr: 172.30.0.102/24
+      ip_cidr: 172.30.0.4/24
 
 instance:
   memory_limit: 1500MB

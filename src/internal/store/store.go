@@ -92,7 +92,7 @@ func NewStore(pg *pgxpool.Pool, redis *redis.Client, mq *MQ) *Storage {
 		Instance: &InstanceStore{
 			Db: pg,
 		},
-		MessageQueue: &MQ{},
+		MessageQueue: mq,
 		Wireguard: &WireguardStore{
 			Con: pg,
 		},

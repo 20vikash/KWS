@@ -36,6 +36,7 @@ type NetworkConfig struct {
 	CoreNetworkSubnet  string `yaml:"core_network_subnet"`
 	CoreNetworkGateway string `yaml:"core_network_gateway"`
 	DNSIP              string `yaml:"dns_ip"`
+	LXCIPStart         int    `yaml:"lxc_ip_start"`
 }
 
 type WireguardConfig struct {
@@ -112,6 +113,7 @@ type EnvConfig struct {
 
 	// Wireguard
 	WGPrivateKey string
+	WGPublicKey  string
 
 	// PG Service
 	PGServiceUsername string
@@ -154,7 +156,8 @@ func DefaultKWSConfig() *KWSConfig {
 			ServicesGateway:    "172.25.0.1",
 			CoreNetworkSubnet:  "172.35.0.0/24",
 			CoreNetworkGateway: "172.35.0.1",
-			DNSIP:              "172.30.0.102",
+			DNSIP:              "172.30.0.4",
+			LXCIPStart:         11,
 		},
 		Wireguard: WireguardConfig{
 			InterfaceName: "wg0",
@@ -171,9 +174,9 @@ func DefaultKWSConfig() *KWSConfig {
 			AdminerHostname:  "adminer.kws.services",
 			AdminerPort:      8080,
 			BridgeAttach: []BridgeAttach{
-				{Container: "postgres.kws.services", Bridge: "lxdbr0", IPCIDR: "172.30.0.100/24"},
-				{Container: "adminer.kws.services", Bridge: "lxdbr0", IPCIDR: "172.30.0.101/24"},
-				{Container: "dnsmasq_kws", Bridge: "lxdbr0", IPCIDR: "172.30.0.102/24"},
+				{Container: "postgres.kws.services", Bridge: "lxdbr0", IPCIDR: "172.30.0.2/24"},
+				{Container: "adminer.kws.services", Bridge: "lxdbr0", IPCIDR: "172.30.0.3/24"},
+				{Container: "dnsmasq_kws", Bridge: "lxdbr0", IPCIDR: "172.30.0.4/24"},
 			},
 		},
 		Instance: InstanceConfig{
@@ -197,32 +200,33 @@ func DefaultKWSConfig() *KWSConfig {
 // DefaultEnvConfig returns env config with sensible defaults.
 func DefaultEnvConfig() *EnvConfig {
 	return &EnvConfig{
-		DBUsername:         "kws",
-		DBPassword:         "",
-		DBName:             "kws_db",
-		DBHost:             "localhost",
-		DBPort:             "5432",
-		RedisHost:          "localhost",
-		RedisPort:          "6379",
-		RedisPassword:      "",
-		Env:                "production",
-		MQUser:             "mq_user",
-		MQPassword:         "",
-		MQServerPort:       "5672",
-		MQUIPort:           "15672",
-		MQHost:             "localhost",
-		WGPrivateKey:       "",
-		PGServiceUsername:  "pgadmin",
-		PGServicePassword:  "",
-		PGServiceHost:      "postgres.kws.services",
-		PGServicePort:      "5433",
-		PGServiceDB:        "pg_service",
-		SMTPHost:           "smtp.gmail.com",
-		SMTPPort:           "587",
-		ServicesSubnet:     "172.25.0.0/24",
-		ServicesGateway:    "172.25.0.1",
-		PGServiceIP:        "172.25.0.2",
-		AdminerIP:          "172.25.0.4",
-		AttachServices:     "postgres.kws.services:lxdbr0:172.30.0.100/24 adminer.kws.services:lxdbr0:172.30.0.101/24 dnsmasq_kws:lxdbr0:172.30.0.102/24",
+		DBUsername:        "kws",
+		DBPassword:        "",
+		DBName:            "kws_db",
+		DBHost:            "localhost",
+		DBPort:            "5432",
+		RedisHost:         "localhost",
+		RedisPort:         "6379",
+		RedisPassword:     "",
+		Env:               "production",
+		MQUser:            "mq_user",
+		MQPassword:        "",
+		MQServerPort:      "5672",
+		MQUIPort:          "15672",
+		MQHost:            "localhost",
+		WGPrivateKey:      "",
+		WGPublicKey:       "",
+		PGServiceUsername: "pgadmin",
+		PGServicePassword: "",
+		PGServiceHost:     "127.0.0.1",
+		PGServicePort:     "5433",
+		PGServiceDB:       "pg_service",
+		SMTPHost:          "smtp.gmail.com",
+		SMTPPort:          "587",
+		ServicesSubnet:    "172.25.0.0/24",
+		ServicesGateway:   "172.25.0.1",
+		PGServiceIP:       "172.25.0.2",
+		AdminerIP:         "172.25.0.4",
+		AttachServices:    "postgres.kws.services:lxdbr0:172.30.0.2/24 adminer.kws.services:lxdbr0:172.30.0.3/24 dnsmasq_kws:lxdbr0:172.30.0.4/24",
 	}
 }

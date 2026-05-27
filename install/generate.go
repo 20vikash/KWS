@@ -59,6 +59,7 @@ MQ_HOST=%s
 
 # Wireguard
 WG_PRIVATE_KEY=%s
+WG_PUBLIC_KEY=%s
 
 # Compose network overrides
 SERVICES_SUBNET=%s
@@ -83,7 +84,7 @@ PG_SERVICE_DB=%s
 		envCfg.GmailAppPassword, envCfg.GmailAddress, envCfg.SMTPHost, envCfg.SMTPPort,
 		envCfg.Env,
 		envCfg.MQUser, envCfg.MQPassword, envCfg.MQServerPort, envCfg.MQUIPort, envCfg.MQHost,
-		envCfg.WGPrivateKey,
+		envCfg.WGPrivateKey, envCfg.WGPublicKey,
 		envCfg.ServicesSubnet, envCfg.ServicesGateway, envCfg.PGServiceIP, envCfg.AdminerIP,
 		envCfg.AttachServices,
 		envCfg.PGServiceUsername, envCfg.PGServicePassword, envCfg.PGServiceHost, envCfg.PGServicePort, envCfg.PGServiceDB,
@@ -161,23 +162,29 @@ server {
 
 // generateDnsmasqConf generates dnsmasq.conf with proper service IPs.
 func generateDnsmasqConf(cfg *KWSConfig, path string) error {
-	// The dnsmasq address records point services to the bridge-attached IP.
-	// Services containers are attached to lxdbr0 at 172.30.0.100.
-	bridgeIP := "172.30.0.100" // default
-	if len(cfg.Services.BridgeAttach) > 0 {
-		// Extract the IP (without CIDR) from the first bridge attach entry
-		bridgeIP = strings.Split(cfg.Services.BridgeAttach[0].IPCIDR, "/")[0]
+	ipByContainer := make(map[string]string)
+	for _, ba := range cfg.Services.BridgeAttach {
+		ipByContainer[ba.Container] = strings.Split(ba.IPCIDR, "/")[0]
+	}
+
+	pgIP := ipByContainer[cfg.Services.PostgresHostname]
+	if pgIP == "" {
+		pgIP = "172.30.0.2"
+	}
+	adminerIP := ipByContainer[cfg.Services.AdminerHostname]
+	if adminerIP == "" {
+		adminerIP = "172.30.0.3"
 	}
 
 	content := fmt.Sprintf(`listen-address=0.0.0.0
-bind-interfaces
+bind-dynamic
 no-hosts
 no-resolv
 server=8.8.8.8
 server=1.1.1.1
 address=/%s/%s
 address=/%s/%s
-`, cfg.Services.PostgresHostname, bridgeIP, cfg.Services.AdminerHostname, bridgeIP)
+`, cfg.Services.PostgresHostname, pgIP, cfg.Services.AdminerHostname, adminerIP)
 
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
 		return fmt.Errorf("failed to write %s: %w", path, err)
