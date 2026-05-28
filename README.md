@@ -53,7 +53,7 @@ KWS is a self-hosted cloud platform that gives each user a private, VPN-protecte
 
 | Requirement | Notes |
 |---|---|
-| **Ubuntu 22.04+** | Server or VM with snapd |
+| **Ubuntu 22.04** | Server or VM with snapd |
 | **Ansible** | To run ansible playbooks |
 | **Docker Engine** | Installed by Ansible if you use it |
 | **LXD** (snap) | Installed by Ansible if you use it |
