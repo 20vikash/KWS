@@ -25,7 +25,7 @@
     state: present
 
 - name: Mark critical packages as manually installed
-  shell: apt-mark manual ufw make
+  command: apt-mark manual ufw make
   changed_when: false
 
 - name: Upgrade all installed packages

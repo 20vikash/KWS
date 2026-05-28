@@ -9,8 +9,6 @@
       - docker-compose
       - docker-compose-v2
       - podman-docker
-      - containerd
-      - runc
     state: absent
   ignore_errors: yes
 
