@@ -76,7 +76,8 @@ cd kws
 
 ```bash
 cd install
-go run .       # or use the pre-built binary: ./kws_install
+go build -o kws_install .
+./kws_install
 ```
 
 The installer asks for:
