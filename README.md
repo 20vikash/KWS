@@ -108,13 +108,7 @@ ansible-playbook -i ansible/inventory ansible/playbook.yaml
 
 **What it does**: apt update/upgrade → installs Docker, LXD (snap), WireGuard, `golang-migrate` → configures LXD bridge + storage pool → sets up iptables (IP forwarding, NAT, WG↔LXD forwarding) → writes WireGuard config.
 
-### 4. Run database migrations
-
-```bash
-make migrate_up
-```
-
-### 5. Add utils to PATH
+### 4. Add utils to PATH
 
 The `make up` and `make start` commands invoke `attach_to_bridge` from `util/`. Add it to your PATH so Make can find it:
 
@@ -124,13 +118,24 @@ export PATH="$PWD/util:$PATH"
 
 To make it permanent, add the line above to your `~/.bashrc`.
 
-### 6. Start the platform
+### 5. Start the platform
 
 ```bash
 make up
 ```
 
 This launches all Docker Compose services, attaches them to the LXD bridge, and tails logs.
+
+### 6. Run database migrations
+
+Open a new terminal window (keep `make up` running) and run:
+
+```bash
+cd /path/to/kws
+make migrate_up
+```
+
+The databases must be running first for the migration tool to connect.
 
 ---
 
