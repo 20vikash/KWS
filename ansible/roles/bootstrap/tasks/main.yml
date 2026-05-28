@@ -7,12 +7,6 @@
     update_cache: yes
     cache_valid_time: 3600
 
-- name: Upgrade all installed packages
-  apt:
-    upgrade: dist
-    autoremove: yes
-    autoclean: yes
-
 - name: Install essential system packages
   apt:
     name:
@@ -27,7 +21,18 @@
       - iproute2
       - htop
       - git
+      - make
     state: present
+
+- name: Mark critical packages as manually installed
+  shell: apt-mark manual ufw make
+  changed_when: false
+
+- name: Upgrade all installed packages
+  apt:
+    upgrade: dist
+    autoremove: yes
+    autoclean: yes
 
 - name: Detect architecture for migrate binary
   command: uname -m
