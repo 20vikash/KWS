@@ -4,3 +4,6 @@ bin/
 kws_config.yaml
 ansible/inventory
 kws_install
+nginx/conf.d/*
+!nginx/conf.d/00-default.conf
+!nginx/conf.d/main.conf
