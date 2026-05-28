@@ -54,6 +54,7 @@ KWS is a self-hosted cloud platform that gives each user a private, VPN-protecte
 | Requirement | Notes |
 |---|---|
 | **Ubuntu 22.04+** | Server or VM with snapd |
+| **Ansible** | To run ansible playbooks |
 | **Docker Engine** | Installed by Ansible if you use it |
 | **LXD** (snap) | Installed by Ansible if you use it |
 | **WireGuard** | Installed by ansible if you use it |
@@ -113,7 +114,17 @@ ansible-playbook -i ansible/inventory ansible/playbook.yaml
 make migrate_up
 ```
 
-### 5. Start the platform
+### 5. Add utils to PATH
+
+The `make up` and `make start` commands invoke `attach_to_bridge` from `util/`. Add it to your PATH so Make can find it:
+
+```bash
+export PATH="$PWD/util:$PATH"
+```
+
+To make it permanent, add the line above to your `~/.bashrc`.
+
+### 6. Start the platform
 
 ```bash
 make up
