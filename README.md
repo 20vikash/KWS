@@ -56,8 +56,8 @@ KWS is a self-hosted cloud platform that gives each user a private, VPN-protecte
 | **Ubuntu 22.04+** | Server or VM with snapd |
 | **Docker Engine** | Installed by Ansible if you use it |
 | **LXD** (snap) | Installed by Ansible if you use it |
-| **WireGuard** | Kernel module + tools |
-| **Go 1.25+** | Only needed if building from source |
+| **WireGuard** | Installed by ansible if you use it |
+| **Go 1.25+** | Needed to build kws_install binary |
 | **Domain name** | Pointed to your server's public IP |
 | **SSL certificate** | Wildcard recommended (e.g. LetsEncrypt) |
 
@@ -68,7 +68,7 @@ KWS is a self-hosted cloud platform that gives each user a private, VPN-protecte
 ### 1. Clone
 
 ```bash
-git clone https://github.com/your-org/kws.git
+git clone https://github.com/20vikash/kws.git
 cd kws
 ```
 
@@ -80,7 +80,7 @@ go run .       # or use the pre-built binary: ./kws_install
 ```
 
 The installer asks for:
-- **Domain name** and **public IP**
+- **Domain name** and **public IP** (If you don't have a public IP, give private IP to set ip up locally)
 - **Wildcard SSL certificate paths** (defaults to LetsEncrypt paths derived from your domain)
 - **Gmail SMTP credentials** (for email verification)
 - **Service passwords** (auto-generated if you press Enter)
