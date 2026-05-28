@@ -80,7 +80,7 @@ go run .       # or use the pre-built binary: ./kws_install
 ```
 
 The installer asks for:
-- **Domain name** and **public IP** (If you don't have a public IP, give private IP to set ip up locally)
+- **Domain name** and **public IP** (If you don't have a public IP, give private IP to set locally)
 - **Wildcard SSL certificate paths** (defaults to LetsEncrypt paths derived from your domain)
 - **Gmail SMTP credentials** (for email verification)
 - **Service passwords** (auto-generated if you press Enter)
