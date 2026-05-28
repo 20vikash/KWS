@@ -16,7 +16,6 @@
       - ca-certificates
       - lsb-release
       - software-properties-common
-      - ufw
       - net-tools
       - iproute2
       - htop
@@ -25,7 +24,7 @@
     state: present
 
 - name: Mark critical packages as manually installed
-  command: apt-mark manual ufw make
+  command: apt-mark manual make
   changed_when: false
 
 - name: Upgrade all installed packages

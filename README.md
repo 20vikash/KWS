@@ -229,7 +229,7 @@ kws/
 │       ├── docker/        # Docker CE + compose
 │       ├── lxd/           # LXD snap + preseed
 │       ├── wireguard/     # WG tools + key setup
-│       └── iptables/      # Forwarding, NAT, UFW
+│       └── iptables/      # Forwarding, NAT, INPUT rules
 ├── install/               # kws_install binary (Go)
 ├── nginx/
 │   ├── nginx.conf         # Global nginx config
