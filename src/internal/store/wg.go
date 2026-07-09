@@ -67,6 +67,35 @@ func (wg *WireguardStore) HitMaxLimit(ctx context.Context, uid int) (bool, error
 	return false, nil
 }
 
+func (wg *WireguardStore) GetPeers(ctx context.Context) ([]models.WireguardType, error) {
+
+	peers := make([]models.WireguardType, 0)
+
+	var publicKey string
+	var ipAddr int
+
+	sql := `
+		SELECT public_key,ip_address from wgpeer	
+	`
+
+	rows, err := wg.Con.Query(ctx, sql)
+	if err != nil {
+		log.Println("Failed to fetch wg peer list")
+		return nil, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		err = rows.Scan(&publicKey, &ipAddr)
+		if err != nil {
+			log.Println("Cannot scan publicIP and IPaddress")
+			return nil, err
+		}
+		peers = append(peers, models.WireguardType{PublicKey: publicKey, IpAddress: ipAddr})
+	}
+	return peers, nil
+}
+
 func (wg *WireguardStore) AddPeer(ctx context.Context, uid int, wgType *models.WireguardType) error {
 	// Before doing anything, check if the user hit the max device limit.
 	maxHit, err := wg.HitMaxLimit(ctx, uid)
