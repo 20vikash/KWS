@@ -279,6 +279,17 @@ func main() {
 		log.Fatal("Cannot configure wireguard to the kernel module")
 	}
 
+	//load wireguard peers
+	peers, err := app.Store.Wireguard.GetPeers(context.Background())
+	if err != nil {
+		log.Fatal("Failed to get wireguard peers")
+	}
+
+	err = app.Wg.LoadPeers(peers, app.IpAlloc)
+	if err != nil {
+		log.Fatal("Failed to load wireguard peers")
+	}
+
 	// Set the IP forward bit to 1
 	err = app.Wg.SetForwardBitToOne()
 	if err != nil {
