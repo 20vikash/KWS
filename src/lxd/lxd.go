@@ -310,9 +310,9 @@ func (lxdkws *LXDKWS) UpdateInstanceState(ctx context.Context, userName, passwor
 				return err
 			}
 
-			err = lxdkws.StartCodeServer(instanceName, userName)
+			err = lxdkws.EnableCodeServerService(instanceName, userName)
 			if err != nil {
-				log.Println("Failed to start code server")
+				log.Println("Failed to start code server service")
 				return err
 			}
 
@@ -594,12 +594,17 @@ cert: false
 	return nil
 }
 
-func (lxdkws *LXDKWS) StartCodeServer(containerName, userName string) error {
-	startCmd := fmt.Sprintf("su - %s -c 'nohup code-server > /dev/null 2>&1 &'", userName)
-	cmd := []string{"bash", "-c", startCmd}
+// Enable code-server service in systemd
+func (lxdkws *LXDKWS) EnableCodeServerService(containerName, userName string) error {
+	cmd := []string{
+		"systemctl",
+		"enable",
+		"--now",
+		fmt.Sprintf("code-server@%s", userName),
+	}
 
 	if err := lxdkws.RunCommand(lxdkws.Conn, containerName, cmd); err != nil {
-		return fmt.Errorf("failed to start code server: %w", err)
+		return fmt.Errorf("failed to enable code-server systemd service: %w", err)
 	}
 
 	return nil
