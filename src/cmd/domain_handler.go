@@ -3,20 +3,18 @@ package main
 import (
 	"encoding/json"
 	"kws/kws/consts/config"
-	"kws/kws/internal/nginx"
-	"kws/kws/models"
+	"kws/kws/internal/store"
 	"log"
 	"net/http"
 	"strconv"
 )
 
 type DomainResponse struct {
-	Domain string
-	Port   string
-	Status string
+	JobID  string `json:"jobID"`
+	Action string `json:"action"`
 }
 
-func (app *Application) AddUserDomain(w http.ResponseWriter, r *http.Request) {
+func (app *Application) handleDomainAction(w http.ResponseWriter, r *http.Request, action string) {
 	err := r.ParseForm()
 	if err != nil {
 		log.Println("Failed to parse form")
@@ -24,86 +22,52 @@ func (app *Application) AddUserDomain(w http.ResponseWriter, r *http.Request) {
 	}
 
 	domain := r.FormValue("domain_name")
-	portStr := r.FormValue("port")
 
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		http.Error(w, "Invalid port number", http.StatusBadRequest)
-		return
+	var port int
+	if action == config.ADD_USER_DOMAIN {
+		portStr := r.FormValue("port")
+
+		port, err = strconv.Atoi(portStr)
+		if err != nil {
+			http.Error(w, "Invalid port number", http.StatusBadRequest)
+			return
+		}
 	}
 
 	uid := app.SessionManager.GetInt(r.Context(), "id")
+	userName := app.SessionManager.GetString(r.Context(), "user_name")
 
-	err = app.Store.Domains.AddUserDomain(r.Context(), &models.Domain{Domain: domain, Port: port, Uid: uid})
-	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
+	// Generate a job ID
+	jid := generateHashedJobID(uid, userName)
 
-	ipInt, err := app.Store.Instance.GetIPFromUID(r.Context(), uid)
-	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
+	// Push the message to the queue.
+	err = app.Store.MessageQueue.PushMessageInstance(r.Context(), &store.DomainQueueMessage{
 
-	nginxTemplate := nginx.Template{
+		JobID:  jid,
 		Domain: domain,
-		IP:     app.IpAlloc.GenerateIPLXC(ipInt),
-		Port:   portStr,
-	}
-
-	err = nginxTemplate.AddNewConf(config.INSTANCE_TEMPLATE)
+		Port:   port,
+		UserID: uid,
+		Action: action,
+	},
+		app.MqPool,
+	)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
-	err = app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
-	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-
-	domainResponse := DomainResponse{
-		Domain: domain,
-		Port:   portStr,
-		Status: "Active",
-	}
-
+	// Send the JSON response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(domainResponse)
+	json.NewEncoder(w).Encode(&DomainResponse{
+		JobID:  jid,
+		Action: action,
+	})
+
+}
+func (app *Application) AddUserDomain(w http.ResponseWriter, r *http.Request) {
+	app.handleDomainAction(w, r, config.ADD_USER_DOMAIN)
 }
 
 func (app *Application) RemoveUserDomain(w http.ResponseWriter, r *http.Request) {
-	uid := app.SessionManager.GetInt(r.Context(), "id")
-
-	err := r.ParseForm()
-	if err != nil {
-		log.Println("Failed to parse form")
-		http.Error(w, "Something went wrong", http.StatusBadRequest)
-	}
-
-	domain := r.FormValue("domain_name")
-
-	err = app.Store.Domains.RemoveDomain(r.Context(), &models.Domain{Uid: uid, Domain: domain})
-	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-
-	nginxTemplate := nginx.Template{
-		Domain: domain,
-	}
-
-	err = nginxTemplate.RemoveConf()
-	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-
-	err = app.Docker.ReloadNginxConf(config.NGINX_CONTAINER)
-	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
+	app.handleDomainAction(w, r, config.REMOVE_USER_DOMAIN)
 }
