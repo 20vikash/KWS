@@ -20,6 +20,9 @@ const (
 	STOP   = "stop"
 	KILL   = "kill"
 
+	ADD_USER_DOMAIN    = "add_user_domain"
+	REMOVE_USER_DOMAIN = "remove_user_domain"
+
 	STACK_KEY = "ip_stack"
 	LXC_IP    = "lxc_ip"
 
