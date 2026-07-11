@@ -30,6 +30,8 @@ type Storage struct {
 		GetStopResult(ctx context.Context, jobID string) (bool, bool, error)
 		PutKillResult(ctx context.Context, result bool, jobID string) error
 		GetKillResult(ctx context.Context, jobID string) (bool, bool, error)
+		PutUserDomainResult(ctx context.Context, jobID, name string, port int, success bool) error
+		GetUserDomainResult(ctx context.Context, jobID string) (bool, *web.JobResponseDomain, error)
 		SetTunnelLogin(ctx context.Context, secret string, uid int) error
 		GetUidFromTunnelSecret(ctx context.Context, secret string) (int, error)
 	}

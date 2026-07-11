@@ -177,3 +177,44 @@ func (r *RedisStore) GetKillResult(ctx context.Context, jobID string) (bool, boo
 
 	return true, val == "true", nil
 }
+
+// User domain
+func (r *RedisStore) PutUserDomainResult(ctx context.Context, jobID, name string, port int, success bool) error {
+	domain := web.Domain{
+		Name: name,
+		Port: port,
+	}
+
+	result := web.JobResponseDomain{
+		Success: success,
+		Domain:  domain,
+	}
+
+	data, err := json.Marshal(result)
+	if err != nil {
+		return err
+	}
+
+	return r.Ds.Set(ctx, "userdomain:result:"+jobID, data, 0).Err()
+}
+
+func (r *RedisStore) GetUserDomainResult(ctx context.Context, jobID string) (bool, *web.JobResponseDomain, error) {
+	val, err := r.Ds.Get(ctx, "userdomain:result:"+jobID).Result()
+	if err != nil {
+		if err == redis.Nil {
+			return false, nil, nil
+		}
+		return false, nil, err
+	}
+
+	var result web.JobResponseDomain
+	if err := json.Unmarshal([]byte(val), &result); err != nil {
+		return false, nil, err
+	}
+
+	if err := r.Ds.Del(ctx, "userdomain:result:"+jobID).Err(); err != nil {
+		return false, nil, err
+	}
+
+	return true, &result, nil
+}
