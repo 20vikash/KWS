@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"kws/kws/consts/config"
 	"kws/kws/internal/store"
+	"kws/kws/models/web"
 	"log"
 	"net/http"
 	"strconv"
@@ -70,4 +71,26 @@ func (app *Application) AddUserDomain(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) RemoveUserDomain(w http.ResponseWriter, r *http.Request) {
 	app.handleDomainAction(w, r, config.REMOVE_USER_DOMAIN)
+}
+
+func (app *Application) DomainResult(w http.ResponseWriter, r *http.Request) {
+	app.handleDomainResult(w, r)
+}
+
+func (app *Application) handleDomainResult(w http.ResponseWriter, r *http.Request) {
+	jobID := r.URL.Query().Get("jobID")
+
+	done, result, err := app.Store.InMemory.GetUserDomainResult(r.Context(), jobID)
+	if err != nil {
+		http.Error(w, "failed to handle your request", http.StatusInternalServerError)
+		return
+	}
+
+	if result == nil {
+		result = &web.JobResponseDomain{}
+	}
+
+	result.Done = done
+
+	writeJSON(w, result)
 }
