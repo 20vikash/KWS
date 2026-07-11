@@ -49,6 +49,7 @@ type DomainQueueMessage struct {
 	Domain string
 	Port   int
 	UserID int
+	Action string
 }
 
 func (d *DomainQueueMessage) WhoAmI() string { return config.USER_DOMAIN_QUEUE }
@@ -68,10 +69,16 @@ func (mq *MQ) PushMessageInstance(ctx context.Context, message QueueMessageInter
 
 	var routingKey string
 
-	if message.WhoAmI() == config.MAIN_INSTANCE_QUEUE {
+	switch message.WhoAmI() {
+
+	case config.MAIN_INSTANCE_QUEUE:
 		routingKey = mq.InstanceQueue.Name
-	} else if message.WhoAmI() == config.MAIN_TUNNEL_QUEUE {
+
+	case config.MAIN_TUNNEL_QUEUE:
 		routingKey = mq.TunnelQueue.Name
+
+	case config.USER_DOMAIN_QUEUE:
+		routingKey = mq.DomainQueue.Name
 	}
 
 	headers := make(amqp.Table)
