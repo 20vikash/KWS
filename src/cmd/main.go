@@ -127,12 +127,35 @@ func main() {
 		log.Fatal("Failed to create a consumer")
 	}
 
+	mqCh = chPool.GetFreeChannel()
+	// Initialize mq user domain queue
+	domainQueue, err := mqCon.CreateQueueInstance(mqCh, config.USER_DOMAIN_QUEUE, config.DOMAIN_RETRY_QUEUE, chPool)
+	if err != nil {
+		log.Fatal("Failed to create domain queue")
+	}
+
+	mqCh = chPool.GetFreeChannel()
+	// Initialize mq retry queue
+	_, err = mqCon.CreateRetryQueue(mqCh, config.DOMAIN_RETRY_QUEUE, config.USER_DOMAIN_QUEUE, chPool)
+	if err != nil {
+		log.Fatal("Failed to create retry queue")
+	}
+
+	DomainMqConsumerCh := chPool.GetFreeChannel()
+	// Create a domainConsumer for that queue
+	domainConsumer, err := mqCon.CreateConsumer(DomainMqConsumerCh, domainQueue)
+	if err != nil {
+		log.Fatal("Failed to create a consumer")
+	}
+
 	// Create MQ struct instance.
 	mqType := &store.MQ{
 		InstanceConsumer: instanceConsumer,
 		InstanceQueue:    instanceQueue,
 		TunnelQueue:      tunnelQueue,
 		TunnelConsumer:   tunnelConsumer,
+		DomainQueue:      domainQueue,
+		DomainConsumer:   domainConsumer,
 	}
 
 	// Set up redis db pool for session manager.
@@ -299,6 +322,7 @@ func main() {
 	// Start the rabbitmq consumers to listen in the background
 	app.ConsumeMessageInstance(app.Mq)
 	app.ConsumeMessageTunnel(app.Mq)
+	app.ConsumeMessageDomain(app.Mq)
 
 	// HTTP server
 	http.ListenAndServe(app.Port, NewRouter(&app))

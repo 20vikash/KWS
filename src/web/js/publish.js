@@ -104,6 +104,10 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('domain_name', domainName);
         formData.append('port', port.toString());
 
+        addBtn.disabled = true;
+        addBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin mr-2"></i>Publishing...';
+
         fetch('/adddomain', {
             method: 'POST',
             headers: {
@@ -115,44 +119,70 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!res.ok) throw new Error('Domain creation failed');
             return res.json();
         })
-        .then(data => {
+        .then(async data => {
+                console.log(data);
+                console.log(data.jobID);
+
+            const result = await pollDomainJob(data.jobID);
+
+            if (!result.Success) {
+                addBtn.disabled = false;
+                addBtn.innerHTML =
+                    '<i class="fas fa-plus mr-2"></i> Add Domain';
+
+                alert("Failed to add domain");
+                return;
+            }
+
+            const domain = result.Domain;
+
             const domainCard = document.createElement('div');
             domainCard.className = 'domain-card';
+
             domainCard.innerHTML = `
                 <div class="flex justify-between items-start">
                     <div class="w-full">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-bold text-white">${data.Domain}</h3>
-                            <button class="remove-btn" data-domain="${data.Domain}">
+                            <h3 class="text-lg font-bold text-white">${domain.Name}</h3>
+                            <button class="remove-btn" data-domain="${domain.Name}">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
                         <div class="domain-url-container">
-                            <div class="domain-url">https://${data.Domain}.${window.KWS_DOMAIN}</div>
-                            <button class="copy-domain-btn" data-url="https://${data.Domain}.${window.KWS_DOMAIN}">
+                            <div class="domain-url">https://${domain.Name}.${window.KWS_DOMAIN}</div>
+                            <button class="copy-domain-btn" data-url="https://${domain.Name}.${window.KWS_DOMAIN}">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
                         <div class="mt-4 grid grid-cols-2 gap-2">
                             <div>
                                 <span class="text-gray-500">Port:</span>
-                                <span class="ml-2 text-white">${data.Port}</span>
+                                <span class="ml-2 text-white">${domain.Port}</span>
                             </div>
                             <div>
                                 <span class="text-gray-500">Status:</span>
-                                <span class="ml-2 text-green-400">${data.Status}</span>
+                                <span class="ml-2 text-green-400">Active</span>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
+
             domainsContainer.appendChild(domainCard);
             attachButtonListeners(domainCard);
             updateDomainsDisplay();
+
             domainInput.value = '';
             portInput.value = '';
+
+            addBtn.disabled = false;
+            addBtn.innerHTML =
+                '<i class="fas fa-plus mr-2"></i> Add Domain';
         })
         .catch(err => {
+            addBtn.disabled = false;
+            addBtn.innerHTML =
+                '<i class="fas fa-plus mr-2"></i> Add Domain';
             console.error(err);
             alert('Failed to add domain. It might already exist or an error occurred.');
         });
@@ -162,6 +192,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const formData = new URLSearchParams();
         formData.append('domain_name', domainName);
 
+        confirmRemoveBtn.disabled = true;
+        confirmRemoveBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin mr-2"></i>Removing...';
+
         fetch('/removedomain', {
             method: 'POST',
             headers: {
@@ -169,21 +203,68 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: formData
         })
-        .then(res => {
-            if (!res.ok) throw new Error('Failed to remove domain');
+        .then(async res => {
+            if (!res.ok)
+                throw new Error("Failed to remove domain");
 
-            const card = domainsContainer.querySelector(`[data-domain="${domainName}"]`)?.closest('.domain-card');
-            if (card) card.remove();
+            const data = await res.json();
+
+            const result = await pollDomainJob(data.jobID);
+
+            if (!result.Success) {
+                confirmRemoveBtn.disabled = false;
+                confirmRemoveBtn.innerHTML = "Remove Domain";
+
+                confirmationModal.style.display = "none";
+                domainToRemove = null;
+
+                alert("Failed to remove domain");
+                return;
+            }
+
+            const card = domainsContainer
+                .querySelector(`[data-domain="${domainName}"]`)
+                ?.closest(".domain-card");
+
+            if (card)
+                card.remove();
 
             updateDomainsDisplay();
-            confirmationModal.style.display = 'none';
+
+            confirmationModal.style.display = "none";
             domainToRemove = null;
+
+            confirmRemoveBtn.disabled = false;
+            confirmRemoveBtn.innerHTML = "Remove Domain";
         })
         .catch(err => {
+            confirmRemoveBtn.disabled = false;
+            confirmRemoveBtn.innerHTML = "Remove Domain";
+
             console.error(err);
             alert('Error removing domain.');
         });
     }
+
+    async function pollDomainJob(jobID) {
+    const maxAttempts = 60;
+
+    for (let i = 0; i < maxAttempts; i++) {
+        const res = await fetch(`/domainresult?jobID=${jobID}`);
+
+        if (!res.ok)
+            throw new Error("Failed to fetch job status");
+
+        const result = await res.json();
+
+        if (result.Done)
+            return result;
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    throw new Error("Timed out waiting for domain operation");
+}
 
     confirmRemoveBtn.addEventListener('click', function () {
         if (domainToRemove) {

@@ -16,6 +16,8 @@ type MQ struct {
 	InstanceConsumer <-chan amqp.Delivery
 	TunnelQueue      *amqp.Queue
 	TunnelConsumer   <-chan amqp.Delivery
+	DomainQueue      *amqp.Queue
+	DomainConsumer   <-chan amqp.Delivery
 }
 
 type QueueMessageInter interface {
@@ -42,6 +44,16 @@ type TunnelQueueMessage struct {
 
 func (t *TunnelQueueMessage) WhoAmI() string { return config.MAIN_TUNNEL_QUEUE }
 
+type DomainQueueMessage struct {
+	JobID  string
+	Domain string
+	Port   int
+	UserID int
+	Action string
+}
+
+func (d *DomainQueueMessage) WhoAmI() string { return config.USER_DOMAIN_QUEUE }
+
 func (mq *MQ) PushMessageInstance(ctx context.Context, message QueueMessageInter, pool *mq.ChannelPool) error {
 	var bin_buf bytes.Buffer
 
@@ -57,10 +69,16 @@ func (mq *MQ) PushMessageInstance(ctx context.Context, message QueueMessageInter
 
 	var routingKey string
 
-	if message.WhoAmI() == config.MAIN_INSTANCE_QUEUE {
+	switch message.WhoAmI() {
+
+	case config.MAIN_INSTANCE_QUEUE:
 		routingKey = mq.InstanceQueue.Name
-	} else if message.WhoAmI() == config.MAIN_TUNNEL_QUEUE {
+
+	case config.MAIN_TUNNEL_QUEUE:
 		routingKey = mq.TunnelQueue.Name
+
+	case config.USER_DOMAIN_QUEUE:
+		routingKey = mq.DomainQueue.Name
 	}
 
 	headers := make(amqp.Table)
