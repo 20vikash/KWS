@@ -67,6 +67,12 @@ type Domain struct {
 	Status string
 }
 
+type JobResponseDomain struct {
+	Done    bool
+	Success bool
+	Domain  Domain
+}
+
 type PublishInstancePageData struct {
 	LoggedInUser string
 	Domains      []Domain
