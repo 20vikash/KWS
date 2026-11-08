@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS userip;
+DROP TABLE IF EXISTS domains;
